@@ -1,0 +1,50 @@
+/* resources/styles/dark.qss */
+
+/* Main window background */
+QMainWindow {
+    background-color: #0b0b0b;
+    color: #ffffff;
+}
+
+/* Labels */
+QLabel {
+    color: #ffffff;
+    font-size: 16px;
+}
+
+/* Buttons */
+QPushButton {
+    background-color: #1f1f1f;
+    color: #ffffff;
+    border: 1px solid #333333;
+    padding: 5px 10px;
+    border-radius: 5px;
+}
+
+QPushButton:hover {
+    background-color: #2a2a2a;
+}
+
+QPushButton:pressed {
+    background-color: #3d3d3d;
+}
+
+/* Line edits / text inputs */
+QLineEdit {
+    background-color: #1f1f1f;
+    color: #ffffff;
+    border: 1px solid #333333;
+    padding: 3px;
+    border-radius: 3px;
+}
+
+/* Menus */
+QMenuBar {
+    background-color: #000000;
+    color: #ffffff;
+}
+
+QMenu {
+    background-color: #000000;
+    color: #ffffff;
+}
