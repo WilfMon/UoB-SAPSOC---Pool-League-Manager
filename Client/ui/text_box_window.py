@@ -2,6 +2,8 @@ from PySide6.QtWidgets import QMainWindow, QGridLayout, QWidget, QLineEdit
 from PySide6.QtGui import QCursor
 from PySide6.QtCore import Qt, Signal
 
+from ui.utils import clean_name
+
 class TextBoxWindow(QMainWindow):
     submitted_player = Signal(str)
     
@@ -28,9 +30,7 @@ class TextBoxWindow(QMainWindow):
     def submit_text(self):
         text = self.box.text()#
         
-        # format names
-        text = text.lower()
-        text = text.title()
+        text = clean_name(text)
         
         if text == "":
             print("--Err-- no valid name submitted")

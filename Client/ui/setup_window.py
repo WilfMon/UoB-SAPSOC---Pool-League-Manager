@@ -1,6 +1,8 @@
 from PySide6.QtWidgets import QMainWindow, QLineEdit, QGridLayout, QWidget, QLabel, QPushButton, QListWidget, QMenu, QListWidgetItem
 from PySide6.QtCore import Qt, QPoint, Signal, QSize
 
+from ui.utils import clean_name
+
 class SetupWindow(QMainWindow):
     # Define a signal that sends a list
     submitted_players = Signal(list)
@@ -48,9 +50,7 @@ class SetupWindow(QMainWindow):
     def submit_text(self):
         text = self.input_box.text()
         
-        # format names
-        text = text.lower()
-        text = text.title()
+        text = clean_name(text)
         
         if text == "":
             print("--Err-- no valid name submitted")

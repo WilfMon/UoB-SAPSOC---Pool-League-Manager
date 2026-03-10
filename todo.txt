@@ -1,0 +1,17 @@
+APPLICATION
+
+-- important --
+- add ways to make people members
+- fix the pairing system for creating games
+- add a way to change scale
+- add data visualization
+
+-- less important --
+- add a tounement mode
+- add elo
+- add more point gain for beating higher points players
+
+
+WEBSITE
+- add data visualization
+- add a leaderboard
