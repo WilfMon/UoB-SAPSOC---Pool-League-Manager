@@ -7,7 +7,6 @@ from ui.main_window import MainWindow
 def main(scale_factor=1.0):
     
     # Enable high-DPI scaling
-    QApplication.setAttribute(Qt.AA_EnableHighDpiScaling, True)
     QApplication.setHighDpiScaleFactorRoundingPolicy(Qt.HighDpiScaleFactorRoundingPolicy.PassThrough)
 
     app = QApplication(sys.argv)

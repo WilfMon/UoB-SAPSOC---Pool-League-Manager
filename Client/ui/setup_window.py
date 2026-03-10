@@ -1,9 +1,9 @@
-from PySide6.QtWidgets import QMainWindow, QLineEdit, QGridLayout, QWidget, QLabel, QPushButton, QListWidget, QMenu, QInputDialog
-from PySide6.QtCore import Qt, QPoint, Signal
+from PySide6.QtWidgets import QMainWindow, QLineEdit, QGridLayout, QWidget, QLabel, QPushButton, QListWidget, QMenu, QListWidgetItem
+from PySide6.QtCore import Qt, QPoint, Signal, QSize
 
-class TextWindow(QMainWindow):
+class SetupWindow(QMainWindow):
     # Define a signal that sends a list
-    submitted_participants = Signal(list)
+    submitted_players = Signal(list)
     
     def __init__(self, scale=1.0):
         super().__init__()
@@ -28,6 +28,7 @@ class TextWindow(QMainWindow):
         self.input_box.returnPressed.connect(self.submit_text)
         
         self.list_widget = QListWidget()
+        self.list_widget.setFixedSize(QSize(250 * scale, 450 * scale))
         layout.addWidget(self.list_widget, 1, 1, alignment=Qt.AlignTop)
         self.list_widget.setContextMenuPolicy(Qt.CustomContextMenu)
         self.list_widget.customContextMenuRequested.connect(self.show_context_menu)
@@ -56,6 +57,10 @@ class TextWindow(QMainWindow):
             return
         
         print("Submitted:", text)
+        
+        # set size of items to be smaller
+        text = QListWidgetItem(text)
+        text.setSizeHint(QSize(0, 18))
         self.list_widget.addItem(text)
 
         self.input_box.clear()
@@ -75,10 +80,10 @@ class TextWindow(QMainWindow):
         
         if action == remove_action:
             i = self.list_widget.row(item)
-            self.list_widget.takeItem(i)  # remove the item
+            self.list_widget.takeItem(i)
             
     def accept(self):
         participants = [self.list_widget.item(i).text() for i in range(self.list_widget.count())]
         
-        self.submitted_participants.emit(participants)
+        self.submitted_players.emit(participants)
         self.close()

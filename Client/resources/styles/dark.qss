@@ -44,7 +44,17 @@ QMenuBar {
     color: #ffffff;
 }
 
+QMenuBar::item:selected {
+    background: #000000;
+}
+
 QMenu {
     background-color: #000000;
     color: #ffffff;
+}
+
+QMenu::separator {
+    height: 1px;
+    background: #636363;
+    margin: 4px 8px;
 }
