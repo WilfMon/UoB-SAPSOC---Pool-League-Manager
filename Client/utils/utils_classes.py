@@ -11,6 +11,7 @@ class LeagueRoundBuilder():
         self.odd = False
         
         self.rounds_played = []
+        self.rounds_left = True
         
         self.G = nx.Graph()
         
@@ -91,8 +92,6 @@ class LeagueRoundBuilder():
         self.remove_played_matches(round_)
         self.rounds_played.append(round_)
         
-        #print(round_)
-        
         bye = None
         
         # find the tuple that contains dummy and the pair that will be the bye
@@ -115,10 +114,22 @@ class LeagueRoundBuilder():
         if to_remove:
             round_.remove(to_remove)
             
-        #print(round_)
-        #print(bye)
+        # Check if any rounds are left to play
+        if self.G.number_of_edges() == 0:
+            self.rounds_left = False
                 
         return round_, bye
+    
+    def remove_round(self):
+        
+        round_ = self.rounds_played[-1] # gets the last round
+        
+        for u, v in round_:
+            
+            self.G.add_edge(u, v)
+        
+        self.rounds_played.pop() # deletes the last round
+        self.rounds_left = True
     
     def remove_played_matches(self, round_):
         

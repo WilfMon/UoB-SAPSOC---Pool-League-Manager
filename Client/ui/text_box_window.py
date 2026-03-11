@@ -22,7 +22,7 @@ class TextBoxWindow(QMainWindow):
         self.setCentralWidget(central)
 
         self.box = QLineEdit()
-        self.box.setStyleSheet(f"font-size: {int(14*scale)}px; padding: 0px; margin: 0px; background-color: black;")
+        self.box.setStyleSheet(f"padding: 0px; margin: 0px; background-color: black;")
         layout.addWidget(self.box)
 
         self.box.returnPressed.connect(self.submit_text)

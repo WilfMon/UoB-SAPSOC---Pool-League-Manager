@@ -1,5 +1,6 @@
 from PySide6.QtWidgets import QDialog, QVBoxLayout, QLabel, QListWidget, QPushButton, QHBoxLayout
 from PySide6.QtCore import Signal
+from PySide6.QtGui import QFont
 
 class ConfirmationWindow(QDialog):
     yesorno = Signal(bool)
@@ -7,6 +8,8 @@ class ConfirmationWindow(QDialog):
     def __init__(self, scale, new_players):
         super().__init__()
         self.scale = scale
+        self.default_font = QFont("Segoe UI", round(self.scale * 18))
+        
         self.setWindowTitle("Confirmation")
         #self.setModal(True)  # Blocks interaction
         
@@ -16,6 +19,7 @@ class ConfirmationWindow(QDialog):
         layout.addWidget(label1)
         
         list_wid = QListWidget()
+        list_wid.setFont(self.default_font)
         for player in new_players:
             list_wid.addItem(player)
         

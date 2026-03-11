@@ -1,15 +1,23 @@
 import sys
+
+from PySide6.QtGui import QFont
 from PySide6.QtWidgets import QApplication
 from PySide6.QtCore import Qt
 from pathlib import Path
-from ui.main_window import MainWindow
 
-def main(scale_factor=1.0):
+from ui.main_window import MainWindow
+from utils.utils import load_scale
+
+def main():
+    
+    scale_factor = load_scale()
     
     # Enable high-DPI scaling
     QApplication.setHighDpiScaleFactorRoundingPolicy(Qt.HighDpiScaleFactorRoundingPolicy.PassThrough)
 
     app = QApplication(sys.argv)
+    
+    app.setFont(QFont("Segoe UI", round(scale_factor * 18)))
     
     # Load dark theme
     qss_file = Path(__file__).parent / "resources" / "styles" / "dark.qss"

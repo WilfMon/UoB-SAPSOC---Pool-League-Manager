@@ -1,5 +1,6 @@
 from PySide6.QtWidgets import QMainWindow, QLineEdit, QGridLayout, QWidget, QLabel, QPushButton, QListWidget, QMenu, QListWidgetItem
 from PySide6.QtCore import Qt, QPoint, Signal, QSize
+from PySide6.QtGui import QKeySequence, QShortcut, QFont
 
 from utils.utils import clean_name
 
@@ -10,6 +11,8 @@ class SetupWindow(QMainWindow):
     def __init__(self, scale=1.0):
         super().__init__()
         self.scale = scale
+        self.default_font = QFont("Segoe UI", round(self.scale * 18))
+        
         self.setWindowTitle("Setup")
         self.setMinimumSize(int(400 * scale), int(300 * scale))
 
@@ -19,33 +22,39 @@ class SetupWindow(QMainWindow):
         self.setCentralWidget(central)
 
         label_text_box = QLabel("Enter Players:")
-        label_text_box.setStyleSheet(f"font-size: {int(14*scale)}px; font-weight: bold;")
         label_text_box.setFixedSize(label_text_box.sizeHint())
         layout.addWidget(label_text_box, 0, 0)
 
         self.input_box = QLineEdit()
-        self.input_box.setStyleSheet(f"font-size: {int(14*scale)}px;")
         layout.addWidget(self.input_box, 1, 0, alignment=Qt.AlignTop)
         
         self.input_box.returnPressed.connect(self.submit_text)
         
         self.list_widget = QListWidget()
         self.list_widget.setFixedSize(QSize(250 * scale, 450 * scale))
+        self.list_widget.setFont(self.default_font)
         layout.addWidget(self.list_widget, 1, 1, alignment=Qt.AlignTop)
         self.list_widget.setContextMenuPolicy(Qt.CustomContextMenu)
         self.list_widget.customContextMenuRequested.connect(self.show_context_menu)
         
+        self.populate_list = QShortcut(QKeySequence("Ctrl+P"), self)
+        self.populate_list.activated.connect(self.on_populate_list)
+        
         button_cancel = QPushButton("Cancel")
-        button_cancel.setStyleSheet(f"font-size: {int(14*scale)}px;")
         button_cancel.adjustSize()
         button_cancel.clicked.connect(self.close)
         layout.addWidget(button_cancel, 2, 0, alignment=Qt.AlignLeft)
         
         button_accept = QPushButton("Accept")
-        button_accept.setStyleSheet(f"font-size: {int(14*scale)}px;")
         button_accept.adjustSize()
         button_accept.clicked.connect(self.accept)
         layout.addWidget(button_accept, 2, 1, alignment=Qt.AlignRight)
+        
+    def on_populate_list(self):
+        players = ["Wilf Moncrieff", "Robert Fry", "Jak Dables", "Wilf Howard", "Dylan Nolan", "Will Vickers", "Paaras Padhair", "Elijah Brook", "Malachi Bielby", "George Worsley", "Evan Morris", "Osain Drake"]
+        
+        for player in players:
+            self.list_widget.addItem(QListWidgetItem(player))
         
     def submit_text(self):
         text = self.input_box.text()
@@ -58,9 +67,8 @@ class SetupWindow(QMainWindow):
         
         print("Submitted:", text)
         
-        # set size of items to be smaller
         text = QListWidgetItem(text)
-        text.setSizeHint(QSize(0, 18))
+        #text.setSizeHint(QSize(0, 18))
         self.list_widget.addItem(text)
 
         self.input_box.clear()

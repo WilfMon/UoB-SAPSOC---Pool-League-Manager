@@ -5,8 +5,8 @@ from database.db import get_connection
 from database.schema import create_tables
 from database.queries import add_player, get_session_id_by_name, get_semester_id_by_name, make_member, get_player, get_all_players, add_semester, add_session, add_game, get_player_id_by_name
 
-from PySide6.QtWidgets import QMainWindow, QSizePolicy, QLabel, QGridLayout,  QFrame, QPushButton, QWidget, QListWidget, QMenu, QApplication, QLineEdit, QScrollArea, QHBoxLayout
-from PySide6.QtGui import QAction, QCursor
+from PySide6.QtWidgets import QMainWindow, QListWidgetItem, QSizePolicy, QLabel, QGridLayout,  QFrame, QPushButton, QWidget, QListWidget, QMenu, QApplication, QLineEdit, QScrollArea, QHBoxLayout
+from PySide6.QtGui import QAction, QCursor, QFont
 from PySide6.QtCore import Qt, QSize, QPoint
 
 from ui.session_setup_window import SetupWindow
@@ -14,13 +14,14 @@ from ui.text_box_window import TextBoxWindow
 from ui.confimation_window import ConfirmationWindow
 from ui.update_memberships_window import MembershipWindow
 
-from utils.utils import check_for_new_players, find_opponent
+from utils.utils import check_for_new_players, find_opponent, save_scale
 from utils.utils_classes import LeagueRoundBuilder
 
 class MainWindow(QMainWindow):
     def __init__(self, scale=1.0):
         super().__init__()
         self.scale = scale
+        self.default_font = QFont("Segoe UI", round(self.scale * 18))
 
         self.setWindowTitle("My Dark Themed PySide6 App")
         self.setMinimumSize(int(1920 * scale), int(1080 * scale))
@@ -48,9 +49,6 @@ class MainWindow(QMainWindow):
             
             add_semester(sem_name)
             self.semester_id = get_semester_id_by_name(sem_name)
-            
-        add_player("Wilf Moncrieff")
-        make_member("Wilf Moncrieff")
 
     def create_menu_bar(self):
         self.menu_bar = self.menuBar()  # Built-in QMainWindow menu bar
@@ -63,9 +61,9 @@ class MainWindow(QMainWindow):
         self.news_action.triggered.connect(self.on_new_session)
         self.file_menu.addAction(self.news_action)
 
-        self.add_memberships = QAction("Add Members", self)
-        self.add_memberships.triggered.connect(self.on_add_memberships)
-        self.file_menu.addAction(self.add_memberships)
+        self.edit_memberships = QAction("Edit Members", self)
+        self.edit_memberships.triggered.connect(self.on_edit_memberships)
+        self.file_menu.addAction(self.edit_memberships)
 
         self.file_menu.addSeparator()
 
@@ -73,12 +71,12 @@ class MainWindow(QMainWindow):
         exit_action.triggered.connect(self.close)  # Built-in close method
         self.file_menu.addAction(exit_action)
 
-        # Help menu
+        # View menu
         view_menu = self.menu_bar.addMenu("View")
         
-        about_action = QAction("About", self)
-        about_action.triggered.connect(self.on_about)
-        view_menu.addAction(about_action)
+        self.change_scale = QAction("Change Scale", self)
+        self.change_scale.triggered.connect(self.on_change_scale)
+        view_menu.addAction(self.change_scale)
 
     # Action callbacks
     def on_new_session(self):
@@ -107,6 +105,11 @@ class MainWindow(QMainWindow):
         self.file_menu.addAction(self.new_round_action)
         self.new_round_action.setDisabled(True)
         
+        self.remove_round_action = QAction("Remove Last Round", self)
+        self.remove_round_action.triggered.connect(self.on_remove_round)
+        self.file_menu.addAction(self.remove_round_action)
+        self.remove_round_action.setDisabled(True)
+        
         self.save_session_action = QAction("Save", self)
         self.save_session_action.triggered.connect(self.on_save_session)
         self.file_menu.addAction(self.save_session_action)
@@ -124,6 +127,7 @@ class MainWindow(QMainWindow):
         
         self.players_list = QListWidget()
         self.players_list.setFixedWidth(250 * self.scale)
+        self.players_list.setFont(self.default_font)
         self.layout1.addWidget(self.players_list, 1, 0, alignment=Qt.AlignLeft)
         
         self.players_list.setContextMenuPolicy(Qt.CustomContextMenu)
@@ -167,9 +171,23 @@ class MainWindow(QMainWindow):
         print(f"Added to list: {players}")
         
     def player_recived(self, player):
-        self.players_list.addItem(player)
+        # check if the player is already in the session
+        found = False
         
-        print(f"Added to list: {[player]}")
+        for i in range(self.players_list.count()):
+            item = self.players_list.item(i)
+            
+            if item.text() == player:
+                found = True
+                break
+        
+        # update list accordingly
+        if not found:
+            self.players_list.addItem(player)
+        
+            print(f"Added to list: {[player]}")
+        else:
+            print(f"Player: {[player]} is already in the list")
         
     def on_confirm_players(self):
         players = self.get_players_from_list()
@@ -211,10 +229,11 @@ class MainWindow(QMainWindow):
             # disable and enable menu options
             self.confirm_players_action.setDisabled(True)
             self.new_round_action.setDisabled(False)
+            self.remove_round_action.setDisabled(False)
             self.save_session_action.setDisabled(False)
             
             # logic for round pairings            
-            self.round_number = -1
+            self.round_number = 0
             
             self.finished_games = [] # [[winner, loser], [winner, loser]]
             
@@ -228,9 +247,6 @@ class MainWindow(QMainWindow):
             print("Not proceeding to rounds")
 
     def on_new_round(self):
-        # Logic for round pairings
-        self.round_number += 1
-        
         # check for new players
         players = set(self.get_players_from_list())
         difference_in_players = players ^ self.last_round_players
@@ -258,6 +274,11 @@ class MainWindow(QMainWindow):
         
         round_container_layout.addWidget(QLabel(f"Round: {self.round_number + 1}"), 0, self.round_number)
         
+        # shuffle order of round
+        round_ = list(round_)
+        rng = np.random.default_rng()
+        rng.shuffle(round_)
+        
         # create buttons to display players and track wins
         for n, pair in enumerate(round_):
             left = QPushButton(pair[0])
@@ -279,10 +300,32 @@ class MainWindow(QMainWindow):
             bye_text = QLabel(f"Bye: {bye}")
         else:
             bye_text = QLabel(f"Bye: None")
-        bye_text.setStyleSheet(f"font-size: {int(12*self.scale)}px;")
         round_container_layout.addWidget(bye_text, n + 2, self.round_number)
         
         self.container_layout.addWidget(round_container)
+        
+        self.remove_round_action.setDisabled(False)
+        if not self.builder.rounds_left: # no rounds left to play
+            self.new_round_action.setDisabled(True)
+
+        self.round_number += 1
+        
+    def on_remove_round(self):
+        self.builder.remove_round()
+        
+        # delete display of last round
+        item = self.container_layout.takeAt(self.round_number - 1)
+        widget = item.widget()
+        if widget:
+            widget.setParent(None)
+            widget.deleteLater()
+
+        self.new_round_action.setDisabled(False)
+        
+        self.round_number -= 1
+        
+        if self.round_number == 0: # no rounds displayed
+            self.remove_round_action.setDisabled(True)
         
     def toggle_match_state(self):
         button = self.sender()
@@ -351,13 +394,24 @@ class MainWindow(QMainWindow):
         self.finished_games = []
     
 
-    def on_add_memberships(self):
+    def on_edit_memberships(self):
         self.update_membership_window = MembershipWindow(scale=self.scale)
         
         self.update_membership_window.show()
 
-    def on_about(self):
-        print("This is a PySide6 demo app.")
+    def on_change_scale(self):
+        self.scale_window = TextBoxWindow(scale=self.scale)
+        self.scale_window.open_at_cursor()
+        
+        self.scale_window.submitted_player.connect(self.on_change_scale2)
+        
+        self.scale_window.show()
+        
+    def on_change_scale2(self, scale):
+        s = int(scale)
+        s = s / 100
+    
+        save_scale(s)
         
     def get_players_from_list(self):
         players = []

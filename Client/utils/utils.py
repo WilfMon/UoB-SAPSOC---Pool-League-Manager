@@ -1,3 +1,5 @@
+import csv
+
 from database.queries import get_all_players
 
 def check_for_new_players(players):
@@ -29,3 +31,20 @@ def find_opponent(arr, player):
         if second == player:
             return first
     return None
+
+def load_scale():
+    with open("Client/config.csv", mode="r") as file:
+        
+        reader = csv.DictReader(file)  # read CSV as dictionary
+        
+        for row in reader:
+            scale = float(row["scale"])
+            return scale
+        
+def save_scale(scale: float):
+    with open("Client/config.csv", mode="w", newline="") as file:
+        
+        writer = csv.writer(file)
+        
+        writer.writerow(["scale"])  # header row
+        writer.writerow([scale])     # data row

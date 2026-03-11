@@ -1,12 +1,11 @@
 APPLICATION
 
 -- important --
-- add ways to make people members (Working)
-- add a way to change scale
 - add data visualization
+- add way to low weight games that have already been played so that games can always be played
 
 -- less important --
-- add a tounement mode
+- add a tournement mode
 - add elo
 - add more point gain for beating higher points players
 

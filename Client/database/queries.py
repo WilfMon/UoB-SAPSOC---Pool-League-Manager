@@ -23,6 +23,20 @@ def make_member(name):
         
     conn.commit()
     conn.close()
+
+def remove_member(name):
+    conn = get_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute("UPDATE players SET member = 0 WHERE name = ?",(name,))
+    
+    if cursor.rowcount == 0:
+        print(f"No player found with name: {name}")
+    else:
+        print(f"{name} is now not a member")
+        
+    conn.commit()
+    conn.close()
     
 def get_player(name):
     conn = get_connection()
