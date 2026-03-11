@@ -53,6 +53,10 @@ QMenu {
     color: #ffffff;
 }
 
+QMenu::item:disabled {
+    color: #2c2c2c;           
+}
+
 QMenu::separator {
     height: 1px;
     background: #636363;

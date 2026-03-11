@@ -9,10 +9,13 @@ from PySide6.QtWidgets import QMainWindow, QSizePolicy, QLabel, QGridLayout,  QF
 from PySide6.QtGui import QAction, QCursor
 from PySide6.QtCore import Qt, QSize, QPoint
 
-from ui.setup_window import SetupWindow
+from ui.session_setup_window import SetupWindow
 from ui.text_box_window import TextBoxWindow
 from ui.confimation_window import ConfirmationWindow
-from ui.utils import LeagueRoundBuilder, check_for_new_players, find_opponent, round_robin_schedule
+from ui.update_memberships_window import MembershipWindow
+
+from utils.utils import check_for_new_players, find_opponent
+from utils.utils_classes import LeagueRoundBuilder
 
 class MainWindow(QMainWindow):
     def __init__(self, scale=1.0):
@@ -45,6 +48,9 @@ class MainWindow(QMainWindow):
             
             add_semester(sem_name)
             self.semester_id = get_semester_id_by_name(sem_name)
+            
+        add_player("Wilf Moncrieff")
+        make_member("Wilf Moncrieff")
 
     def create_menu_bar(self):
         self.menu_bar = self.menuBar()  # Built-in QMainWindow menu bar
@@ -53,13 +59,13 @@ class MainWindow(QMainWindow):
         self.file_menu = self.menu_bar.addMenu("File")
 
         # File menu actions
-        news_action = QAction("New Session", self)
-        news_action.triggered.connect(self.on_new_session)
-        self.file_menu.addAction(news_action)
+        self.news_action = QAction("New Session", self)
+        self.news_action.triggered.connect(self.on_new_session)
+        self.file_menu.addAction(self.news_action)
 
-        open_action = QAction("Open Session", self)
-        open_action.triggered.connect(self.on_open)
-        self.file_menu.addAction(open_action)
+        self.add_memberships = QAction("Add Members", self)
+        self.add_memberships.triggered.connect(self.on_add_memberships)
+        self.file_menu.addAction(self.add_memberships)
 
         self.file_menu.addSeparator()
 
@@ -90,23 +96,28 @@ class MainWindow(QMainWindow):
         # Session menu
         self.file_menu = self.menu_bar.addMenu("Session")
         
-        confirm_players_action = QAction("Confirm", self)
-        confirm_players_action.triggered.connect(self.on_confirm_players)
-        self.file_menu.addAction(confirm_players_action)
+        self.news_action.setDisabled(True)
         
-        new_round_action = QAction("New Round", self)
-        new_round_action.triggered.connect(self.on_new_round)
-        self.file_menu.addAction(new_round_action)
+        self.confirm_players_action = QAction("Confirm", self)
+        self.confirm_players_action.triggered.connect(self.on_confirm_players)
+        self.file_menu.addAction(self.confirm_players_action)
         
-        save_session_action = QAction("Save", self)
-        save_session_action.triggered.connect(self.on_save_session)
-        self.file_menu.addAction(save_session_action)
+        self.new_round_action = QAction("New Round", self)
+        self.new_round_action.triggered.connect(self.on_new_round)
+        self.file_menu.addAction(self.new_round_action)
+        self.new_round_action.setDisabled(True)
+        
+        self.save_session_action = QAction("Save", self)
+        self.save_session_action.triggered.connect(self.on_save_session)
+        self.file_menu.addAction(self.save_session_action)
+        self.save_session_action.setDisabled(True)
         
         self.file_menu.addSeparator()
         
-        cancel_action = QAction("Cancel", self)
-        cancel_action.triggered.connect(self.on_cancel_session)
-        self.file_menu.addAction(cancel_action)
+        self.cancel_action = QAction("Cancel", self)
+        self.cancel_action.triggered.connect(self.on_cancel_session)
+        self.file_menu.addAction(self.cancel_action)
+        
         
         self.players_list_title = QLabel("List of Players:")
         self.layout1.addWidget(self.players_list_title, 0, 0, alignment=Qt.AlignLeft)
@@ -197,19 +208,19 @@ class MainWindow(QMainWindow):
             self.round_area.setWidget(self.container)
             self.layout1.addWidget(self.round_area, 1, 1)
             
+            # disable and enable menu options
+            self.confirm_players_action.setDisabled(True)
+            self.new_round_action.setDisabled(False)
+            self.save_session_action.setDisabled(False)
+            
+            # logic for round pairings            
             self.round_number = -1
             
             self.finished_games = [] # [[winner, loser], [winner, loser]]
             
-            # logic for round pairings
-            self.first_round_players = players
+            self.last_round_players = set(players)
                 
             self.builder = LeagueRoundBuilder(players)
-            self.builder.round_robin_schedule()
-            self.rounds_to_play = self.builder.rounds
-            self.byes = self.builder.byes
-            
-            print(f"Number of rounds to play: {len(self.rounds_to_play)}")
             
             self.on_new_round() # creates first round
                 
@@ -219,17 +230,26 @@ class MainWindow(QMainWindow):
     def on_new_round(self):
         # Logic for round pairings
         self.round_number += 1
-        self.builder.round_complete(self.round_number)
         
         # check for new players
         players = set(self.get_players_from_list())
-        new_players = players - set(self.first_round_players)
-        if False:
-            self.builder.add_players(new_players) # add new players to the builder class
+        difference_in_players = players ^ self.last_round_players
+        if difference_in_players != set(): # if there is a difference in players from last round
             
-            self.rounds_to_play, self.byes = self.builder.round_robin_schedule()
-            print(f"Rounds to play: {self.rounds_to_play}")
-            print(f"Byes: {self.byes}")
+            more_players = players - self.last_round_players
+            less_players = self.last_round_players - players
+        
+            # update the LeagueRoundBuilder with this infomaion
+            if more_players != set():
+                self.builder.add_players(list(more_players))
+                
+            if less_players != set():
+                self.builder.add_players(list(less_players))
+            
+        # Create new round and the bye (None for no bye)
+        round_, bye = self.builder.create_round()
+        
+        self.last_round_players = players
                     
         # creating display of round pairings
         round_container = QFrame()
@@ -239,7 +259,7 @@ class MainWindow(QMainWindow):
         round_container_layout.addWidget(QLabel(f"Round: {self.round_number + 1}"), 0, self.round_number)
         
         # create buttons to display players and track wins
-        for n, pair in enumerate(self.rounds_to_play[self.round_number]):
+        for n, pair in enumerate(round_):
             left = QPushButton(pair[0])
             right = QPushButton(pair[1])
             
@@ -255,8 +275,8 @@ class MainWindow(QMainWindow):
             round_container_layout.addWidget(QLabel("v"), n + 1, self.round_number + 1)
             round_container_layout.addWidget(right, n + 1, self.round_number + 2)
         
-        if self.byes != None:
-            bye_text = QLabel(f"Bye: {self.byes[self.round_number]}")
+        if bye != None:
+            bye_text = QLabel(f"Bye: {bye}")
         else:
             bye_text = QLabel(f"Bye: None")
         bye_text.setStyleSheet(f"font-size: {int(12*self.scale)}px;")
@@ -275,8 +295,8 @@ class MainWindow(QMainWindow):
             button.setStyleSheet("background-color: green")
             button.setProperty("color_state", "green")
             
-            # make sure the rounc searched is the same as the round played
-            opp = find_opponent(self.rounds_to_play[round_num], name)
+            # make sure the round searched is the same as the round played
+            opp = find_opponent(self.builder.rounds_played[round_num], name)
             
             # check if this is an adjustment
             if [opp, name] in self.finished_games:
@@ -312,6 +332,9 @@ class MainWindow(QMainWindow):
             
     def on_cancel_session(self):
         
+        # enable new session creation again
+        self.news_action.setDisabled(False)
+        
         # clear the session layout
         self.clear_layout(self.layout1)
         
@@ -328,8 +351,10 @@ class MainWindow(QMainWindow):
         self.finished_games = []
     
 
-    def on_open(self):
-        print("Open file triggered!")
+    def on_add_memberships(self):
+        self.update_membership_window = MembershipWindow(scale=self.scale)
+        
+        self.update_membership_window.show()
 
     def on_about(self):
         print("This is a PySide6 demo app.")

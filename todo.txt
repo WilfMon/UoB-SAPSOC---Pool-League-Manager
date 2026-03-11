@@ -1,8 +1,7 @@
 APPLICATION
 
 -- important --
-- add ways to make people members
-- fix the pairing system for creating games
+- add ways to make people members (Working)
 - add a way to change scale
 - add data visualization
 

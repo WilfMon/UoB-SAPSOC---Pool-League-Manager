@@ -2,7 +2,7 @@ from PySide6.QtWidgets import QMainWindow, QGridLayout, QWidget, QLineEdit
 from PySide6.QtGui import QCursor
 from PySide6.QtCore import Qt, Signal
 
-from ui.utils import clean_name
+from utils.utils import clean_name
 
 class TextBoxWindow(QMainWindow):
     submitted_player = Signal(str)

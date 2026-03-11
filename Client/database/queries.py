@@ -1,5 +1,7 @@
 from database.db import get_connection
 
+
+# Functions for players table
 def add_player(name):
     conn = get_connection()
     cursor = conn.cursor()
@@ -13,6 +15,12 @@ def make_member(name):
     cursor = conn.cursor()
     
     cursor.execute("UPDATE players SET member = 1 WHERE name = ?",(name,))
+    
+    if cursor.rowcount == 0:
+        print(f"No player found with name: {name}")
+    else:
+        print(f"{name} is now a member")
+        
     conn.commit()
     conn.close()
     
@@ -25,6 +33,16 @@ def get_player(name):
     
     return rows
 
+def get_members():
+    conn = get_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute("SELECT name FROM players WHERE member = ?", (1,))
+    rows = cursor.fetchall()
+    
+    names = [row[0] for row in rows]
+    return names
+
 def get_all_players():
     conn = get_connection()
     cursor = conn.cursor()
@@ -35,6 +53,8 @@ def get_all_players():
     names = [row[0] for row in rows]
     return names
 
+
+# Functions to add objects to table
 def add_semester(semester_name):
     conn = get_connection()
     cursor = conn.cursor()
@@ -106,6 +126,8 @@ def add_game(session_id, player1_id, player2_id, winner_id):
     conn.commit()
     conn.close()
     
+    
+# Functions to get ids
 def get_semester_id_by_name(semester_name):
     conn = get_connection()
     cursor = conn.cursor()
