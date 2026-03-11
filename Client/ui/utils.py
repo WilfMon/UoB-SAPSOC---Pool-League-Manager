@@ -74,7 +74,11 @@ def round_robin_schedule(arr):
 class LeagueRoundBuilder():
     def __init__(self, players):
         
-        self.players = list(players)
+        # shuffle the list of players randomly
+        rng = np.random.default_rng()
+        random_players = rng.permutation(players)
+        
+        self.players = list(random_players)
         self.used_pairs = set()
         
     def round_robin_schedule(self):
@@ -119,8 +123,6 @@ class LeagueRoundBuilder():
         
         self.rounds = rounds
         self.byes = byes
-        
-        return rounds, byes
     
     def round_complete(self, round_number):
         

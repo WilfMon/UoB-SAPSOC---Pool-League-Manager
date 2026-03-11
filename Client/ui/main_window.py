@@ -197,20 +197,17 @@ class MainWindow(QMainWindow):
             self.round_area.setWidget(self.container)
             self.layout1.addWidget(self.round_area, 1, 1)
             
-            self.round_count = -1
+            self.round_number = -1
             
             self.finished_games = [] # [[winner, loser], [winner, loser]]
             
             # logic for round pairings
-            self.last_round_players = players
-        
-            # shuffle the list of players randomly
-            rng = np.random.default_rng()
-            random_players = rng.permutation(players)
+            self.first_round_players = players
                 
-            # create pairings
-            self.builder = LeagueRoundBuilder(random_players)
-            self.rounds_to_play, self.byes = self.builder.round_robin_schedule()
+            self.builder = LeagueRoundBuilder(players)
+            self.builder.round_robin_schedule()
+            self.rounds_to_play = self.builder.rounds
+            self.byes = self.builder.byes
             
             print(f"Number of rounds to play: {len(self.rounds_to_play)}")
             
@@ -221,30 +218,28 @@ class MainWindow(QMainWindow):
 
     def on_new_round(self):
         # Logic for round pairings
-        self.round_count += 1
-        self.builder.round_complete(self.round_count)
+        self.round_number += 1
+        self.builder.round_complete(self.round_number)
         
         # check for new players
         players = set(self.get_players_from_list())
-        new_players = players - set(self.last_round_players)
+        new_players = players - set(self.first_round_players)
         if False:
             self.builder.add_players(new_players) # add new players to the builder class
             
             self.rounds_to_play, self.byes = self.builder.round_robin_schedule()
             print(f"Rounds to play: {self.rounds_to_play}")
             print(f"Byes: {self.byes}")
-        
-        self.games_to_play = self.rounds_to_play[self.round_count]
-            
+                    
         # creating display of round pairings
         round_container = QFrame()
         round_container.setStyleSheet("background-color: #1f1f1f;")
         round_container_layout = QGridLayout(round_container)
         
-        round_container_layout.addWidget(QLabel(f"Round: {self.round_count + 1}"), 0, self.round_count)
+        round_container_layout.addWidget(QLabel(f"Round: {self.round_number + 1}"), 0, self.round_number)
         
         # create buttons to display players and track wins
-        for n, pair in enumerate(self.games_to_play):
+        for n, pair in enumerate(self.rounds_to_play[self.round_number]):
             left = QPushButton(pair[0])
             right = QPushButton(pair[1])
             
@@ -252,20 +247,20 @@ class MainWindow(QMainWindow):
             right.clicked.connect(self.toggle_match_state)
             
             # to track what round each button is created in
-            left.setProperty("round_num", self.round_count)
-            right.setProperty("round_num", self.round_count)
+            left.setProperty("round_num", self.round_number)
+            right.setProperty("round_num", self.round_number)
             
             # adding buttons to the gui
-            round_container_layout.addWidget(left, n + 1, self.round_count)
-            round_container_layout.addWidget(QLabel("v"), n + 1, self.round_count + 1)
-            round_container_layout.addWidget(right, n + 1, self.round_count + 2)
+            round_container_layout.addWidget(left, n + 1, self.round_number)
+            round_container_layout.addWidget(QLabel("v"), n + 1, self.round_number + 1)
+            round_container_layout.addWidget(right, n + 1, self.round_number + 2)
         
         if self.byes != None:
-            bye_text = QLabel(f"Bye: {self.byes[self.round_count]}")
+            bye_text = QLabel(f"Bye: {self.byes[self.round_number]}")
         else:
             bye_text = QLabel(f"Bye: None")
         bye_text.setStyleSheet(f"font-size: {int(12*self.scale)}px;")
-        round_container_layout.addWidget(bye_text, n + 2, self.round_count)
+        round_container_layout.addWidget(bye_text, n + 2, self.round_number)
         
         self.container_layout.addWidget(round_container)
         
