@@ -2,7 +2,7 @@ APPLICATION
 
 -- important --
 - add data visualization
-- add leaderboard
+- making pairing more random
 - add way to low weight games that have already been played so that games can always be played
 
 -- less important --

@@ -5,7 +5,7 @@ from database.db import get_connection
 from database.schema import create_tables
 from database.queries import add_player, get_session_id_by_name, get_semester_id_by_name, make_member, get_player, get_all_players, add_semester, add_session, add_game, get_player_id_by_name
 
-from PySide6.QtWidgets import QMainWindow, QListWidgetItem, QSizePolicy, QLabel, QGridLayout,  QFrame, QPushButton, QWidget, QListWidget, QMenu, QApplication, QLineEdit, QScrollArea, QHBoxLayout
+from PySide6.QtWidgets import QMainWindow, QComboBox, QListWidgetItem, QSizePolicy, QLabel, QGridLayout,  QFrame, QPushButton, QWidget, QListWidget, QMenu, QApplication, QLineEdit, QScrollArea, QHBoxLayout
 from PySide6.QtGui import QAction, QCursor, QFont
 from PySide6.QtCore import Qt, QSize, QPoint
 
@@ -26,6 +26,10 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("My Dark Themed PySide6 App")
         self.setMinimumSize(int(1920 * scale), int(1080 * scale))
         
+        central = QWidget()
+        self.main_layout = QGridLayout(central)
+        self.setCentralWidget(central)
+        
         # Create the menu bar
         self.create_menu_bar()
         
@@ -39,13 +43,13 @@ class MainWindow(QMainWindow):
         
         # automatically determine semester and year
         if 9 <= self.month <= 12:
-            sem_name = self.year + " semester 1"
+            sem_name = self.year + ".1"
             
             add_semester(sem_name)
             self.semester_id = get_semester_id_by_name(sem_name)
 
         if 1 <= self.month <= 8:
-            sem_name = self.year + " semester 2"
+            sem_name = self.year + ".2"
             
             add_semester(sem_name)
             self.semester_id = get_semester_id_by_name(sem_name)
@@ -94,6 +98,8 @@ class MainWindow(QMainWindow):
         
         self.session_setup_window.show()
         
+        self.clear_layout(self.main_layout)
+        
         # Session menu
         self.file_menu = self.menu_bar.addMenu("Session")
         
@@ -124,12 +130,7 @@ class MainWindow(QMainWindow):
         self.cancel_action.triggered.connect(self.on_cancel_session)
         self.file_menu.addAction(self.cancel_action)
         
-        
         # logic for main window on new session
-        central = QWidget()
-        self.main_layout = QGridLayout(central)
-        self.setCentralWidget(central)
-
         self.players_list_title = QLabel("List of Players:")
         self.main_layout.addWidget(self.players_list_title, 0, 0, alignment=Qt.AlignLeft)
         
@@ -227,11 +228,11 @@ class MainWindow(QMainWindow):
             self.round_area.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
             self.round_area.setStyleSheet("background-color: #0b0b0b;")
 
-            self.container = QWidget()
-            self.container_layout = QHBoxLayout(self.container)
-            self.container_layout.setAlignment(Qt.AlignTop | Qt.AlignLeft)
+            self.round_container = QWidget()
+            self.round_container_layout = QHBoxLayout(self.round_container)
+            self.round_container_layout.setAlignment(Qt.AlignTop | Qt.AlignLeft)
 
-            self.round_area.setWidget(self.container)
+            self.round_area.setWidget(self.round_container)
             self.main_layout.addWidget(self.round_area, 1, 1)
             
             # disable and enable menu options
@@ -308,9 +309,10 @@ class MainWindow(QMainWindow):
             bye_text = QLabel(f"Bye: {bye}")
         else:
             bye_text = QLabel(f"Bye: None")
+            
         round_container_layout.addWidget(bye_text, n + 2, self.round_number)
         
-        self.container_layout.addWidget(round_container)
+        self.round_container_layout.addWidget(round_container)
         
         self.remove_round_action.setDisabled(False)
         if not self.builder.rounds_left: # no rounds left to play
@@ -322,7 +324,7 @@ class MainWindow(QMainWindow):
         self.builder.remove_round()
         
         # delete display of last round
-        item = self.container_layout.takeAt(self.round_number - 1)
+        item = self.round_container_layout.takeAt(self.round_number - 1)
         widget = item.widget()
         if widget:
             widget.setParent(None)
@@ -427,11 +429,6 @@ class MainWindow(QMainWindow):
         self.file_menu.addAction(self.advanced)
         self.advanced.setDisabled(True)
 
-        # logic for main window on new statistics
-        central = QWidget()
-        self.main_layout = QGridLayout(central)
-        self.setCentralWidget(central)
-
     def on_enter_player(self):
 
         def player_recived(player):
@@ -471,8 +468,205 @@ class MainWindow(QMainWindow):
 
     def on_view_leaderboard(self):
         
+        self.clear_layout(self.main_layout)
+        
+        def on_semester_selected(semester, first_time=False):
+            
+            # clean data
+            data = semester.split()
+            data.pop(1)
+            data.reverse()
+            
+            for sem in semester_leaderboard:
+                if sem[-1][0] == data[0]: # check if semester_id matches
+                    break
+            
+            for n, player in enumerate(sem, start=1):
+                n *= 2
+                
+                # prevent the semester data from being displayed
+                if sem[-1] == player:
+                    break
+                
+                line = QFrame()
+                line.setFrameShape(QFrame.HLine)
+                line.setFrameShadow(QFrame.Sunken)
+                line.setStyleSheet("background-color: #3d3d3d")
+                
+                leaderboard_container_layout_sm.addWidget(line, n, 0, 1, 2)
+                
+                points = QLabel(f"{player[2]}")
+                points.setStyleSheet("font-weight: normal;")
+                
+                name = QLabel(f"{player[1]}")
+                name.setStyleSheet("font-weight: normal;")
+
+                leaderboard_container_layout_sm.addWidget(points, n + 1, 0)
+                leaderboard_container_layout_sm.addWidget(name, n + 1, 1)
+                                
+            self.L_semester_label = QLabel("Semester Leaderboard:", self)
+            leaderboard_container_layout_sm.addWidget(self.L_semester_label, 0, 0, alignment=Qt.AlignLeft | Qt.AlignTop)
+
+            self.L_select_semester_score = QLabel("Points:", self)
+            self.L_select_semester_score.setStyleSheet("font-weight: normal;")
+            leaderboard_container_layout_sm.addWidget(self.L_select_semester_score, 1, 0, alignment=Qt.AlignLeft | Qt.AlignTop)
+            
+            self.L_select_semester_name = QLabel("Name:", self)
+            self.L_select_semester_name.setStyleSheet("font-weight: normal;")
+            leaderboard_container_layout_sm.addWidget(self.L_select_semester_name, 1, 1, alignment=Qt.AlignLeft | Qt.AlignTop)
+
+            self.L_select_semester = QComboBox()
+            for semester in semester_leaderboard:
+                self.L_select_semester.addItem(str(semester[-1][1]) + " - " + str(semester[-1][0]))
+            self.L_select_semester.setCurrentText(str(sem[-1][1]) + " - " + str(sem[-1][0]))
+            if first_time:
+                self.L_select_semester.setCurrentIndex(len(semester_leaderboard) - 1)
+            self.L_select_semester.currentTextChanged.connect(on_semester_selected)
+            leaderboard_container_layout_sm.addWidget(self.L_select_semester, 0, 1, alignment=Qt.AlignLeft | Qt.AlignTop)
+
+            self.leaderboard_container_layout.addWidget(leaderboard_container_sm, 0, 0)
+
+        def on_session_selected(session, first_time=False):
+            
+            self.leaderboard_container_layout.removeWidget(leaderboard_container_se)
+            
+            # clean data
+            data = session.split()
+            data.pop(1)
+            data.pop(2)
+            
+            for ses in session_leaderboard:
+                if int(ses[-1][0]) == int(data[0]) and int(ses[-1][3]) == int(data[2]): # check if session_id and semester_id matches
+                    break
+                
+            for n, player in enumerate(ses, start=1):
+                n *= 2
+                
+                # prevent the semester data from being displayed
+                if ses[-1] == player:
+                    break
+                
+                line = QFrame()
+                line.setFrameShape(QFrame.HLine)
+                line.setFrameShadow(QFrame.Sunken)
+                line.setStyleSheet("background-color: #3d3d3d")
+                
+                leaderboard_container_layout_se.addWidget(line, n, 0, 1, 2)
+                
+                points = QLabel(f"{player[2]}")
+                points.setStyleSheet("font-weight: normal;")
+                
+                name = QLabel(f"{player[1]}")
+                name.setStyleSheet("font-weight: normal;")
+
+                leaderboard_container_layout_se.addWidget(points, n + 1, 0)
+                leaderboard_container_layout_se.addWidget(name, n + 1, 1)
+                
+            self.L_session_label = QLabel("Session Leaderboard:", self)
+            leaderboard_container_layout_se.addWidget(self.L_session_label, 0, 0, alignment=Qt.AlignLeft | Qt.AlignTop)
+
+            self.L_select_session_score = QLabel("Points:", self)
+            self.L_select_session_score.setStyleSheet("font-weight: normal;")
+            leaderboard_container_layout_se.addWidget(self.L_select_session_score, 1, 0, alignment=Qt.AlignLeft | Qt.AlignTop)
+            
+            self.L_select_session_name = QLabel("Name:", self)
+            self.L_select_session_name.setStyleSheet("font-weight: normal;")
+            leaderboard_container_layout_se.addWidget(self.L_select_session_name, 1, 1, alignment=Qt.AlignLeft | Qt.AlignTop)
+
+            self.L_select_session = QComboBox()
+            for session_ in session_leaderboard:
+                self.L_select_session.addItem(str(session_[-1][0]) + " - " + str(session_[-1][1]) + " - " + str(session_[-1][3]))
+            self.L_select_session.setCurrentText(str(ses[-1][0]) + " - " + str(ses[-1][1]) + " - " + str(ses[-1][3]))
+            if first_time:
+                self.L_select_session.setCurrentIndex(len(session_leaderboard) - 1)
+            self.L_select_session.currentTextChanged.connect(on_session_selected)
+            leaderboard_container_layout_se.addWidget(self.L_select_session, 0, 1, alignment=Qt.AlignLeft | Qt.AlignTop)
+
+            self.leaderboard_container_layout.addWidget(leaderboard_container_se, 0, 1)
+        
+        # get leaderboards
         L = Leaderboard()
-        print(L.semester())
+        semester_leaderboard, session_leaderboard, alltime_leaderboard = L.collect_leaderboards()
+        
+        # ui setup
+        self.leaderboard_area = QScrollArea()
+        self.leaderboard_area.setWidgetResizable(True)
+        self.leaderboard_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        self.leaderboard_area.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.leaderboard_area.setStyleSheet("background-color: #0b0b0b;")
+        
+        self.leaderboard_container = QWidget()
+        self.leaderboard_container_layout = QGridLayout(self.leaderboard_container)
+        self.leaderboard_container_layout.setSpacing(35)
+
+        self.leaderboard_area.setWidget(self.leaderboard_container)
+        self.main_layout.addWidget(self.leaderboard_area, 1, 1)
+        
+        leaderboard_container_sm = QFrame()
+        leaderboard_container_sm.setStyleSheet("background-color: #1f1f1f;")
+        leaderboard_container_layout_sm = QGridLayout(leaderboard_container_sm)
+        
+        leaderboard_container_se = QFrame()
+        leaderboard_container_se.setStyleSheet("background-color: #1f1f1f;")
+        leaderboard_container_layout_se = QGridLayout(leaderboard_container_se)
+        
+        leaderboard_container_at = QFrame()
+        leaderboard_container_at.setStyleSheet("background-color: #1f1f1f;")
+        leaderboard_container_layout_at = QGridLayout(leaderboard_container_at)
+                        
+        # combo boxes
+        self.L_select_semester = QComboBox()
+        for semester in semester_leaderboard:
+            self.L_select_semester.addItem(str(semester[-1][1]) + " - " + str(semester[-1][0]))
+        self.L_select_semester.setCurrentIndex(len(semester_leaderboard) - 1)
+        self.L_select_semester.currentTextChanged.connect(on_semester_selected)
+        leaderboard_container_layout_sm.addWidget(self.L_select_semester, 0, 1, alignment=Qt.AlignLeft | Qt.AlignTop)
+        
+        self.L_select_session = QComboBox()
+        for session in session_leaderboard:
+            self.L_select_session.addItem(str(session[-1][0]) + " - " + str(session[-1][1]) + " - " + str(session[-1][3]))
+        self.L_select_session.setCurrentIndex(len(session_leaderboard) - 1)
+        self.L_select_session.currentTextChanged.connect(on_session_selected)
+        leaderboard_container_layout_se.addWidget(self.L_select_session, 0, 1, alignment=Qt.AlignLeft | Qt.AlignTop)
+        
+        # alltime leaderboard
+        self.L_alltime_label = QLabel("All-Time Leaderboard:", self)
+        leaderboard_container_layout_at.addWidget(self.L_alltime_label, 0, 0, alignment=Qt.AlignLeft | Qt.AlignTop)
+        
+        self.L_alltime_label_score = QLabel("Points:", self)
+        self.L_alltime_label_score.setStyleSheet("font-weight: normal;")
+        leaderboard_container_layout_at.addWidget(self.L_alltime_label_score, 1, 0, alignment=Qt.AlignLeft | Qt.AlignTop)
+        
+        self.L_alltime_label_name = QLabel("Name:", self)
+        self.L_alltime_label_name.setStyleSheet("font-weight: normal;")
+        leaderboard_container_layout_at.addWidget(self.L_alltime_label_name, 1, 1, alignment=Qt.AlignLeft | Qt.AlignTop)
+
+        # displaying leaderboards
+        for n, player in enumerate(alltime_leaderboard, start=1):
+            n *= 2
+            
+            line = QFrame()
+            line.setFrameShape(QFrame.HLine)
+            line.setFrameShadow(QFrame.Sunken)
+            line.setStyleSheet("background-color: #3d3d3d")
+            
+            leaderboard_container_layout_at.addWidget(line, n, 0, 1, 2)
+            
+            points = QLabel(f"{player[2]}")
+            points.setStyleSheet("font-weight: normal;")
+            
+            name = QLabel(f"{player[1]}")
+            name.setStyleSheet("font-weight: normal;")
+
+            leaderboard_container_layout_at.addWidget(points, n + 1, 0)
+            leaderboard_container_layout_at.addWidget(name, n + 1, 1)
+        
+        on_semester_selected(str(semester_leaderboard[0][-1][1]) + " - " + str(semester_leaderboard[0][-1][0]), first_time=True)
+        on_session_selected(str(session_leaderboard[0][-1][0]) + " - " + str(session_leaderboard[0][-1][1]) + " - " + str(session_leaderboard[0][-1][3]), first_time=True)
+        
+        self.leaderboard_container_layout.addWidget(leaderboard_container_sm, 0, 0)
+        self.leaderboard_container_layout.addWidget(leaderboard_container_se, 0, 1)
+        self.leaderboard_container_layout.addWidget(leaderboard_container_at, 0, 2)
 
     def on_edit_memberships(self):
         self.update_membership_window = MembershipWindow(scale=self.scale)

@@ -1,5 +1,6 @@
 import networkx as nx
 import itertools
+import numpy as np
 
 from networkx import max_weight_matching
 
@@ -15,16 +16,9 @@ class LeagueRoundBuilder():
         
         self.G = nx.Graph()
         
-        # Handle odd number of players
-        if self.num_players % 2 == 1:
-            self.num_players += 1
-            self.players.append("Dummy")
-            
-            self.odd = True
-        
-        self.G.add_nodes_from(self.players) # add players to the graph
-        for a, b in itertools.combinations(self.players, 2): # add connections between players
-            self.G.add_edge(a, b)
+        self.rng = np.random.default_rng()
+                
+        self.add_players(self.players)
 
     def add_players(self, players_to_add):
         
@@ -49,7 +43,10 @@ class LeagueRoundBuilder():
         self.G.add_nodes_from(self.players_to_add) # add players to the graph
         
         for a, b in itertools.combinations(self.players, 2): # add connections between players
-            self.G.add_edge(a, b)
+            
+            ran_float = self.rng.random()
+            
+            self.G.add_edge(a, b, weight=1000 + ran_float)
             
         # make sure all previous matches played are removed from the graph again
         for r in self.rounds_played:
@@ -77,7 +74,10 @@ class LeagueRoundBuilder():
         
         self.G.remove_nodes_from(self.players_to_remove) # remove players to the graph
         for a, b in itertools.combinations(self.players, 2): # add connections between players
-            self.G.add_edge(a, b)
+            
+            ran_float = self.rng.random()
+            
+            self.G.add_edge(a, b, weight=1000 + ran_float)
             
         # make sure all previous matches played are removed from the graph again
         for r in self.rounds_played:
@@ -125,8 +125,9 @@ class LeagueRoundBuilder():
         round_ = self.rounds_played[-1] # gets the last round
         
         for u, v in round_:
+            ran_float = self.rng.random()
             
-            self.G.add_edge(u, v)
+            self.G.add_edge(u, v, weight=1000 + ran_float)
         
         self.rounds_played.pop() # deletes the last round
         self.rounds_left = True
@@ -139,7 +140,6 @@ class LeagueRoundBuilder():
             if self.G.has_edge(u, v): # check if the edge exists and if it doesn't don't attempt to remove
                 self.G.remove_edge(u, v)
 
-import numpy as np
 import matplotlib.pyplot as plt
 
 from database.queries import get_player, get_player_games
@@ -187,29 +187,6 @@ class Leaderboard():
     def __init__(self):
         pass
     
-    def session(self):
-        conn = get_connection()
-        cursor = conn.cursor()
-        
-        cursor.execute("""
-            SELECT 
-            s.session_id,
-            s.session_date,
-            p.player_id,
-            p.name,
-            SUM(g.points_to_winner) AS total_points
-            FROM games g
-            JOIN sessions s ON g.session_id = s.session_id
-            JOIN players p ON g.winner_id = p.player_id
-            GROUP BY s.session_id, p.player_id
-            ORDER BY s.session_id, total_points DESC;    
-        """)
-        
-        result = cursor.fetchall()
-        conn.close()
-        
-        return result
-    
     def semester(self):
         conn = get_connection()
         cursor = conn.cursor()
@@ -220,19 +197,102 @@ class Leaderboard():
             sem.semester_name,
             p.player_id,
             p.name,
-            SUM(g.points_to_winner) AS total_points
-            FROM games g
-            JOIN sessions s ON g.session_id = s.session_id
-            JOIN semester sem ON s.semester_id = sem.semester_id
-            JOIN players p ON g.winner_id = p.player_id
+            COALESCE(SUM(g.points_to_winner), 0) AS total_points
+            FROM players p
+            CROSS JOIN semester sem
+            LEFT JOIN sessions s 
+            ON s.semester_id = sem.semester_id
+            LEFT JOIN games g 
+            ON g.winner_id = p.player_id 
+            AND g.session_id = s.session_id
             GROUP BY sem.semester_id, p.player_id
-            ORDER BY sem.semester_id, total_points DESC;   
+            ORDER BY sem.semester_id, total_points DESC, p.name;  
         """)
         
         result = cursor.fetchall()
+        
+        cursor.execute("""
+            SELECT semester_id FROM semester               
+        """)
+        
+        semesters_list = cursor.fetchall()
         conn.close()
         
-        return result
+        # order the leaderboard
+        results_per_semester = []
+        
+        for i in range(len(semesters_list)): # loop though semesters
+            results_per_semester.append([])
+            
+            for player in result:
+                if player[0] == semesters_list[i][0]: # if the semester the player is in is the semester we are looping though
+                    
+                    if results_per_semester[i] == []: # last item contains info about semester
+                        results_per_semester[i].append((player[0], player[1], -1))
+                    
+                    tup = (player[2], player[3], player[4])
+                    
+                    results_per_semester[i].append(tup)
+          
+        in_order = []
+                  
+        for result in results_per_semester:
+            in_order.append(sorted(result, key=lambda x: x[2], reverse=True))
+        
+        return in_order    
+
+    def session(self):
+        conn = get_connection()
+        cursor = conn.cursor()
+        
+        cursor.execute("""
+            SELECT 
+            s.session_id,
+            s.session_date,
+            s.semester_id,
+            p.player_id,
+            p.name,
+            COALESCE(SUM(g.points_to_winner), 0) AS total_points
+            FROM players p
+            CROSS JOIN sessions s
+            LEFT JOIN games g 
+            ON g.winner_id = p.player_id 
+            AND g.session_id = s.session_id
+            GROUP BY s.session_id, p.player_id
+            ORDER BY s.session_id, total_points DESC, p.name;
+        """)
+        
+        result = cursor.fetchall()
+        
+        cursor.execute("""
+            SELECT session_id FROM sessions
+        """)
+        
+        session_list = cursor.fetchall()
+        conn.close()
+        
+        # order the leaderboard
+        results_per_session = []
+        
+        for i in range(len(session_list)): # loop though sessions
+            results_per_session.append([])
+            
+            for player in result:
+                if player[0] == session_list[i][0]:
+                    
+                    if results_per_session[i] == []: # last item contains info about session
+                        results_per_session[i].append((player[0], player[1], -1, player[2]))
+                    
+                    tup = (player[3], player[4], player[5])
+                    
+                    results_per_session[i].append(tup)
+          
+        in_order = []
+                  
+        for result in results_per_session:
+            in_order.append(sorted(result, key=lambda x: x[2], reverse=True))
+        
+        return in_order
     
     def alltime(self):
         conn = get_connection()
@@ -242,14 +302,29 @@ class Leaderboard():
             SELECT 
             p.player_id,
             p.name,
-            SUM(g.points_to_winner) AS total_points
-            FROM games g
-            JOIN players p ON g.winner_id = p.player_id
+            COALESCE(SUM(g.points_to_winner), 0) AS total_points
+            FROM players p
+            LEFT JOIN games g 
+            ON g.winner_id = p.player_id
             GROUP BY p.player_id
-            ORDER BY total_points DESC;    
+            ORDER BY total_points DESC, p.name;   
         """)
         
         result = cursor.fetchall()
         conn.close()
         
-        return result
+        # order the leaderboard
+        in_order = sorted(result, key=lambda x: x[2], reverse=True)
+        
+        return in_order
+    
+    def collect_leaderboards(self):
+        
+        sessions = self.session()
+        semesters = self.semester()
+        alltime = self.alltime()
+        
+        #print(sessions)
+        #print(semesters)
+        
+        return semesters, sessions, alltime
