@@ -151,9 +151,105 @@ class StatisticsBuilder():
 
     def display_player_stats(self, player_name):
         
+        # player object
         player_info = get_player(player_name)
         player_games = get_player_games(player_name)
 
-        print(player_games)
-
-        player = PlayerObj(player_info)
+        player = PlayerObj(player_info, player_games)
+        
+        # visual data
+        points = [0]
+        wins = [0]
+        games_played = [0]
+        
+        for i, game in enumerate(player.games_played_info):
+            games_played.append(games_played[i] + 1)
+            
+            # check if won
+            if game[4] == player.player_id:
+                wins.append(wins[i] + 1)
+                points.append(points[i] + game[5])
+            else:
+                wins.append(wins[i])
+                points.append(points[i])
+            
+        plt.plot(games_played, points)
+        plt.plot(games_played, wins)
+        plt.xlabel("Games Played")
+        
+        #plt.show()
+        
+        return player
+    
+from database.db import get_connection
+    
+class Leaderboard():
+    def __init__(self):
+        pass
+    
+    def session(self):
+        conn = get_connection()
+        cursor = conn.cursor()
+        
+        cursor.execute("""
+            SELECT 
+            s.session_id,
+            s.session_date,
+            p.player_id,
+            p.name,
+            SUM(g.points_to_winner) AS total_points
+            FROM games g
+            JOIN sessions s ON g.session_id = s.session_id
+            JOIN players p ON g.winner_id = p.player_id
+            GROUP BY s.session_id, p.player_id
+            ORDER BY s.session_id, total_points DESC;    
+        """)
+        
+        result = cursor.fetchall()
+        conn.close()
+        
+        return result
+    
+    def semester(self):
+        conn = get_connection()
+        cursor = conn.cursor()
+        
+        cursor.execute("""
+            SELECT 
+            sem.semester_id,
+            sem.semester_name,
+            p.player_id,
+            p.name,
+            SUM(g.points_to_winner) AS total_points
+            FROM games g
+            JOIN sessions s ON g.session_id = s.session_id
+            JOIN semester sem ON s.semester_id = sem.semester_id
+            JOIN players p ON g.winner_id = p.player_id
+            GROUP BY sem.semester_id, p.player_id
+            ORDER BY sem.semester_id, total_points DESC;   
+        """)
+        
+        result = cursor.fetchall()
+        conn.close()
+        
+        return result
+    
+    def alltime(self):
+        conn = get_connection()
+        cursor = conn.cursor()
+        
+        cursor.execute("""
+            SELECT 
+            p.player_id,
+            p.name,
+            SUM(g.points_to_winner) AS total_points
+            FROM games g
+            JOIN players p ON g.winner_id = p.player_id
+            GROUP BY p.player_id
+            ORDER BY total_points DESC;    
+        """)
+        
+        result = cursor.fetchall()
+        conn.close()
+        
+        return result

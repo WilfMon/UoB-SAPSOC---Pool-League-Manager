@@ -53,7 +53,7 @@ def get_player_games(name):
     conn = get_connection()
     cursor = conn.cursor()
 
-    cursor.execute("SELECT games_id FROM games WHERE player1_id = ? OR player2_id = ?", (id_, id_))
+    cursor.execute("SELECT * FROM games WHERE player1_id = ? OR player2_id = ?", (id_, id_))
 
     return cursor.fetchall()
 
@@ -112,15 +112,21 @@ def add_game(session_id, player1_id, player2_id, winner_id):
 
     # Insert the game
     cursor.execute("""
-        INSERT INTO games (session_id, player1_id, player2_id, winner_id)
-        VALUES (?, ?, ?, ?)
-    """, (session_id, player1_id, player2_id, winner_id))
+        INSERT INTO games (session_id, player1_id, player2_id, winner_id, points_to_winner)
+        VALUES (?, ?, ?, ?, ?)
+    """, (session_id, player1_id, player2_id, winner_id, 1))
 
-    # Increment winner's points
+    # Increment winner's points and wins
     cursor.execute("""
         UPDATE players
         SET points = points + 1,
             games_played = games_played + 1
+        WHERE player_id = ?
+    """, (winner_id,))
+    
+    cursor.execute("""
+        UPDATE players
+        SET wins = wins + 1
         WHERE player_id = ?
     """, (winner_id,))
     

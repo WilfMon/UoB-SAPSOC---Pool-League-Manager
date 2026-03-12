@@ -15,7 +15,7 @@ from ui.confimation_window import ConfirmationWindow
 from ui.update_memberships_window import MembershipWindow
 
 from utils.utils import check_for_new_players, find_opponent, save_scale
-from utils.utils_classes import LeagueRoundBuilder, StatisticsBuilder
+from utils.utils_classes import LeagueRoundBuilder, StatisticsBuilder, Leaderboard
 
 class MainWindow(QMainWindow):
     def __init__(self, scale=1.0):
@@ -64,6 +64,10 @@ class MainWindow(QMainWindow):
         self.new_statistics_action = QAction("New Statisctics", self)
         self.new_statistics_action.triggered.connect(self.on_new_statistics)
         self.file_menu.addAction(self.new_statistics_action)
+        
+        self.view_leaderboard = QAction("View Leaderboard", self)
+        self.view_leaderboard.triggered.connect(self.on_view_leaderboard)
+        self.file_menu.addAction(self.view_leaderboard)
 
         self.edit_memberships = QAction("Edit Members", self)
         self.edit_memberships.triggered.connect(self.on_edit_memberships)
@@ -431,7 +435,29 @@ class MainWindow(QMainWindow):
     def on_enter_player(self):
 
         def player_recived(player):
-            self.stats_builder.display_player_stats(player)
+            player_obj = self.stats_builder.display_player_stats(player)
+            
+            # display crucial stats
+            player_name = QLabel(f"{player_obj.name}:")
+            self.main_layout.addWidget(player_name, 0, 0, alignment=Qt.AlignLeft | Qt.AlignTop)
+            
+            player_points = QLabel(f"Points: {player_obj.points}")
+            player_points.setStyleSheet("font-weight: normal;")
+            self.main_layout.addWidget(player_points, 0, 1, alignment=Qt.AlignLeft | Qt.AlignTop)
+            
+            player_games_played = QLabel(f"Games Played: {int(player_obj.num_games_played)}")
+            player_games_played.setStyleSheet("font-weight: normal;")
+            self.main_layout.addWidget(player_games_played, 0, 2, alignment=Qt.AlignLeft | Qt.AlignTop)
+            
+            player_winrate = QLabel(f"Winrate: {player_obj.winrate}%")
+            player_winrate.setStyleSheet("font-weight: normal;")
+            self.main_layout.addWidget(player_winrate, 0, 3, alignment=Qt.AlignLeft | Qt.AlignTop)
+            
+            player_member = QLabel(f"Member: {player_obj.member_displayable}")
+            player_member.setStyleSheet("font-weight: normal;")
+            self.main_layout.addWidget(player_member, 0, 4, alignment=Qt.AlignLeft | Qt.AlignTop)
+
+        self.clear_layout(self.main_layout)
 
         # init stats class
         self.stats_builder = StatisticsBuilder()
@@ -443,6 +469,10 @@ class MainWindow(QMainWindow):
         
         self.text_box.show()
 
+    def on_view_leaderboard(self):
+        
+        L = Leaderboard()
+        print(L.semester())
 
     def on_edit_memberships(self):
         self.update_membership_window = MembershipWindow(scale=self.scale)

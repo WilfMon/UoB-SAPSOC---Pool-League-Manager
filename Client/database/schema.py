@@ -16,7 +16,8 @@ def create_tables():
         member BOOLEAN NOT NULL DEFAULT 0,
         
         points FLOAT NOT NULL DEFAULT 0,
-        games_played INTEGER NOT NULL DEFAULT 0
+        games_played INTEGER NOT NULL DEFAULT 0,
+        wins INTEGER NOT NULL DEFAULT 0
     )
     """)
 
@@ -54,6 +55,7 @@ def create_tables():
     player2_id INTEGER NOT NULL,
 
     winner_id INTEGER NOT NULL,
+    points_to_winner FLOAT NOT NULL,
 
     FOREIGN KEY(session_id) REFERENCES sessions(session_id),
     FOREIGN KEY(player1_id) REFERENCES players(player_id),
