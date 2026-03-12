@@ -15,7 +15,7 @@ from ui.confimation_window import ConfirmationWindow
 from ui.update_memberships_window import MembershipWindow
 
 from utils.utils import check_for_new_players, find_opponent, save_scale
-from utils.utils_classes import LeagueRoundBuilder
+from utils.utils_classes import LeagueRoundBuilder, StatisticsBuilder
 
 class MainWindow(QMainWindow):
     def __init__(self, scale=1.0):
@@ -57,9 +57,13 @@ class MainWindow(QMainWindow):
         self.file_menu = self.menu_bar.addMenu("File")
 
         # File menu actions
-        self.news_action = QAction("New Session", self)
-        self.news_action.triggered.connect(self.on_new_session)
-        self.file_menu.addAction(self.news_action)
+        self.new_session_action = QAction("New Session", self)
+        self.new_session_action.triggered.connect(self.on_new_session)
+        self.file_menu.addAction(self.new_session_action)
+
+        self.new_statistics_action = QAction("New Statisctics", self)
+        self.new_statistics_action.triggered.connect(self.on_new_statistics)
+        self.file_menu.addAction(self.new_statistics_action)
 
         self.edit_memberships = QAction("Edit Members", self)
         self.edit_memberships.triggered.connect(self.on_edit_memberships)
@@ -86,15 +90,10 @@ class MainWindow(QMainWindow):
         
         self.session_setup_window.show()
         
-        # logic for main window on new session
-        central = QWidget()
-        self.layout1 = QGridLayout(central)
-        self.setCentralWidget(central)
-        
         # Session menu
         self.file_menu = self.menu_bar.addMenu("Session")
         
-        self.news_action.setDisabled(True)
+        self.new_session_action.setDisabled(True)
         
         self.confirm_players_action = QAction("Confirm", self)
         self.confirm_players_action.triggered.connect(self.on_confirm_players)
@@ -122,13 +121,18 @@ class MainWindow(QMainWindow):
         self.file_menu.addAction(self.cancel_action)
         
         
+        # logic for main window on new session
+        central = QWidget()
+        self.main_layout = QGridLayout(central)
+        self.setCentralWidget(central)
+
         self.players_list_title = QLabel("List of Players:")
-        self.layout1.addWidget(self.players_list_title, 0, 0, alignment=Qt.AlignLeft)
+        self.main_layout.addWidget(self.players_list_title, 0, 0, alignment=Qt.AlignLeft)
         
         self.players_list = QListWidget()
         self.players_list.setFixedWidth(250 * self.scale)
         self.players_list.setFont(self.default_font)
-        self.layout1.addWidget(self.players_list, 1, 0, alignment=Qt.AlignLeft)
+        self.main_layout.addWidget(self.players_list, 1, 0, alignment=Qt.AlignLeft)
         
         self.players_list.setContextMenuPolicy(Qt.CustomContextMenu)
         self.players_list.customContextMenuRequested.connect(self.show_context_menu)
@@ -211,7 +215,7 @@ class MainWindow(QMainWindow):
             
             # Ui stuff
             self.round_title = QLabel("Rounds:")
-            self.layout1.addWidget(self.round_title, 0, 1, alignment=Qt.AlignLeft)
+            self.main_layout.addWidget(self.round_title, 0, 1, alignment=Qt.AlignLeft)
             
             self.round_area = QScrollArea()
             self.round_area.setWidgetResizable(True)
@@ -224,7 +228,7 @@ class MainWindow(QMainWindow):
             self.container_layout.setAlignment(Qt.AlignTop | Qt.AlignLeft)
 
             self.round_area.setWidget(self.container)
-            self.layout1.addWidget(self.round_area, 1, 1)
+            self.main_layout.addWidget(self.round_area, 1, 1)
             
             # disable and enable menu options
             self.confirm_players_action.setDisabled(True)
@@ -376,10 +380,10 @@ class MainWindow(QMainWindow):
     def on_cancel_session(self):
         
         # enable new session creation again
-        self.news_action.setDisabled(False)
+        self.new_session_action.setDisabled(False)
         
         # clear the session layout
-        self.clear_layout(self.layout1)
+        self.clear_layout(self.main_layout)
         
         # delete session menu bar
         for action in self.menu_bar.actions():
@@ -392,7 +396,53 @@ class MainWindow(QMainWindow):
             
         # clear finished games
         self.finished_games = []
-    
+
+    def on_new_statistics(self):
+        # set up the visulalise menu
+        self.file_menu = self.menu_bar.addMenu("Statistics")
+
+        self.enter_player = QAction("Enter Player", self)
+        self.enter_player.triggered.connect(self.on_enter_player)
+        self.file_menu.addAction(self.enter_player)
+
+        self.select_player = QAction("Select Player", self)
+        self.file_menu.addAction(self.select_player)
+
+        self.select_session = QAction("Select Session", self)
+        self.file_menu.addAction(self.select_session)
+
+        self.select_sememster = QAction("Select Semester", self)
+        self.file_menu.addAction(self.select_sememster)
+
+        self.select_alltime = QAction("Select Alltime", self)
+        self.file_menu.addAction(self.select_alltime)
+
+        self.file_menu.addSeparator()
+
+        self.advanced = QAction("Advanced", self)
+        self.file_menu.addAction(self.advanced)
+        self.advanced.setDisabled(True)
+
+        # logic for main window on new statistics
+        central = QWidget()
+        self.main_layout = QGridLayout(central)
+        self.setCentralWidget(central)
+
+    def on_enter_player(self):
+
+        def player_recived(player):
+            self.stats_builder.display_player_stats(player)
+
+        # init stats class
+        self.stats_builder = StatisticsBuilder()
+
+        self.text_box = TextBoxWindow(scale=self.scale)
+        self.text_box.open_at_cursor()
+        
+        self.text_box.submitted_player.connect(player_recived)
+        
+        self.text_box.show()
+
 
     def on_edit_memberships(self):
         self.update_membership_window = MembershipWindow(scale=self.scale)

@@ -47,6 +47,16 @@ def get_player(name):
     
     return rows
 
+def get_player_games(name):
+    id_ = get_player_id_by_name(name)
+
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT games_id FROM games WHERE player1_id = ? OR player2_id = ?", (id_, id_))
+
+    return cursor.fetchall()
+
 def get_members():
     conn = get_connection()
     cursor = conn.cursor()

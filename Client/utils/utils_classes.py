@@ -139,70 +139,21 @@ class LeagueRoundBuilder():
             if self.G.has_edge(u, v): # check if the edge exists and if it doesn't don't attempt to remove
                 self.G.remove_edge(u, v)
 
-if __name__ == "__main__" and False:
-    players = ["Wilf", "Fred", "Jon", "Fin"]
+import numpy as np
+import matplotlib.pyplot as plt
+
+from database.queries import get_player, get_player_games
+from database.objects import PlayerObj
+
+class StatisticsBuilder():
+    def __init__(self):
+        pass
+
+    def display_player_stats(self, player_name):
         
-    build = LeagueRoundBuilder(players)
-    round1 = build.create_round()
-    print(round1)
-    
-    build.add_players(["Evan"])
-    
-    round1 = build.create_round()
-    print(round1)
-    
-    round1 = build.create_round()
-    print(round1)
-    round1 = build.create_round()
-    print(round1)
-    round1 = build.create_round()
-    print(round1)
-    round1 = build.create_round()
-    print(round1)
-    round1 = build.create_round()
-    print(round1)
-    round1 = build.create_round()
-    print(round1)
-    round1 = build.create_round()
-    print(round1)
+        player_info = get_player(player_name)
+        player_games = get_player_games(player_name)
 
-if __name__ == "__main__" and False:    
-    players = ["name1", "name2", "name3", "name4"]
-        
-    build = LeagueRoundBuilder(players)
-    round1 = build.create_round()
-    print(round1)
+        print(player_games)
 
-    build.add_players(["new1"])
-
-    round2 = build.create_round()
-    print(round2)
-
-    build.add_players(["new2"])
-
-    round3 = build.create_round()
-    print(round3)
-
-    build.add_players(["verynew1", "verynew2"])
-
-    round4 = build.create_round()
-    print(round4)
-    round5 = build.create_round()
-    print(round5)
-    round6 = build.create_round()
-    print(round6)
-    round7 = build.create_round()
-    print(round7)
-
-    build.remove_players(["name1"])
-
-    round8 = build.create_round()
-    print(round8)
-    round9 = build.create_round()
-    print(round9)
-    round10 = build.create_round()
-    print(round10)
-    round11 = build.create_round()
-    print(round11)
-    round12 = build.create_round()
-    print(round12)
+        player = PlayerObj(player_info)
