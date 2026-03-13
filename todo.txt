@@ -3,11 +3,12 @@ APPLICATION
 -- important --
 - add data visualization
 - add way to low weight games that have already been played so that games can always be played
+- fix session leaderboard not updating first time use
 
 -- less important --
 - add a tournement mode
 - add elo
-- fix leaderboard spagetti code
+- fix leaderboard spaghetti code
 
 
 WEBSITE

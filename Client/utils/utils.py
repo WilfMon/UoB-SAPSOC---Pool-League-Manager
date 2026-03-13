@@ -40,3 +40,15 @@ def save_scale(scale: float):
         
         writer.writerow(["scale"])  # header row
         writer.writerow([scale])     # data row
+
+def remove_menu(menu_bar, menu_to_remove):
+
+    for action in menu_bar.actions():
+        if action.text() == menu_to_remove:
+            
+            menu_bar.removeAction(action)
+
+            action.menu().deleteLater()
+            break
+
+    return menu_bar

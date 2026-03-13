@@ -14,7 +14,7 @@ from ui.text_box_window import TextBoxWindow
 from ui.confimation_window import ConfirmationWindow
 from ui.update_memberships_window import MembershipWindow
 
-from utils.utils import check_for_new_players, save_scale
+from utils.utils import check_for_new_players, save_scale, remove_menu
 from utils.utils_classes import LeagueRoundBuilder, StatisticsBuilder, Leaderboard
 
 class MainWindow(QMainWindow):
@@ -89,58 +89,6 @@ class MainWindow(QMainWindow):
         self.change_scale = QAction("Change Scale", self)
         self.change_scale.triggered.connect(self.on_change_scale)
         view_menu.addAction(self.change_scale)
-
-    # Action callbacks
-    def on_new_session(self):
-        # logic for new session window
-        self.session_setup_window = SetupWindow(scale=self.scale)
-        self.session_setup_window.submitted_players.connect(self.players_recived)
-        
-        self.session_setup_window.show()
-        
-        self.clear_layout(self.main_layout)
-        
-        # Session menu
-        self.file_menu = self.menu_bar.addMenu("Session")
-        
-        self.new_session_action.setDisabled(True)
-        
-        self.confirm_players_action = QAction("Confirm", self)
-        self.confirm_players_action.triggered.connect(self.on_confirm_players)
-        self.file_menu.addAction(self.confirm_players_action)
-        
-        self.new_round_action = QAction("New Round", self)
-        self.new_round_action.triggered.connect(self.on_new_round)
-        self.file_menu.addAction(self.new_round_action)
-        self.new_round_action.setDisabled(True)
-        
-        self.remove_round_action = QAction("Remove Last Round", self)
-        self.remove_round_action.triggered.connect(self.on_remove_round)
-        self.file_menu.addAction(self.remove_round_action)
-        self.remove_round_action.setDisabled(True)
-        
-        self.save_session_action = QAction("Save", self)
-        self.save_session_action.triggered.connect(self.on_save_session)
-        self.file_menu.addAction(self.save_session_action)
-        self.save_session_action.setDisabled(True)
-        
-        self.file_menu.addSeparator()
-        
-        self.cancel_action = QAction("Cancel", self)
-        self.cancel_action.triggered.connect(self.on_cancel_session)
-        self.file_menu.addAction(self.cancel_action)
-        
-        # logic for main window on new session
-        self.players_list_title = QLabel("List of Players:")
-        self.main_layout.addWidget(self.players_list_title, 0, 0, alignment=Qt.AlignLeft)
-        
-        self.players_list = QListWidget()
-        self.players_list.setFixedWidth(250 * self.scale)
-        self.players_list.setFont(self.default_font)
-        self.main_layout.addWidget(self.players_list, 1, 0, alignment=Qt.AlignLeft)
-        
-        self.players_list.setContextMenuPolicy(Qt.CustomContextMenu)
-        self.players_list.customContextMenuRequested.connect(self.show_context_menu)
         
     def show_context_menu(self, position: QPoint):
         # Get the item under the cursor
@@ -198,6 +146,57 @@ class MainWindow(QMainWindow):
         else:
             print(f"Player: {[player]} is already in the list")
         
+    def on_new_session(self):
+        # logic for new session window
+        self.session_setup_window = SetupWindow(scale=self.scale)
+        self.session_setup_window.submitted_players.connect(self.players_recived)
+        
+        self.session_setup_window.show()
+        
+        self.clear_layout(self.main_layout)
+        
+        # Session menu
+        self.file_menu = self.menu_bar.addMenu("Session")
+        
+        self.new_session_action.setDisabled(True)
+        
+        self.confirm_players_action = QAction("Confirm", self)
+        self.confirm_players_action.triggered.connect(self.on_confirm_players)
+        self.file_menu.addAction(self.confirm_players_action)
+        
+        self.new_round_action = QAction("New Round", self)
+        self.new_round_action.triggered.connect(self.on_new_round)
+        self.file_menu.addAction(self.new_round_action)
+        self.new_round_action.setDisabled(True)
+        
+        self.remove_round_action = QAction("Remove Last Round", self)
+        self.remove_round_action.triggered.connect(self.on_remove_round)
+        self.file_menu.addAction(self.remove_round_action)
+        self.remove_round_action.setDisabled(True)
+        
+        self.save_session_action = QAction("Save", self)
+        self.save_session_action.triggered.connect(self.on_save_session)
+        self.file_menu.addAction(self.save_session_action)
+        self.save_session_action.setDisabled(True)
+        
+        self.file_menu.addSeparator()
+        
+        self.cancel_action = QAction("Cancel", self)
+        self.cancel_action.triggered.connect(self.on_cancel_session)
+        self.file_menu.addAction(self.cancel_action)
+        
+        # logic for main window on new session
+        self.players_list_title = QLabel("List of Players:")
+        self.main_layout.addWidget(self.players_list_title, 0, 0, alignment=Qt.AlignLeft)
+        
+        self.players_list = QListWidget()
+        self.players_list.setFixedWidth(250 * self.scale)
+        self.players_list.setFont(self.default_font)
+        self.main_layout.addWidget(self.players_list, 1, 0, alignment=Qt.AlignLeft)
+        
+        self.players_list.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.players_list.customContextMenuRequested.connect(self.show_context_menu)
+
     def on_confirm_players(self):
         players = self.get_players_from_list()
                 
@@ -416,19 +415,17 @@ class MainWindow(QMainWindow):
         self.clear_layout(self.main_layout)
         
         # delete session menu bar
-        for action in self.menu_bar.actions():
-            if action.text() == "Session":
-                
-                self.menu_bar.removeAction(action)
-
-                action.menu().deleteLater()
-                break
+        self.menu_bar = remove_menu(self.menu_bar, "Session")
             
         # clear finished games
         self.finished_games = []
 
     def on_new_statistics(self):
         # set up the visulalise menu
+        self.clear_layout(self.main_layout)
+
+        self.menu_bar = remove_menu(self.menu_bar, "Session")
+
         self.file_menu = self.menu_bar.addMenu("Statistics")
 
         self.enter_player = QAction("Enter Player", self)
@@ -491,8 +488,6 @@ class MainWindow(QMainWindow):
         self.text_box.show()
 
     def on_view_leaderboard(self):
-        
-        self.clear_layout(self.main_layout)
         
         def on_semester_selected(semester="first"):
             
@@ -640,6 +635,11 @@ class MainWindow(QMainWindow):
 
             self.leaderboard_container_layout.addWidget(leaderboard_container_se, 0, 1)
         
+        self.clear_layout(self.main_layout)
+
+        self.menu_bar = remove_menu(self.menu_bar, "Session")
+        self.menu_bar = remove_menu(self.menu_bar, "Statistics")
+
         # get leaderboards
         L = Leaderboard()
         semester_leaderboard, session_leaderboard, alltime_leaderboard = L.collect_leaderboards()
@@ -715,18 +715,19 @@ class MainWindow(QMainWindow):
         self.update_membership_window.show()
 
     def on_change_scale(self):
+
+        def change_scale(scale):
+            s = int(scale)
+            s = s / 100
+        
+            save_scale(s)
+
         self.scale_window = TextBoxWindow(scale=self.scale)
         self.scale_window.open_at_cursor()
         
-        self.scale_window.submitted_player.connect(self.on_change_scale2)
+        self.scale_window.submitted_player.connect(change_scale)
         
         self.scale_window.show()
-        
-    def on_change_scale2(self, scale):
-        s = int(scale)
-        s = s / 100
-    
-        save_scale(s)
         
     def get_players_from_list(self):
         players = []
