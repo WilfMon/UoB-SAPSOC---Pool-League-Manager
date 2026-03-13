@@ -6,6 +6,7 @@ from PySide6.QtCore import Qt
 from pathlib import Path
 
 from ui.main_window import MainWindow
+
 from utils.utils import load_scale
 
 def main():

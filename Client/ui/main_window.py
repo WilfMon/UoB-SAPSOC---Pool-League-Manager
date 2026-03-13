@@ -14,7 +14,7 @@ from ui.text_box_window import TextBoxWindow
 from ui.confimation_window import ConfirmationWindow
 from ui.update_memberships_window import MembershipWindow
 
-from utils.utils import check_for_new_players, find_opponent, save_scale
+from utils.utils import check_for_new_players, save_scale
 from utils.utils_classes import LeagueRoundBuilder, StatisticsBuilder, Leaderboard
 
 class MainWindow(QMainWindow):
@@ -244,7 +244,7 @@ class MainWindow(QMainWindow):
             # logic for round pairings            
             self.round_number = 0
             
-            self.finished_games = [] # [[winner, loser], [winner, loser]]
+            self.finished_games = [] # martix
             
             self.last_round_players = set(players)
                 
@@ -273,6 +273,7 @@ class MainWindow(QMainWindow):
             
         # Create new round and the bye (None for no bye)
         round_, bye = self.builder.create_round()
+        self.finished_games.append([])
         
         self.last_round_players = players
                     
@@ -283,10 +284,14 @@ class MainWindow(QMainWindow):
         
         round_container_layout.addWidget(QLabel(f"Round: {self.round_number + 1}"), 0, self.round_number)
         
-        # shuffle order of round
-        round_ = list(round_)
+        # shuffle order of round and games so display is random
         rng = np.random.default_rng()
+    
+        round_ = [list(t) for t in list(round_)]
         rng.shuffle(round_)
+        
+        for game in round_:
+            rng.shuffle(game)
         
         # create buttons to display players and track wins
         for n, pair in enumerate(round_):
@@ -299,6 +304,14 @@ class MainWindow(QMainWindow):
             # to track what round each button is created in
             left.setProperty("round_num", self.round_number)
             right.setProperty("round_num", self.round_number)
+            
+            # keep track of the order of buttons and therefore games
+            left.setProperty("index", n)
+            right.setProperty("index", n)
+            
+            # keep track of opponent
+            left.setProperty("opp", pair[1])
+            right.setProperty("opp", pair[0])
             
             # adding buttons to the gui
             round_container_layout.addWidget(left, n + 1, self.round_number)
@@ -322,6 +335,7 @@ class MainWindow(QMainWindow):
         
     def on_remove_round(self):
         self.builder.remove_round()
+        self.finished_games.pop(-1)
         
         # delete display of last round
         item = self.round_container_layout.takeAt(self.round_number - 1)
@@ -339,8 +353,12 @@ class MainWindow(QMainWindow):
         
     def toggle_match_state(self):
         button = self.sender()
+        
         current_color = button.property("color_state")
         round_num = button.property("round_num")
+        index = button.property("index")
+        opp = button.property("opp")
+        
         name = button.text()
         
         # toggle button to green for a win and update the finsihed games tracker to reflect the result
@@ -348,20 +366,25 @@ class MainWindow(QMainWindow):
             button.setStyleSheet("background-color: green")
             button.setProperty("color_state", "green")
             
-            # make sure the round searched is the same as the round played
-            opp = find_opponent(self.builder.rounds_played[round_num], name)
-            
             # check if this is an adjustment
-            if [opp, name] in self.finished_games:
-                self.finished_games.remove([opp, name])
-            if [name, opp] in self.finished_games:
-                self.finished_games.remove([name, opp])
+            if [opp, name] in self.finished_games[round_num]:
+                self.finished_games[round_num].remove([opp, name])
             
-            self.finished_games.append([name, opp])
+            if [name, opp] in self.finished_games[round_num]:
+                self.finished_games[round_num].remove([name, opp])
+            
+            self.finished_games[round_num].append([name, opp])
             
         elif current_color == "green":
             button.setStyleSheet("background-color: #1f1f1f")
             button.setProperty("color_state", None)
+            
+            # check if this is an adjustment
+            if [name, opp] in self.finished_games[round_num]:
+                self.finished_games[round_num].remove([name, opp])
+            
+        print(self.finished_games)
+        #print(self.finished_games[round_num].append([name, opp]))
 
     def on_save_session(self):
         
@@ -372,12 +395,13 @@ class MainWindow(QMainWindow):
         for name in players:
             add_player(name)
         
-        for game in self.finished_games:
-            
-            player1_id = get_player_id_by_name(game[0])
-            player2_id = get_player_id_by_name(game[1])
-            
-            add_game(self.session_id, player1_id, player2_id, winner_id=player1_id)
+        for round_ in self.finished_games:
+            for game in round_:
+                
+                player1_id = get_player_id_by_name(game[0])
+                player2_id = get_player_id_by_name(game[1])
+                
+                add_game(self.session_id, player1_id, player2_id, winner_id=player1_id)
             
         print("Saved Session")
         
@@ -470,16 +494,26 @@ class MainWindow(QMainWindow):
         
         self.clear_layout(self.main_layout)
         
-        def on_semester_selected(semester, first_time=False):
+        def on_semester_selected(semester="first"):
             
-            # clean data
-            data = semester.split()
-            data.pop(1)
-            data.reverse()
+            self.leaderboard_container_layout.removeWidget(leaderboard_container_sm)
             
-            for sem in semester_leaderboard:
-                if sem[-1][0] == data[0]: # check if semester_id matches
-                    break
+            # decide which semester to display
+            if semester == "first": # perform on first call to show most recent semester
+                index = len(semester_leaderboard) - 1
+                sem = semester_leaderboard[index]
+            
+            else:
+                semester = self.L_select_semester.currentData()
+                
+                # clean data
+                data = semester.split()
+                data.pop(1)
+                data.reverse()
+                
+                for i, sem in enumerate(semester_leaderboard):
+                    if int(sem[-1][0]) == int(data[0]): # check if semester_id matches
+                        break
             
             for n, player in enumerate(sem, start=1):
                 n *= 2
@@ -515,29 +549,45 @@ class MainWindow(QMainWindow):
             self.L_select_semester_name.setStyleSheet("font-weight: normal;")
             leaderboard_container_layout_sm.addWidget(self.L_select_semester_name, 1, 1, alignment=Qt.AlignLeft | Qt.AlignTop)
 
+            # combo box
             self.L_select_semester = QComboBox()
-            for semester in semester_leaderboard:
-                self.L_select_semester.addItem(str(semester[-1][1]) + " - " + str(semester[-1][0]))
-            self.L_select_semester.setCurrentText(str(sem[-1][1]) + " - " + str(sem[-1][0]))
-            if first_time:
+            
+            for semester_ in semester_leaderboard:
+                # pass all data but only display the semester year and number
+                year_num = str(semester_[-1][1]).split(".")
+                
+                self.L_select_semester.addItem(f"{year_num[0]} Semester: {year_num[1]}", str(semester_[-1][1]) + " - " + str(semester_[-1][0]))
+            
+            if semester == "first": # perform on first call to show most recent session
                 self.L_select_semester.setCurrentIndex(len(semester_leaderboard) - 1)
-            self.L_select_semester.currentTextChanged.connect(on_semester_selected)
+            else:     
+                self.L_select_semester.setCurrentIndex(i) # set index found earlier
+                
+            self.L_select_semester.currentIndexChanged.connect(on_semester_selected)
             leaderboard_container_layout_sm.addWidget(self.L_select_semester, 0, 1, alignment=Qt.AlignLeft | Qt.AlignTop)
 
             self.leaderboard_container_layout.addWidget(leaderboard_container_sm, 0, 0)
-
-        def on_session_selected(session, first_time=False):
+            
+        def on_session_selected(session="first"):
             
             self.leaderboard_container_layout.removeWidget(leaderboard_container_se)
+
+            # decide which session to display
+            if session == "first": # perform on first call to show most recent session
+                index = len(session_leaderboard) - 1
+                ses = session_leaderboard[index]
             
-            # clean data
-            data = session.split()
-            data.pop(1)
-            data.pop(2)
-            
-            for ses in session_leaderboard:
-                if int(ses[-1][0]) == int(data[0]) and int(ses[-1][3]) == int(data[2]): # check if session_id and semester_id matches
-                    break
+            else:
+                session = self.L_select_session.currentData()
+                
+                # clean data
+                data = session.split()
+                data.pop(1)
+                data.pop(2)
+                
+                for i, ses in enumerate(session_leaderboard):
+                    if int(ses[-1][0]) == int(data[0]) and int(ses[-1][3]) == int(data[2]): # check if session_id and semester_id matches
+                        break
                 
             for n, player in enumerate(ses, start=1):
                 n *= 2
@@ -573,13 +623,19 @@ class MainWindow(QMainWindow):
             self.L_select_session_name.setStyleSheet("font-weight: normal;")
             leaderboard_container_layout_se.addWidget(self.L_select_session_name, 1, 1, alignment=Qt.AlignLeft | Qt.AlignTop)
 
+            # combo box
             self.L_select_session = QComboBox()
+            
             for session_ in session_leaderboard:
-                self.L_select_session.addItem(str(session_[-1][0]) + " - " + str(session_[-1][1]) + " - " + str(session_[-1][3]))
-            self.L_select_session.setCurrentText(str(ses[-1][0]) + " - " + str(ses[-1][1]) + " - " + str(ses[-1][3]))
-            if first_time:
+                # pass all data but only display the date of the session
+                self.L_select_session.addItem(str(session_[-1][1]), str(session_[-1][0]) + " - " + str(session_[-1][1]) + " - " + str(session_[-1][3]))
+            
+            if session == "first": # perform on first call to show most recent session
                 self.L_select_session.setCurrentIndex(len(session_leaderboard) - 1)
-            self.L_select_session.currentTextChanged.connect(on_session_selected)
+            else:     
+                self.L_select_session.setCurrentIndex(i) # set index found earlier
+                
+            self.L_select_session.currentIndexChanged.connect(on_session_selected)
             leaderboard_container_layout_se.addWidget(self.L_select_session, 0, 1, alignment=Qt.AlignLeft | Qt.AlignTop)
 
             self.leaderboard_container_layout.addWidget(leaderboard_container_se, 0, 1)
@@ -614,21 +670,6 @@ class MainWindow(QMainWindow):
         leaderboard_container_at.setStyleSheet("background-color: #1f1f1f;")
         leaderboard_container_layout_at = QGridLayout(leaderboard_container_at)
                         
-        # combo boxes
-        self.L_select_semester = QComboBox()
-        for semester in semester_leaderboard:
-            self.L_select_semester.addItem(str(semester[-1][1]) + " - " + str(semester[-1][0]))
-        self.L_select_semester.setCurrentIndex(len(semester_leaderboard) - 1)
-        self.L_select_semester.currentTextChanged.connect(on_semester_selected)
-        leaderboard_container_layout_sm.addWidget(self.L_select_semester, 0, 1, alignment=Qt.AlignLeft | Qt.AlignTop)
-        
-        self.L_select_session = QComboBox()
-        for session in session_leaderboard:
-            self.L_select_session.addItem(str(session[-1][0]) + " - " + str(session[-1][1]) + " - " + str(session[-1][3]))
-        self.L_select_session.setCurrentIndex(len(session_leaderboard) - 1)
-        self.L_select_session.currentTextChanged.connect(on_session_selected)
-        leaderboard_container_layout_se.addWidget(self.L_select_session, 0, 1, alignment=Qt.AlignLeft | Qt.AlignTop)
-        
         # alltime leaderboard
         self.L_alltime_label = QLabel("All-Time Leaderboard:", self)
         leaderboard_container_layout_at.addWidget(self.L_alltime_label, 0, 0, alignment=Qt.AlignLeft | Qt.AlignTop)
@@ -661,8 +702,8 @@ class MainWindow(QMainWindow):
             leaderboard_container_layout_at.addWidget(points, n + 1, 0)
             leaderboard_container_layout_at.addWidget(name, n + 1, 1)
         
-        on_semester_selected(str(semester_leaderboard[0][-1][1]) + " - " + str(semester_leaderboard[0][-1][0]), first_time=True)
-        on_session_selected(str(session_leaderboard[0][-1][0]) + " - " + str(session_leaderboard[0][-1][1]) + " - " + str(session_leaderboard[0][-1][3]), first_time=True)
+        on_semester_selected()
+        on_session_selected()
         
         self.leaderboard_container_layout.addWidget(leaderboard_container_sm, 0, 0)
         self.leaderboard_container_layout.addWidget(leaderboard_container_se, 0, 1)

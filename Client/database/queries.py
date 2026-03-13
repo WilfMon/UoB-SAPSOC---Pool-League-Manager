@@ -48,14 +48,30 @@ def get_player(name):
     return rows
 
 def get_player_games(name):
-    id_ = get_player_id_by_name(name)
+    player_id = get_player_id_by_name(name)
 
     conn = get_connection()
     cursor = conn.cursor()
 
-    cursor.execute("SELECT * FROM games WHERE player1_id = ? OR player2_id = ?", (id_, id_))
+    cursor.execute("SELECT * FROM games WHERE player1_id = ? OR player2_id = ?", (player_id, player_id))
 
     return cursor.fetchall()
+
+def get_player_points(player_id, semester_id):
+    
+    conn = get_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute("""
+        SELECT COALESCE(SUM(g.points_to_winner), 0)
+        FROM games g
+        JOIN sessions s   ON g.session_id = s.session_id
+        JOIN semester sem ON s.semester_id = sem.semester_id
+        WHERE g.winner_id = ?
+          AND sem.semester_id = ?
+    """, (player_id, semester_id))
+    
+    return cursor.fetchone()[0]
 
 def get_members():
     conn = get_connection()
@@ -110,6 +126,19 @@ def add_game(session_id, player1_id, player2_id, winner_id):
     conn = get_connection()
     cursor = conn.cursor()
 
+    # figure out points to add onto winner
+    loser_id = player2_id
+    
+    points_to_add = 1
+    
+    semster_id = get_semester_id_from_session_id(session_id)
+    
+    winner_points = get_player_points(winner_id, semster_id)
+    loser_points = get_player_points(loser_id, semster_id)
+    
+    if loser_points - winner_points >= 10: # check if winner was 10 or more points behind loser
+        points_to_add = 1 + loser_points * 0.2 # add 20% of losers points onto winners take
+
     # Insert the game
     cursor.execute("""
         INSERT INTO games (session_id, player1_id, player2_id, winner_id, points_to_winner)
@@ -119,23 +148,18 @@ def add_game(session_id, player1_id, player2_id, winner_id):
     # Increment winner's points and wins
     cursor.execute("""
         UPDATE players
-        SET points = points + 1,
-            games_played = games_played + 1
+        SET points = points + ?,
+            games_played = games_played + 1,
+            wins = wins + 1
         WHERE player_id = ?
-    """, (winner_id,))
-    
-    cursor.execute("""
-        UPDATE players
-        SET wins = wins + 1
-        WHERE player_id = ?
-    """, (winner_id,))
+    """, (points_to_add, winner_id,))
     
     # increment games played of loser aswell
     cursor.execute("""
         UPDATE players
         SET games_played = games_played + 1
         WHERE player_id = ?
-    """, (player2_id,))
+    """, (loser_id,))
 
     # Update the number of games in the session
     cursor.execute("""
@@ -163,6 +187,17 @@ def get_semester_id_by_name(semester_name):
     cursor = conn.cursor()
     
     cursor.execute("SELECT semester_id FROM semester WHERE semester_name = ?", (semester_name,))
+    result = cursor.fetchone()
+    
+    conn.close()
+    
+    return result[0]
+
+def get_semester_id_from_session_id(session_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute("SELECT semester_id FROM sessions WHERE session_id = ?;", (session_id,))
     result = cursor.fetchone()
     
     conn.close()

@@ -2,13 +2,12 @@ APPLICATION
 
 -- important --
 - add data visualization
-- making pairing more random
 - add way to low weight games that have already been played so that games can always be played
 
 -- less important --
 - add a tournement mode
 - add elo
-- add more point gain for beating higher points players
+- fix leaderboard spagetti code
 
 
 WEBSITE

@@ -24,14 +24,6 @@ def clean_name(name):
     
     return name
 
-def find_opponent(arr, player):
-    for first, second in arr:
-        if first == player:
-            return second
-        if second == player:
-            return first
-    return None
-
 def load_scale():
     with open("Client/config.csv", mode="r") as file:
         
