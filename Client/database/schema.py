@@ -17,7 +17,9 @@ def create_tables():
         
         points FLOAT NOT NULL DEFAULT 0,
         games_played INTEGER NOT NULL DEFAULT 0,
-        wins INTEGER NOT NULL DEFAULT 0
+        wins INTEGER NOT NULL DEFAULT 0,
+                   
+        elo FLOAT NOT NULL DEFAULT 1000
     )
     """)
 

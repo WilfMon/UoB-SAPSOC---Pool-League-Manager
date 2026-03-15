@@ -1,14 +1,19 @@
 APPLICATION
 
 -- important --
-- add data visualization
-- add way to low weight games that have already been played so that games can always be played
-- fix session leaderboard not updating first time use
+- make it so that session is a tab and therfore can always be accessed
 
 -- less important --
-- add a tournement mode
 - add elo
+- add data visualization
+
 - fix leaderboard spaghetti code
+  fix session leaderboard not updating first time use
+  have a memberships only leaderboard
+
+- add a tournement mode
+- add lowering weight of games that have already been played so that more games can be player
+
 
 
 WEBSITE
