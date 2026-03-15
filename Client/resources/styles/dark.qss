@@ -62,3 +62,30 @@ QMenu::separator {
     background: #636363;
     margin: 4px 8px;
 }
+
+QScrollBar:vertical {
+    background: #0b0b0b;
+    width: 10px;
+    margin: 2px 0 2px 0;
+    border-radius: 5px;
+}
+
+QScrollBar::handle:vertical {
+    background: #3a3a3a;
+    min-height: 20px;
+    border-radius: 5px;
+}
+
+QScrollBar::handle:vertical:hover {
+    background: #5a5a5a;
+}
+
+QScrollBar::add-line:vertical,
+QScrollBar::sub-line:vertical {
+    height: 0px;
+}
+
+QScrollBar::add-page:vertical,
+QScrollBar::sub-page:vertical {
+    background: none;
+}

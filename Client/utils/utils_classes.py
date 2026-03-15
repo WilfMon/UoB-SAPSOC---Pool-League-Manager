@@ -185,59 +185,91 @@ from database.db import get_connection
     
 class Leaderboard():
     def __init__(self):
-        pass
-    
-    def semester(self):
         conn = get_connection()
         cursor = conn.cursor()
         
         cursor.execute("""
-            SELECT 
-            sem.semester_id,
-            sem.semester_name,
-            p.player_id,
-            p.name,
-            COALESCE(SUM(g.points_to_winner), 0) AS total_points
-            FROM players p
-            CROSS JOIN semester sem
-            LEFT JOIN sessions s 
-            ON s.semester_id = sem.semester_id
-            LEFT JOIN games g 
-            ON g.winner_id = p.player_id 
-            AND g.session_id = s.session_id
-            GROUP BY sem.semester_id, p.player_id
-            ORDER BY sem.semester_id, total_points DESC, p.name;  
+            SELECT
+                s.semester_id,
+                g.session_id,
+                g.games_id,
+                sem.semester_name,
+                s.session_date,
+                p1.player_id AS player1_id,
+                p1.name AS player1_name,
+                p2.player_id AS player2_id,
+                p2.name AS player2_name,
+                w.player_id  AS winner_id,
+                w.name       AS winner_name,
+                g.points_to_winner
+            FROM games g
+            JOIN sessions s 
+                ON g.session_id = s.session_id
+            JOIN semester sem
+                ON s.semester_id = sem.semester_id
+            JOIN players p1
+                ON g.player1_id = p1.player_id
+            JOIN players p2
+                ON g.player2_id = p2.player_id
+            JOIN players w
+                ON g.winner_id = w.player_id
+            ORDER BY sem.semester_id, s.session_id, g.games_id;
         """)
         
-        result = cursor.fetchall()
+        self.games = cursor.fetchall()
+        conn.close()
         
+        print(self.games)
+    
+    def semester(self):
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        # list of all semester ids
         cursor.execute("""
             SELECT semester_id FROM semester               
         """)
         
-        semesters_list = cursor.fetchall()
+        semester_id_list = cursor.fetchall()
+        print(semester_id_list)
+        
         conn.close()
         
-        # order the leaderboard
-        results_per_semester = []
+        games_per_semester = []
+        players_per_semester = []
         
-        for i in range(len(semesters_list)): # loop though semesters
-            results_per_semester.append([])
+        # sort games into semesters
+        for i in range(len(semester_id_list)): # loop though semesters
+            games_per_semester.append([])
+            for game in self.games: # loop though games and make lists of the same semester
+                if semester_id_list[i][0] == game[0]:
+                    games_per_semester[i].append(game)
+                
+        # sort players in each semester into a new list
+        for semester in games_per_semester:
+            names = set()
+            for game in semester:
+                
+                names.add((game[6], 0.0))  # name at index 6
+                names.add((game[8], 0.0))  # name at index 8
             
-            for player in result:
-                if player[0] == semesters_list[i][0]: # if the semester the player is in is the semester we are looping though
+            names.add(((game[0], game[3]), -1)) # add data about semster to the set
                     
-                    if results_per_semester[i] == []: # last item contains info about semester
-                        results_per_semester[i].append((player[0], player[1], -1))
-                    
-                    tup = (player[2], player[3], player[4])
-                    
-                    results_per_semester[i].append(tup)
+            players_per_semester.append(list(names))
+            
+        # add up points to each of the players from the list of all games this semester
+        for n, semester in enumerate(games_per_semester):
+            
+            for game in semester:
+                
+                for i, (name, score) in enumerate(players_per_semester[n]):
+                    if name == game[10]:
+                        players_per_semester[n][i] = (name, score + game[11])
           
         in_order = []
                   
-        for result in results_per_semester:
-            in_order.append(sorted(result, key=lambda x: x[2], reverse=True))
+        for player in players_per_semester:
+            in_order.append(sorted(player, key=lambda x: x[1], reverse=True))
         
         return in_order    
 
@@ -246,18 +278,27 @@ class Leaderboard():
         cursor = conn.cursor()
         
         cursor.execute("""
+            WITH participants AS (
+                SELECT session_id, player1_id AS player_id FROM games
+                UNION ALL
+                SELECT session_id, player2_id FROM games
+            )
             SELECT 
-            s.session_id,
-            s.session_date,
-            s.semester_id,
-            p.player_id,
-            p.name,
-            COALESCE(SUM(g.points_to_winner), 0) AS total_points
-            FROM players p
-            CROSS JOIN sessions s
+                s.session_id,
+                s.session_date,
+                s.semester_id,
+                p.player_id,
+                p.name,
+                COALESCE(SUM(CASE WHEN g.winner_id = p.player_id 
+                                THEN g.points_to_winner ELSE 0 END), 0) AS total_points
+            FROM sessions s
+            JOIN participants pt 
+                ON pt.session_id = s.session_id
+            JOIN players p 
+                ON p.player_id = pt.player_id
             LEFT JOIN games g 
-            ON g.winner_id = p.player_id 
-            AND g.session_id = s.session_id
+                ON g.session_id = s.session_id 
+                AND g.winner_id = p.player_id
             GROUP BY s.session_id, p.player_id
             ORDER BY s.session_id, total_points DESC, p.name;
         """)
@@ -323,8 +364,5 @@ class Leaderboard():
         sessions = self.session()
         semesters = self.semester()
         alltime = self.alltime()
-        
-        #print(sessions)
-        #print(semesters)
         
         return semesters, sessions, alltime

@@ -52,3 +52,22 @@ def remove_menu(menu_bar, menu_to_remove):
             break
 
     return menu_bar
+
+def get_players_from_qlist(q_list):
+    players = []
+    
+    for i in range(q_list.count()):
+        item = q_list.item(i)
+        players.append(item.text())
+        
+    return players
+
+def clear_layout(layout):
+    if layout is not None:
+        while layout.count():
+            
+            item = layout.takeAt(0)
+            widget = item.widget()
+            
+            if widget is not None:
+                widget.setParent(None)

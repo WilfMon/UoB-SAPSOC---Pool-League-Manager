@@ -143,7 +143,7 @@ def add_game(session_id, player1_id, player2_id, winner_id):
     cursor.execute("""
         INSERT INTO games (session_id, player1_id, player2_id, winner_id, points_to_winner)
         VALUES (?, ?, ?, ?, ?)
-    """, (session_id, player1_id, player2_id, winner_id, 1))
+    """, (session_id, player1_id, player2_id, winner_id, points_to_add))
 
     # Increment winner's points and wins
     cursor.execute("""

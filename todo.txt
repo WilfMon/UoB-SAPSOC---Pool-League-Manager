@@ -1,7 +1,6 @@
 APPLICATION
 
 -- important --
-- make it so that session is a tab and therfore can always be accessed
 
 -- less important --
 - add elo
