@@ -73,6 +73,17 @@ def get_player_points(player_id, semester_id):
     
     return cursor.fetchone()[0]
 
+def get_player_elo(player_id):
+    
+    conn = get_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute("""
+        SELECT elo FROM players WHERE player_id = ?
+    """, (player_id,))
+    
+    return cursor.fetchone()[0]
+
 def get_members():
     conn = get_connection()
     cursor = conn.cursor()
@@ -123,6 +134,8 @@ def add_session(semester_id, session_date):
     return session_id
     
 def add_game(session_id, player1_id, player2_id, winner_id):
+    from utils.utils import calc_elo_change
+    
     conn = get_connection()
     cursor = conn.cursor()
 
@@ -137,29 +150,50 @@ def add_game(session_id, player1_id, player2_id, winner_id):
     loser_points = get_player_points(loser_id, semster_id)
     
     if loser_points - winner_points >= 10: # check if winner was 10 or more points behind loser
-        points_to_add = 1 + loser_points * 0.2 # add 20% of losers points onto winners take
+        points_to_add = 1 + loser_points * 0.1 # add 10% of losers points onto winners take
+        
+        print("Yes")
+
+    print(winner_points)
+    print(loser_points)
+    print(points_to_add)
+        
+    # figure out elo updates
+    winner_elo = get_player_elo(winner_id)
+    loser_elo = get_player_elo(loser_id)
+    
+    winner_elo_change, loser_elo_change = calc_elo_change(winner_elo, loser_elo)
 
     # Insert the game
     cursor.execute("""
-        INSERT INTO games (session_id, player1_id, player2_id, winner_id, points_to_winner)
-        VALUES (?, ?, ?, ?, ?)
-    """, (session_id, player1_id, player2_id, winner_id, points_to_add))
+        INSERT INTO games (
+            session_id, 
+            player1_id, 
+            player2_id, 
+            winner_id, 
+            points_to_winner,
+            elo_to_winner,
+            elo_to_loser
+            )
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    """, (session_id, player1_id, player2_id, winner_id, points_to_add, winner_elo_change, loser_elo_change))
 
-    # Increment winner's points and wins
+    # Increment winner's points, wins and elo
     cursor.execute("""
         UPDATE players
         SET points = points + ?,
             games_played = games_played + 1,
-            wins = wins + 1
+            wins = wins + 1,
+            elo = elo + ?
         WHERE player_id = ?
-    """, (points_to_add, winner_id,))
+    """, (points_to_add, winner_elo_change, winner_id))
     
-    # increment games played of loser aswell
+    # increment games played of loser and elo aswell
     cursor.execute("""
         UPDATE players
-        SET games_played = games_played + 1
+        SET games_played = games_played + 1, elo = elo + ?
         WHERE player_id = ?
-    """, (loser_id,))
+    """, (loser_elo_change, loser_id))
 
     # Update the number of games in the session
     cursor.execute("""

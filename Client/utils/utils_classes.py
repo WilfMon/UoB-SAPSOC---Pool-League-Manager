@@ -146,40 +146,63 @@ from database.queries import get_player, get_player_games
 from database.objects import PlayerObj
 
 class StatisticsBuilder():
-    def __init__(self):
-        pass
-
-    def display_player_stats(self, player_name):
-        
+    def __init__(self, player_name):
         # player object
         player_info = get_player(player_name)
         player_games = get_player_games(player_name)
 
-        player = PlayerObj(player_info, player_games)
+        # make an object that holds all the info on the player
+        self.player = PlayerObj(player_info, player_games)
+
+    def display_player_stats(self):
         
         # visual data
         points = [0]
         wins = [0]
         games_played = [0]
         
-        for i, game in enumerate(player.games_played_info):
+        for i, game in enumerate(self.player.games_played_info):
             games_played.append(games_played[i] + 1)
             
             # check if won
-            if game[4] == player.player_id:
+            if game[4] == self.player.player_id:
                 wins.append(wins[i] + 1)
                 points.append(points[i] + game[5])
             else:
                 wins.append(wins[i])
                 points.append(points[i])
             
-        plt.plot(games_played, points)
-        plt.plot(games_played, wins)
-        plt.xlabel("Games Played")
+        fig1, ax1 = plt.subplots()
         
-        #plt.show()
+        ax1.plot(games_played, points, label="Points")
+
+        ax1.set_title("Graph")
+        ax1.set_xlabel("Games Played")
+        ax1.set_ylabel("Empty")
         
-        return player
+        ax1.legend()
+        
+        fig2, ax2 = plt.subplots()
+        
+        ax2.plot(games_played, wins, label="Wins")
+        
+        ax2.set_title("Graph")
+        ax2.set_xlabel("Games Played")
+        ax2.set_ylabel("Empty")
+        
+        ax2.legend()
+        
+        fig3, ax3 = plt.subplots()
+        
+        ax3.plot(games_played, wins, label="Wins")
+        
+        ax3.set_title("Graph")
+        ax3.set_xlabel("Games Played")
+        ax3.set_ylabel("Empty")
+        
+        ax3.legend()
+        
+        return (fig1, fig2, fig3)
     
 from database.db import get_connection
     

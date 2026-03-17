@@ -1,7 +1,6 @@
 APPLICATION
 
 -- important --
-- add elo (in progress)
 - add data visualization
 - add a configure option to change theme
 
@@ -10,8 +9,8 @@ APPLICATION
 - make only sessions of the selected semester show up in leaderboard session combo box
 - add a tournement mode
 - add lowering weight of games that have already been played so that more games can be player
-
-
+- add a way to legacy old players so they dont appear in leaderboard and statistics but still exist
+- adjust elo system
 
 WEBSITE
 - add data visualization

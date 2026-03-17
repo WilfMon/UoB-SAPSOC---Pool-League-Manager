@@ -1,6 +1,8 @@
 import numpy as np
 import datetime
 
+from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
+
 from database.db import get_connection
 from database.schema import create_tables
 from database.queries import add_player, get_session_id_by_name, get_semester_id_by_name, make_member, get_player, get_all_players, add_semester, add_session, add_game, get_player_id_by_name
@@ -50,21 +52,17 @@ class MainWindow(QMainWindow):
         create_tables()
         
         # automatically determine semester and year
-        if False:
-            if 9 <= self.month <= 12:
-                sem_name = self.year + ".1"
-                
-                add_semester(sem_name)
-                self.semester_id = get_semester_id_by_name(sem_name)
+        if 9 <= self.month <= 12:
+            sem_name = self.year + ".1"
+            
+            add_semester(sem_name)
+            self.semester_id = get_semester_id_by_name(sem_name)
 
-            if 1 <= self.month <= 8:
-                sem_name = self.year + ".2"
-                
-                add_semester(sem_name)
-                self.semester_id = get_semester_id_by_name(sem_name)
-                
-        add_semester("2025.2")
-        self.semester_id = get_semester_id_by_name("2025.2")
+        if 1 <= self.month <= 8:
+            sem_name = self.year + ".2"
+            
+            add_semester(sem_name)
+            self.semester_id = get_semester_id_by_name(sem_name)
 
     def create_menu_bar(self):
         self.menu_bar = self.menuBar()  # Built-in QMainWindow menu bar
@@ -105,7 +103,7 @@ class MainWindow(QMainWindow):
     def on_new_session(self):
         
         def on_confirm_players():
-            players = get_players_from_qlist(self.players_list)
+            players = get_players_from_qlist(self.players_list_session)
                     
             new_players = check_for_new_players(players)
             if new_players != []:
@@ -122,7 +120,7 @@ class MainWindow(QMainWindow):
         def players_confirmed(yesorno):
             if yesorno:
                 print("Proceeding to rounds")
-                players = get_players_from_qlist(self.players_list)
+                players = get_players_from_qlist(self.players_list_session)
                 
                 # Ui stuff
                 self.round_title = QLabel("Rounds:")
@@ -193,12 +191,9 @@ class MainWindow(QMainWindow):
                     # check if this is an adjustment
                     if [name, opp] in self.finished_games[round_num]:
                         self.finished_games[round_num].remove([name, opp])
-                    
-                print(self.finished_games)
-                #print(self.finished_games[round_num].append([name, opp]))
             
             # check for new players
-            players = set(get_players_from_qlist(self.players_list))
+            players = set(get_players_from_qlist(self.players_list_session))
             difference_in_players = players ^ self.last_round_players
             if difference_in_players != set(): # if there is a difference in players from last round
                 
@@ -294,12 +289,10 @@ class MainWindow(QMainWindow):
 
         def on_save_session():
 
-            #self.session_id = add_session(semester_id=self.semester_id, session_date=self.date)
-            
-            self.session_id = add_session(semester_id=self.semester_id, session_date="03.06.2025")
+            self.session_id = add_session(semester_id=self.semester_id, session_date=self.date)
             
             # write to database
-            players = set(get_players_from_qlist(self.players_list))
+            players = set(get_players_from_qlist(self.players_list_session))
             for name in players:
                 add_player(name)
             
@@ -329,12 +322,12 @@ class MainWindow(QMainWindow):
             # clear finished games
             self.finished_games = []
 
-        def player_recived(player):
+        def player_recived(player): # called when new players are added
             # check if the player is already in the session
             found = False
             
-            for i in range(self.players_list.count()):
-                item = self.players_list.item(i)
+            for i in range(self.players_list_session.count()):
+                item = self.players_list_session.item(i)
                 
                 if item.text() == player:
                     found = True
@@ -342,7 +335,7 @@ class MainWindow(QMainWindow):
             
             # update list accordingly
             if not found:
-                self.players_list.addItem(player)
+                self.players_list_session.addItem(player)
             
                 print(f"Added to list: {[player]}")
             else:
@@ -350,20 +343,20 @@ class MainWindow(QMainWindow):
                 
         def players_recived(players): # only called on the initial submition of players
             for name in players:
-                self.players_list.addItem(name)
+                self.players_list_session.addItem(name)
                 
             print(f"Added to list: {players}")
 
         def show_context_menu(position: QPoint): # menu for adding and removing players from left list
             # Get the item under the cursor
-            item = self.players_list.itemAt(position)
+            item = self.players_list_session.itemAt(position)
             
             if item is None:
                 menu = QMenu()
                 new_action = menu.addAction("New")
                 
                 # Show menu and wait for user selection
-                action = menu.exec(self.players_list.mapToGlobal(position))
+                action = menu.exec(self.players_list_session.mapToGlobal(position))
                 
                 if action == new_action:
                     self.text_box = TextBoxWindow(scale=self.scale)
@@ -379,13 +372,16 @@ class MainWindow(QMainWindow):
                 remove_action = menu.addAction("Remove")
                 
                 # Show menu and wait for user selection
-                action = menu.exec(self.players_list.mapToGlobal(position))
+                action = menu.exec(self.players_list_session.mapToGlobal(position))
                 
                 if action == remove_action:
-                    i = self.players_list.row(item)
-                    self.players_list.takeItem(i)
+                    i = self.players_list_session.row(item)
+                    self.players_list_session.takeItem(i)
 
         def on_tab_in():
+            # remove menus
+            remove_menu(self.menu_bar, "Statistics")
+            
             self.central.setCurrentIndex(1)
 
         # logic for new session window
@@ -395,6 +391,9 @@ class MainWindow(QMainWindow):
         self.session_setup_window.show()
         
         on_tab_in()
+        
+        # remove menus
+        remove_menu(self.menu_bar, "Statistics")
         
         # Session menu
         self.file_menu = self.menu_bar.addMenu("Session")
@@ -436,22 +435,24 @@ class MainWindow(QMainWindow):
         self.players_list_title = QLabel("List of Players:")
         self.main_session_layout.addWidget(self.players_list_title, 0, 0, alignment=Qt.AlignLeft)
         
-        self.players_list = QListWidget()
-        self.players_list.setFixedWidth(250 * self.scale)
-        self.players_list.setFont(self.default_font)
-        self.main_session_layout.addWidget(self.players_list, 1, 0, alignment=Qt.AlignLeft)
+        self.players_list_session = QListWidget()
+        self.players_list_session.setFixedWidth(250 * self.scale)
+        self.players_list_session.setFont(self.default_font)
+        self.main_session_layout.addWidget(self.players_list_session, 1, 0, alignment=Qt.AlignLeft)
         
-        self.players_list.setContextMenuPolicy(Qt.CustomContextMenu)
-        self.players_list.customContextMenuRequested.connect(show_context_menu)
+        self.players_list_session.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.players_list_session.customContextMenuRequested.connect(show_context_menu)
 
     def on_new_statistics(self):
         
         def on_enter_player():
 
             def player_recived(player):
-                player_obj = self.stats_builder.display_player_stats(player)
+                # init stats class
+                stats_builder = StatisticsBuilder(player)
+                player_obj = stats_builder.player
                 
-                # display crucial stats
+                # display stats
                 player_name = QLabel(f"{player_obj.name}:")
                 self.main_layout.addWidget(player_name, 0, 0, alignment=Qt.AlignLeft | Qt.AlignTop)
                 
@@ -470,12 +471,21 @@ class MainWindow(QMainWindow):
                 player_member = QLabel(f"Member: {player_obj.member_displayable}")
                 player_member.setStyleSheet("font-weight: normal;")
                 self.main_layout.addWidget(player_member, 0, 4, alignment=Qt.AlignLeft | Qt.AlignTop)
-
+                
+                # display graphs
+                graphs_container = QWidget()
+                graphs_container_layout = QGridLayout(graphs_container)
+                
+                self.main_layout.addWidget(graphs_container, 1, 0, 1, 5)
+                
+                graphs = stats_builder.display_player_stats()
+                for i, fig in enumerate(graphs):
+                    canvas = FigureCanvas(fig)
+                    graphs_container_layout.addWidget(canvas, 0, i, alignment=Qt.AlignLeft)
+                
             clear_layout(self.main_layout)
 
-            # init stats class
-            self.stats_builder = StatisticsBuilder()
-
+            # text box for entering player name
             self.text_box = TextBoxWindow(scale=self.scale)
             self.text_box.open_at_cursor()
             
@@ -510,6 +520,17 @@ class MainWindow(QMainWindow):
         self.advanced = QAction("Advanced", self)
         self.file_menu.addAction(self.advanced)
         self.advanced.setDisabled(True)
+        
+        # left side list of players
+        self.players_list_statistics = QListWidget()
+        self.players_list_statistics.setFixedWidth(250 * self.scale)
+        self.players_list_statistics.setFont(self.default_font)
+        self.main_layout.addWidget(self.players_list_statistics, 1, 0, alignment=Qt.AlignLeft)
+        
+        players = get_all_players()
+        print(players)
+        for player in players:
+            self.players_list_statistics.addItem(player)
 
     def on_view_leaderboard(self):
         
@@ -540,7 +561,7 @@ class MainWindow(QMainWindow):
                 
                 layout.addWidget(line, n, 0, 1, 2)
                 
-                points = QLabel(f"{player[1]}")
+                points = QLabel(f"{round(player[1], 2)}")
                 points.setStyleSheet("font-weight: normal;")
                 
                 name_ = QLabel(f"{player[0]}")
@@ -559,7 +580,10 @@ class MainWindow(QMainWindow):
             
             return layout
             
-        def construct_alltime(name, layout):
+        def construct_alltime():
+            
+            name = "All Time"
+            layout = leaderboard_container_layout_at
 
             leaderboard = self.box_to_select_alltime.currentData()
 
@@ -593,10 +617,10 @@ class MainWindow(QMainWindow):
                 name_ = QLabel(f"{player[0]}")
                 name_.setStyleSheet("font-weight: normal;")
 
-                points = QLabel(f"{player[1]}")
+                points = QLabel(f"{round(player[1], 2)}")
                 points.setStyleSheet("font-weight: normal;")
 
-                elo = QLabel(f"{player[2]}")
+                elo = QLabel(f"{round(player[2])}")
                 elo.setStyleSheet("font-weight: normal;")
 
                 layout.addWidget(name_, n + 1, 2)
@@ -604,7 +628,6 @@ class MainWindow(QMainWindow):
                 layout.addWidget(elo, n + 1, 1)
 
             return layout
-
 
         def refresh_leaderboards(semester_l, session_l):
             
@@ -672,9 +695,6 @@ class MainWindow(QMainWindow):
             self.box_to_select_semester.setCurrentText(f"{sem_title[0]} Semester: {sem_title[1]}")
             self.box_to_select_semester.blockSignals(False)
        
-        def update_alltime():
-            pass
-
         clear_layout(self.main_layout)
         self.central.setCurrentIndex(0)
 
@@ -748,14 +768,14 @@ class MainWindow(QMainWindow):
             
         leaderboard_container_layout_at.addWidget(self.box_to_select_alltime, 0, 1, alignment=Qt.AlignLeft | Qt.AlignTop)
 
-        self.box_to_select_alltime.currentIndexChanged.connect(update_alltime)
+        self.box_to_select_alltime.currentIndexChanged.connect(construct_alltime)
         
         # call updated functions once to make sure the combo boxes are set correctly
         update_semester()
         update_session()
 
         # making the alltime leaderboard
-        construct_alltime("All Time", leaderboard_container_layout_at)
+        construct_alltime()
 
         # finish layout
         leaderboard_container_layout.addWidget(leaderboard_container_sm, 0, 0)

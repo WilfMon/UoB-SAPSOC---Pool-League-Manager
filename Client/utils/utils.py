@@ -1,4 +1,5 @@
 import csv
+import numpy as np
 
 from database.queries import get_all_players
 
@@ -71,3 +72,20 @@ def clear_layout(layout):
             
             if widget is not None:
                 widget.setParent(None)
+                
+def calc_elo_change(a, b): # where A is the winner
+    
+    # define the constants
+    BASE = 10
+    SCALE_FACTOR = 400 # controls the trend value (thousends)
+    K_FACTOR = 48 # controls how much a win or loss effects the elo change
+    
+    # calc probablity for each player to win given the ratings
+    Ea = 1 / (1 + (BASE ** ((b - a) / SCALE_FACTOR)))
+    Eb = 1 - Ea
+    
+    # calc the change in ratings due to the outcome
+    Ra = K_FACTOR * (1 - Ea) # a won
+    Rb = K_FACTOR * (0 - Eb) # b lost
+
+    return (Ra, Rb)

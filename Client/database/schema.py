@@ -58,6 +58,9 @@ def create_tables():
 
         winner_id INTEGER NOT NULL,
         points_to_winner FLOAT NOT NULL,
+        
+        elo_to_winner FLOAT NOT NULL,
+        elo_to_loser FLOAT NOT NULL,
 
         FOREIGN KEY(session_id) REFERENCES sessions(session_id),
         FOREIGN KEY(player1_id) REFERENCES players(player_id),
