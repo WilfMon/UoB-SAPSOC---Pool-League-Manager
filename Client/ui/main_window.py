@@ -516,9 +516,9 @@ class MainWindow(QMainWindow):
         def construct(name, leaderboard, layout):
             
             # to allow for spacing
-            num_players = len(alltime_leaderboard)
+            num_players = len(alltime_leaderboard_points_sorted)
             
-            title_label = QLabel(f"{name} Leaderboard:", self)
+            title_label = QLabel(f"{name}:", self)
             layout.addWidget(title_label, 0, 0, alignment=Qt.AlignLeft | Qt.AlignTop)
 
             points_label = QLabel("Points:", self)
@@ -543,11 +543,11 @@ class MainWindow(QMainWindow):
                 points = QLabel(f"{player[1]}")
                 points.setStyleSheet("font-weight: normal;")
                 
-                name = QLabel(f"{player[0]}")
-                name.setStyleSheet("font-weight: normal;")
+                name_ = QLabel(f"{player[0]}")
+                name_.setStyleSheet("font-weight: normal;")
 
                 layout.addWidget(points, n + 1, 0)
-                layout.addWidget(name, n + 1, 1)
+                layout.addWidget(name_, n + 1, 1)
 
             # add spaces to make each leaderboard aligned     
             if False:       
@@ -559,6 +559,53 @@ class MainWindow(QMainWindow):
             
             return layout
             
+        def construct_alltime(name, layout):
+
+            leaderboard = self.box_to_select_alltime.currentData()
+
+            # add elo parts
+            title_label = QLabel(f"{name}:", self)
+            layout.addWidget(title_label, 0, 0, alignment=Qt.AlignLeft | Qt.AlignTop)
+
+            points_label = QLabel("Points:", self)
+            points_label.setStyleSheet("font-weight: normal;")
+            layout.addWidget(points_label, 1, 0, alignment=Qt.AlignLeft | Qt.AlignTop)
+
+            elo_label = QLabel("Elo:", self)
+            elo_label.setStyleSheet("font-weight: normal;")
+            layout.addWidget(elo_label, 1, 1, alignment=Qt.AlignLeft | Qt.AlignTop)
+            
+            name_label = QLabel("Name:", self)
+            name_label.setStyleSheet("font-weight: normal;")
+            layout.addWidget(name_label, 1, 2, alignment=Qt.AlignLeft | Qt.AlignTop)
+            
+            # create the players in the leaderboard
+            for n, player in enumerate(leaderboard, start=1):
+                n *= 2
+                
+                line = QFrame()
+                line.setFrameShape(QFrame.HLine)
+                line.setFrameShadow(QFrame.Sunken)
+                line.setStyleSheet("background-color: #3d3d3d")
+                
+                layout.addWidget(line, n, 0, 1, 3) # 3 wide to allow for elo to be covered
+                
+                name_ = QLabel(f"{player[0]}")
+                name_.setStyleSheet("font-weight: normal;")
+
+                points = QLabel(f"{player[1]}")
+                points.setStyleSheet("font-weight: normal;")
+
+                elo = QLabel(f"{player[2]}")
+                elo.setStyleSheet("font-weight: normal;")
+
+                layout.addWidget(name_, n + 1, 2)
+                layout.addWidget(points, n + 1, 0)
+                layout.addWidget(elo, n + 1, 1)
+
+            return layout
+
+
         def refresh_leaderboards(semester_l, session_l):
             
             # create editable copies
@@ -571,7 +618,6 @@ class MainWindow(QMainWindow):
             
             construct("Semester", semester_l_copy, leaderboard_container_layout_sm)
             construct("Session", session_l_copy, leaderboard_container_layout_se)
-            construct("All Time", alltime_leaderboard, leaderboard_container_layout_at)
             
         def update_semester():
             sem_id = self.box_to_select_semester.currentData()
@@ -590,7 +636,7 @@ class MainWindow(QMainWindow):
             refresh_leaderboards(sem, possible_sessions[-1])
             
             sem_title = str(sem[-1][0][1]).split(".")
-            ses_title = str(ses[-1][0][2])
+            ses_title = str(possible_sessions[-1][-1][0][2])
             
             self.box_to_select_semester.blockSignals(True)
             self.box_to_select_semester.setCurrentText(f"{sem_title[0]} Semester: {sem_title[1]}")
@@ -601,8 +647,6 @@ class MainWindow(QMainWindow):
             self.box_to_select_session.blockSignals(False)
                 
         def update_session():
-            print("Update Session Triggered")
-            
             ses_id = self.box_to_select_session.currentData()
             
             # find the session selected
@@ -628,6 +672,9 @@ class MainWindow(QMainWindow):
             self.box_to_select_semester.setCurrentText(f"{sem_title[0]} Semester: {sem_title[1]}")
             self.box_to_select_semester.blockSignals(False)
        
+        def update_alltime():
+            pass
+
         clear_layout(self.main_layout)
         self.central.setCurrentIndex(0)
 
@@ -635,7 +682,7 @@ class MainWindow(QMainWindow):
 
         # get leaderboards
         L = Leaderboard()
-        semester_leaderboard, session_leaderboard, alltime_leaderboard = L.collect_leaderboards()
+        semester_leaderboard, session_leaderboard, alltime_leaderboard_points_sorted, alltime_leaderboard_elo_sorted = L.collect_leaderboards()
         
         # ui setup
         """ Whole window widget to allow vertical scrolling """
@@ -678,9 +725,9 @@ class MainWindow(QMainWindow):
             
         self.box_to_select_semester.setCurrentIndex(len(semester_leaderboard) - 1) # latest semster
             
-        self.box_to_select_semester.currentIndexChanged.connect(update_semester)
         leaderboard_container_layout_sm.addWidget(self.box_to_select_semester, 0, 1, alignment=Qt.AlignLeft | Qt.AlignTop)
 
+        self.box_to_select_semester.currentIndexChanged.connect(update_semester)
         
         self.box_to_select_session = QComboBox()
         for ses in session_leaderboard:
@@ -690,8 +737,25 @@ class MainWindow(QMainWindow):
             
         self.box_to_select_session.setCurrentIndex(len(semester_leaderboard) - 1) # latest session
             
-        self.box_to_select_session.currentIndexChanged.connect(update_session)
         leaderboard_container_layout_se.addWidget(self.box_to_select_session, 0, 1, alignment=Qt.AlignLeft | Qt.AlignTop)
+
+        self.box_to_select_session.currentIndexChanged.connect(update_session)
+
+        self.box_to_select_alltime = QComboBox()
+
+        self.box_to_select_alltime.addItem(f"Sort by Points", alltime_leaderboard_points_sorted)
+        self.box_to_select_alltime.addItem(f"Sort by Elo", alltime_leaderboard_elo_sorted)
+            
+        leaderboard_container_layout_at.addWidget(self.box_to_select_alltime, 0, 1, alignment=Qt.AlignLeft | Qt.AlignTop)
+
+        self.box_to_select_alltime.currentIndexChanged.connect(update_alltime)
+        
+        # call updated functions once to make sure the combo boxes are set correctly
+        update_semester()
+        update_session()
+
+        # making the alltime leaderboard
+        construct_alltime("All Time", leaderboard_container_layout_at)
 
         # finish layout
         leaderboard_container_layout.addWidget(leaderboard_container_sm, 0, 0)

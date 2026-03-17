@@ -321,31 +321,40 @@ class Leaderboard():
         
         return in_order    
     
-    def alltime(self):
-        
-        names = set()
-        for game in self.games:
-            
-            names.add((game[6], 0.0))  # name at index 6
-            names.add((game[8], 0.0))  # name at index 8
-        
-        players = list(names)
-        
-        for game in self.games:
-            
-            for i, (name, score) in enumerate(players):
-                if name == game[10]:
-                    players[i] = (name, score + game[11])
+    def alltime_points(self):
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            SELECT name, points, elo FROM players
+        """)
+    
+        players = cursor.fetchall()
         
         # order the leaderboard
         in_order = sorted(players, key=lambda x: x[1], reverse=True)
-        
+
         return in_order
     
+    def alltime_elo(self):
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            SELECT name, points, elo FROM players
+        """)
+    
+        players = cursor.fetchall()
+
+        in_order = sorted(players, key=lambda x: x[2], reverse=True)
+
+        return in_order
+
     def collect_leaderboards(self):
         
         sessions = self.session()
         semesters = self.semester()
-        alltime = self.alltime()
+        alltime_points = self.alltime_points()
+        alltime_elo = self.alltime_elo()
         
-        return semesters, sessions, alltime
+        return semesters, sessions, alltime_points, alltime_elo

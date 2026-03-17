@@ -1,15 +1,13 @@
 APPLICATION
 
 -- important --
+- add elo (in progress)
+- add data visualization
+- add a configure option to change theme
 
 -- less important --
-- add elo
-- add data visualization
-
-- fix leaderboard spaghetti code
-  fix session leaderboard not updating first time use
-  have a memberships only leaderboard
-
+- fix leaderboard spacing
+- make only sessions of the selected semester show up in leaderboard session combo box
 - add a tournement mode
 - add lowering weight of games that have already been played so that more games can be player
 

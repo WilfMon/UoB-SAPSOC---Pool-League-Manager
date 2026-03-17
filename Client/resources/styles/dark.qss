@@ -63,6 +63,7 @@ QMenu::separator {
     margin: 4px 8px;
 }
 
+/* Scrollbars */
 QScrollBar:vertical {
     background: #0b0b0b;
     width: 10px;
@@ -87,5 +88,32 @@ QScrollBar::sub-line:vertical {
 
 QScrollBar::add-page:vertical,
 QScrollBar::sub-page:vertical {
+    background: none;
+}
+
+QScrollBar:horizontal {
+    background: #0b0b0b;
+    height: 10px;
+    margin: 0 2px 0 2px;
+    border-radius: 5px;
+}
+
+QScrollBar::handle:horizontal {
+    background: #3a3a3a;
+    min-width: 20px;
+    border-radius: 5px;
+}
+
+QScrollBar::handle:horizontal:hover {
+    background: #5a5a5a;
+}
+
+QScrollBar::add-line:horizontal,
+QScrollBar::sub-line:horizontal {
+    width: 0px;
+}
+
+QScrollBar::add-page:horizontal,
+QScrollBar::sub-page:horizontal {
     background: none;
 }
