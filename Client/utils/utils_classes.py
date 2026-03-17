@@ -218,8 +218,6 @@ class Leaderboard():
         
         self.games = cursor.fetchall()
         conn.close()
-        
-        print(self.games)
     
     def semester(self):
         conn = get_connection()
@@ -231,7 +229,6 @@ class Leaderboard():
         """)
         
         semester_id_list = cursor.fetchall()
-        print(semester_id_list)
         
         conn.close()
         
@@ -276,86 +273,72 @@ class Leaderboard():
     def session(self):
         conn = get_connection()
         cursor = conn.cursor()
-        
-        cursor.execute("""
-            WITH participants AS (
-                SELECT session_id, player1_id AS player_id FROM games
-                UNION ALL
-                SELECT session_id, player2_id FROM games
-            )
-            SELECT 
-                s.session_id,
-                s.session_date,
-                s.semester_id,
-                p.player_id,
-                p.name,
-                COALESCE(SUM(CASE WHEN g.winner_id = p.player_id 
-                                THEN g.points_to_winner ELSE 0 END), 0) AS total_points
-            FROM sessions s
-            JOIN participants pt 
-                ON pt.session_id = s.session_id
-            JOIN players p 
-                ON p.player_id = pt.player_id
-            LEFT JOIN games g 
-                ON g.session_id = s.session_id 
-                AND g.winner_id = p.player_id
-            GROUP BY s.session_id, p.player_id
-            ORDER BY s.session_id, total_points DESC, p.name;
-        """)
-        
-        result = cursor.fetchall()
-        
+
+        # list of all session ids
         cursor.execute("""
             SELECT session_id FROM sessions
         """)
         
-        session_list = cursor.fetchall()
+        session_id_list = cursor.fetchall()
+        
         conn.close()
         
-        # order the leaderboard
-        results_per_session = []
+        games_per_session = []
+        players_per_session = []
         
-        for i in range(len(session_list)): # loop though sessions
-            results_per_session.append([])
+        # sort games into sessions
+        for i in range(len(session_id_list)): # loop though sessions
+            games_per_session.append([])
+            for game in self.games: # loop though games and make lists of the same session
+                if session_id_list[i][0] == game[1]:
+                    games_per_session[i].append(game)
+                
+        # sort players in each session into a new list
+        for session in games_per_session:
+            names = set()
+            for game in session:
+                
+                names.add((game[6], 0.0))  # name at index 6
+                names.add((game[8], 0.0))  # name at index 8
             
-            for player in result:
-                if player[0] == session_list[i][0]:
+            names.add(((game[0], game[1], game[4]), -1)) # add data about session to the set
                     
-                    if results_per_session[i] == []: # last item contains info about session
-                        results_per_session[i].append((player[0], player[1], -1, player[2]))
-                    
-                    tup = (player[3], player[4], player[5])
-                    
-                    results_per_session[i].append(tup)
+            players_per_session.append(list(names))
+            
+        # add up points to each of the players from the list of all games this session
+        for n, session in enumerate(games_per_session):
+            
+            for game in session:
+                
+                for i, (name, score) in enumerate(players_per_session[n]):
+                    if name == game[10]:
+                        players_per_session[n][i] = (name, score + game[11])
           
         in_order = []
                   
-        for result in results_per_session:
-            in_order.append(sorted(result, key=lambda x: x[2], reverse=True))
+        for player in players_per_session:
+            in_order.append(sorted(player, key=lambda x: x[1], reverse=True))
         
-        return in_order
+        return in_order    
     
     def alltime(self):
-        conn = get_connection()
-        cursor = conn.cursor()
         
-        cursor.execute("""
-            SELECT 
-            p.player_id,
-            p.name,
-            COALESCE(SUM(g.points_to_winner), 0) AS total_points
-            FROM players p
-            LEFT JOIN games g 
-            ON g.winner_id = p.player_id
-            GROUP BY p.player_id
-            ORDER BY total_points DESC, p.name;   
-        """)
+        names = set()
+        for game in self.games:
+            
+            names.add((game[6], 0.0))  # name at index 6
+            names.add((game[8], 0.0))  # name at index 8
         
-        result = cursor.fetchall()
-        conn.close()
+        players = list(names)
+        
+        for game in self.games:
+            
+            for i, (name, score) in enumerate(players):
+                if name == game[10]:
+                    players[i] = (name, score + game[11])
         
         # order the leaderboard
-        in_order = sorted(result, key=lambda x: x[2], reverse=True)
+        in_order = sorted(players, key=lambda x: x[1], reverse=True)
         
         return in_order
     

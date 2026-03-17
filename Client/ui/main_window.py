@@ -50,17 +50,21 @@ class MainWindow(QMainWindow):
         create_tables()
         
         # automatically determine semester and year
-        if 9 <= self.month <= 12:
-            sem_name = self.year + ".1"
-            
-            add_semester(sem_name)
-            self.semester_id = get_semester_id_by_name(sem_name)
+        if False:
+            if 9 <= self.month <= 12:
+                sem_name = self.year + ".1"
+                
+                add_semester(sem_name)
+                self.semester_id = get_semester_id_by_name(sem_name)
 
-        if 1 <= self.month <= 8:
-            sem_name = self.year + ".2"
-            
-            add_semester(sem_name)
-            self.semester_id = get_semester_id_by_name(sem_name)
+            if 1 <= self.month <= 8:
+                sem_name = self.year + ".2"
+                
+                add_semester(sem_name)
+                self.semester_id = get_semester_id_by_name(sem_name)
+                
+        add_semester("2025.2")
+        self.semester_id = get_semester_id_by_name("2025.2")
 
     def create_menu_bar(self):
         self.menu_bar = self.menuBar()  # Built-in QMainWindow menu bar
@@ -289,8 +293,10 @@ class MainWindow(QMainWindow):
                 self.remove_round_action.setDisabled(True)
 
         def on_save_session():
-        
-            self.session_id = add_session(semester_id=self.semester_id, session_date=self.date)
+
+            #self.session_id = add_session(semester_id=self.semester_id, session_date=self.date)
+            
+            self.session_id = add_session(semester_id=self.semester_id, session_date="03.06.2025")
             
             # write to database
             players = set(get_players_from_qlist(self.players_list))
@@ -543,23 +549,84 @@ class MainWindow(QMainWindow):
                 layout.addWidget(points, n + 1, 0)
                 layout.addWidget(name, n + 1, 1)
 
-            # add spaces to make each leaderboard aligned            
-            for i in range(num_players):
-                if i > len(leaderboard):
-                    
-                    layout.addItem(QSpacerItem(0, 41), n + i, 0)
-                    layout.addItem(QSpacerItem(0, 41), n + i + 1, 0)
+            # add spaces to make each leaderboard aligned     
+            if False:       
+                for i in range(num_players):
+                    if i > len(leaderboard):
+                        
+                        layout.addItem(QSpacerItem(0, 41), n + i, 0)
+                        layout.addItem(QSpacerItem(0, 41), n + i + 1, 0)
             
             return layout
             
-        def refresh_leaderboards():
+        def refresh_leaderboards(semester_l, session_l):
             
-            construct("Semester", semester_leaderboard[-1], leaderboard_container_layout_sm)
-            construct("Session", session_leaderboard[-1], leaderboard_container_layout_se)
+            # create editable copies
+            semester_l_copy = semester_l.copy()
+            session_l_copy = session_l.copy()
+            
+            # remove tracking data
+            semester_l_copy.pop(-1)
+            session_l_copy.pop(-1)
+            
+            construct("Semester", semester_l_copy, leaderboard_container_layout_sm)
+            construct("Session", session_l_copy, leaderboard_container_layout_se)
             construct("All Time", alltime_leaderboard, leaderboard_container_layout_at)
             
-        def combo_boxes():
-            pass
+        def update_semester():
+            sem_id = self.box_to_select_semester.currentData()
+            
+            # find the semester selected
+            for sem in semester_leaderboard:
+                if sem[-1][0][0] == sem_id:
+                    break
+                
+            # find the latest session in the chosen semester
+            possible_sessions = []
+            for ses in session_leaderboard:
+                if ses[-1][0][0] == sem_id:
+                    possible_sessions.append(ses)
+                    
+            refresh_leaderboards(sem, possible_sessions[-1])
+            
+            sem_title = str(sem[-1][0][1]).split(".")
+            ses_title = str(ses[-1][0][2])
+            
+            self.box_to_select_semester.blockSignals(True)
+            self.box_to_select_semester.setCurrentText(f"{sem_title[0]} Semester: {sem_title[1]}")
+            self.box_to_select_semester.blockSignals(False)
+                
+            self.box_to_select_session.blockSignals(True)
+            self.box_to_select_session.setCurrentText(f"Session: {ses_title}")
+            self.box_to_select_session.blockSignals(False)
+                
+        def update_session():
+            print("Update Session Triggered")
+            
+            ses_id = self.box_to_select_session.currentData()
+            
+            # find the session selected
+            for ses in session_leaderboard:
+                if ses[-1][0][1] == ses_id:
+                    break
+                
+            # find the semester the session is in
+            for sem in semester_leaderboard:
+                if sem[-1][0][0] == ses[-1][0][0]:
+                    break
+                
+            refresh_leaderboards(sem, ses)
+            
+            ses_title = str(ses[-1][0][2])
+            sem_title = str(sem[-1][0][1]).split(".")
+            
+            self.box_to_select_session.blockSignals(True)
+            self.box_to_select_session.setCurrentText(f"Session: {ses_title}")
+            self.box_to_select_session.blockSignals(False)
+            
+            self.box_to_select_semester.blockSignals(True)
+            self.box_to_select_semester.setCurrentText(f"{sem_title[0]} Semester: {sem_title[1]}")
+            self.box_to_select_semester.blockSignals(False)
        
         clear_layout(self.main_layout)
         self.central.setCurrentIndex(0)
@@ -569,8 +636,6 @@ class MainWindow(QMainWindow):
         # get leaderboards
         L = Leaderboard()
         semester_leaderboard, session_leaderboard, alltime_leaderboard = L.collect_leaderboards()
-        
-        print(semester_leaderboard)
         
         # ui setup
         """ Whole window widget to allow vertical scrolling """
@@ -601,14 +666,34 @@ class MainWindow(QMainWindow):
         leaderboard_container_at.setStyleSheet("background-color: #1f1f1f;")
         leaderboard_container_layout_at = QGridLayout(leaderboard_container_at)
         
-        #print(semester_leaderboard[-1])
-        #print(session_leaderboard[-1])
+        # first call to init the leaderboards
+        refresh_leaderboards(semester_leaderboard[-1], session_leaderboard[-1])
         
-        # (semester_id, semester_name, -1)
-        # (session_id, session_date, -1, semester_id)
+        # combo boxes
+        self.box_to_select_semester = QComboBox()
+        for sem in semester_leaderboard:
+            title = str(sem[-1][0][1]).split(".")
+            
+            self.box_to_select_semester.addItem(f"{title[0]} Semester: {title[1]}", sem[-1][0][0])
+            
+        self.box_to_select_semester.setCurrentIndex(len(semester_leaderboard) - 1) # latest semster
+            
+        self.box_to_select_semester.currentIndexChanged.connect(update_semester)
+        leaderboard_container_layout_sm.addWidget(self.box_to_select_semester, 0, 1, alignment=Qt.AlignLeft | Qt.AlignTop)
+
         
-        refresh_leaderboards()
-                        
+        self.box_to_select_session = QComboBox()
+        for ses in session_leaderboard:
+            title = str(ses[-1][0][2])
+            
+            self.box_to_select_session.addItem(f"Session: {title}", ses[-1][0][1])
+            
+        self.box_to_select_session.setCurrentIndex(len(semester_leaderboard) - 1) # latest session
+            
+        self.box_to_select_session.currentIndexChanged.connect(update_session)
+        leaderboard_container_layout_se.addWidget(self.box_to_select_session, 0, 1, alignment=Qt.AlignLeft | Qt.AlignTop)
+
+        # finish layout
         leaderboard_container_layout.addWidget(leaderboard_container_sm, 0, 0)
         leaderboard_container_layout.addWidget(leaderboard_container_se, 0, 1)
         leaderboard_container_layout.addWidget(leaderboard_container_at, 0, 2)
