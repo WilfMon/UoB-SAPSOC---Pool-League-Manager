@@ -3,6 +3,8 @@ APPLICATION
 -- important --
 - add data visualization
 - add a configure option to change theme
+- add more extreme elo changes when a player is new
+- placment games for the alltime leaderboard
 
 -- less important --
 - fix leaderboard spacing
