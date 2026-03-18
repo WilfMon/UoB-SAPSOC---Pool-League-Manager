@@ -3,11 +3,11 @@ APPLICATION
 -- important --
 - add data visualization
 - add a configure option to change theme
-- add more extreme elo changes when a player is new
-- placment games for the alltime leaderboard
+- fix leaderboard spacing
 
 -- less important --
-- fix leaderboard spacing
+- add more extreme elo changes when a player is new
+- placment games for the alltime leaderboard
 - make only sessions of the selected semester show up in leaderboard session combo box
 - add a tournement mode
 - add lowering weight of games that have already been played so that more games can be player

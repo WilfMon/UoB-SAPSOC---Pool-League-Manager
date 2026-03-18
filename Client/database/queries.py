@@ -73,6 +73,14 @@ def get_player_points(player_id, semester_id):
     
     return cursor.fetchone()[0]
 
+def get_player_games_played(player_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute("SELECT games_played FROM players WHERE player_id = ?", (player_id,))
+    
+    return cursor.fetchone()[0]
+
 def get_player_elo(player_id):
     
     conn = get_connection()
@@ -152,17 +160,14 @@ def add_game(session_id, player1_id, player2_id, winner_id):
     if loser_points - winner_points >= 10: # check if winner was 10 or more points behind loser
         points_to_add = 1 + loser_points * 0.1 # add 10% of losers points onto winners take
         
-        print("Yes")
-
-    print(winner_points)
-    print(loser_points)
-    print(points_to_add)
-        
     # figure out elo updates
     winner_elo = get_player_elo(winner_id)
     loser_elo = get_player_elo(loser_id)
+
+    winner_games_played = get_player_games_played(winner_id)
+    loser_games_played = get_player_games_played(loser_id)
     
-    winner_elo_change, loser_elo_change = calc_elo_change(winner_elo, loser_elo)
+    winner_elo_change, loser_elo_change = calc_elo_change(winner_elo, loser_elo, winner_games_played, loser_games_played)
 
     # Insert the game
     cursor.execute("""

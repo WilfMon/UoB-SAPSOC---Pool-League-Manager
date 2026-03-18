@@ -159,26 +159,33 @@ class StatisticsBuilder():
         # visual data
         points = [0]
         wins = [0]
+        elo = [1000.0]
         games_played = [0]
         
         for i, game in enumerate(self.player.games_played_info):
+            # update games played
             games_played.append(games_played[i] + 1)
             
             # check if won
             if game[4] == self.player.player_id:
                 wins.append(wins[i] + 1)
                 points.append(points[i] + game[5])
+                elo.append(elo[i] + game[6])
+            
+            # if not won
             else:
                 wins.append(wins[i])
                 points.append(points[i])
+                elo.append(elo[i] + game[7])
+
             
         fig1, ax1 = plt.subplots()
         
         ax1.plot(games_played, points, label="Points")
 
-        ax1.set_title("Graph")
-        ax1.set_xlabel("Games Played")
-        ax1.set_ylabel("Empty")
+        ax1.set_title("")
+        ax1.set_xlabel("")
+        ax1.set_ylabel("")
         
         ax1.legend()
         
@@ -186,19 +193,19 @@ class StatisticsBuilder():
         
         ax2.plot(games_played, wins, label="Wins")
         
-        ax2.set_title("Graph")
+        ax2.set_title("Wins Plot")
         ax2.set_xlabel("Games Played")
-        ax2.set_ylabel("Empty")
+        ax2.set_ylabel("Wins")
         
         ax2.legend()
         
         fig3, ax3 = plt.subplots()
         
-        ax3.plot(games_played, wins, label="Wins")
+        ax3.plot(games_played, elo, label="Elo")
         
-        ax3.set_title("Graph")
+        ax3.set_title("Elo Plot")
         ax3.set_xlabel("Games Played")
-        ax3.set_ylabel("Empty")
+        ax3.set_ylabel("Elo")
         
         ax3.legend()
         
