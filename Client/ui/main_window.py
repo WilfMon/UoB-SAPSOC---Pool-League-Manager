@@ -5,7 +5,7 @@ from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 
 from database.db import get_connection
 from database.schema import create_tables
-from database.queries import add_player, get_session_id_by_name, get_semester_id_by_name, make_member, get_player, get_all_players, add_semester, add_session, add_game, get_player_id_by_name
+from database.queries import add_player, get_elo_change, get_session_id_by_name, get_semester_id_by_name, make_member, get_player, get_all_players, add_semester, add_session, add_game, get_player_id_by_name
 
 from PySide6.QtWidgets import QMainWindow, QStackedWidget, QSpacerItem, QComboBox, QListWidgetItem, QSizePolicy, QLabel, QGridLayout,  QFrame, QPushButton, QWidget, QListWidget, QMenu, QApplication, QLineEdit, QScrollArea, QHBoxLayout
 from PySide6.QtGui import QAction, QCursor, QFont
@@ -231,6 +231,24 @@ class MainWindow(QMainWindow):
             
             # create buttons to display players and track wins
             for n, pair in enumerate(round_):
+                
+                if False:
+                    n *= 2
+                
+                    left_id = get_player_id_by_name(pair[0])
+                    right_id = get_player_id_by_name(pair[1])
+                    
+                    left_change, _ = get_elo_change(left_id, right_id)
+                    right_change, _ = get_elo_change(right_id, left_id)
+                    
+                    elo_left = QLabel(f"+ {round(left_change)}")
+                    elo_right = QLabel(f"+ {round(right_change)}")
+                    
+                    elo_left.setStyleSheet()
+                    
+                    round_container_layout.addWidget(elo_left, n + 2, self.round_number, alignment=Qt.AlignLeft)
+                    round_container_layout.addWidget(elo_right, n + 2, self.round_number + 2, alignment=Qt.AlignRight)
+                
                 left = QPushButton(pair[0])
                 right = QPushButton(pair[1])
                 

@@ -141,8 +141,18 @@ def add_session(semester_id, session_date):
     
     return session_id
     
-def add_game(session_id, player1_id, player2_id, winner_id):
+def get_elo_change(winner_id, loser_id):
     from utils.utils import calc_elo_change
+    
+    winner_elo = get_player_elo(winner_id)
+    loser_elo = get_player_elo(loser_id)
+
+    winner_games_played = get_player_games_played(winner_id)
+    loser_games_played = get_player_games_played(loser_id)
+    
+    return calc_elo_change(winner_elo, loser_elo, winner_games_played, loser_games_played)
+    
+def add_game(session_id, player1_id, player2_id, winner_id):
     
     conn = get_connection()
     cursor = conn.cursor()
@@ -161,13 +171,7 @@ def add_game(session_id, player1_id, player2_id, winner_id):
         points_to_add = 1 + loser_points * 0.1 # add 10% of losers points onto winners take
         
     # figure out elo updates
-    winner_elo = get_player_elo(winner_id)
-    loser_elo = get_player_elo(loser_id)
-
-    winner_games_played = get_player_games_played(winner_id)
-    loser_games_played = get_player_games_played(loser_id)
-    
-    winner_elo_change, loser_elo_change = calc_elo_change(winner_elo, loser_elo, winner_games_played, loser_games_played)
+    winner_elo_change, loser_elo_change = get_elo_change(winner_id, loser_id)
 
     # Insert the game
     cursor.execute("""

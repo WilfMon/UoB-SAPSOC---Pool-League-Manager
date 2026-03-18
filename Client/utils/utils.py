@@ -79,15 +79,22 @@ def calc_elo_change(a, b, games_a, games_b): # where A is the winner
     BASE = 10
     SCALE_FACTOR = 400 # controls the trend value (thousends)
     
+    def placement_factor(games):
+        # returns a factor when games = 0 of 2.71 (e)
+        # drops off slowly until at games = 10 the multiple is 1
+        
+        return 1 + np.e - np.e ** (0.1 * games)
+    
+    # controls how much a win or loss effects the elo change
+    k_factor_a = 64
+    k_factor_b = 64
+    
     # check for placements
     if games_a < 10:
-        
+        k_factor_a = k_factor_a * placement_factor(games_a)
 
     if games_b < 10:
-
-    # controls how much a win or loss effects the elo change
-    k_factor_a = 48
-    k_factor_b = 48
+        k_factor_b = k_factor_b * placement_factor(games_b)
 
     # calc probablity for each player to win given the ratings
     Ea = 1 / (1 + (BASE ** ((b - a) / SCALE_FACTOR)))

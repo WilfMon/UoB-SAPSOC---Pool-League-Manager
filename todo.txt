@@ -1,5 +1,8 @@
 APPLICATION
 
+!! WORKING !!
+Adding a advanced session view to display winnable and loseable elo from each game
+
 -- important --
 - add data visualization
 - add a configure option to change theme
