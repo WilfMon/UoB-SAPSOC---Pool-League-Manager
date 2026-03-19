@@ -112,7 +112,6 @@ def get_all_players():
     names = [row[0] for row in rows]
     return names
 
-
 # Functions to add objects to table
 def add_semester(semester_name):
     conn = get_connection()
@@ -144,11 +143,20 @@ def add_session(semester_id, session_date):
 def get_elo_change(winner_id, loser_id):
     from utils.utils import calc_elo_change
     
-    winner_elo = get_player_elo(winner_id)
-    loser_elo = get_player_elo(loser_id)
-
-    winner_games_played = get_player_games_played(winner_id)
-    loser_games_played = get_player_games_played(loser_id)
+    # for new players
+    if winner_id == None:
+        winner_elo = 1000.0
+        winner_games_played = 0
+    else:
+        winner_elo = get_player_elo(winner_id)
+        winner_games_played = get_player_games_played(winner_id)
+    
+    if loser_id == None:
+        loser_elo = 1000.0
+        loser_games_played = 0
+    else:
+        loser_elo = get_player_elo(loser_id)
+        loser_games_played = get_player_games_played(loser_id)
     
     return calc_elo_change(winner_elo, loser_elo, winner_games_played, loser_games_played)
     
@@ -223,7 +231,6 @@ def add_game(session_id, player1_id, player2_id, winner_id):
     conn.commit()
     conn.close()
     
-    
 # Functions to get ids
 def get_semester_id_by_name(semester_name):
     conn = get_connection()
@@ -266,5 +273,8 @@ def get_player_id_by_name(player_name):
     result = cursor.fetchone()
     
     conn.close()
+    
+    if result == None:
+        return None
     
     return result[0]  # the player's id

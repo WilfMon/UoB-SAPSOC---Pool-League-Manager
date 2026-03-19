@@ -244,7 +244,7 @@ class MainWindow(QMainWindow):
                     elo_left = QLabel(f"+ {round(left_change)}")
                     elo_right = QLabel(f"+ {round(right_change)}")
                     
-                    elo_left.setStyleSheet()
+                    #elo_left.setStyleSheet()
                     
                     round_container_layout.addWidget(elo_left, n + 2, self.round_number, alignment=Qt.AlignLeft)
                     round_container_layout.addWidget(elo_right, n + 2, self.round_number + 2, alignment=Qt.AlignRight)
@@ -277,7 +277,7 @@ class MainWindow(QMainWindow):
             else:
                 bye_text = QLabel(f"Bye: None")
                 
-            round_container_layout.addWidget(bye_text, n + 2, self.round_number)
+            round_container_layout.addWidget(bye_text, n + 3, self.round_number)
             
             self.round_container_layout.addWidget(round_container)
             

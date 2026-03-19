@@ -161,6 +161,7 @@ class StatisticsBuilder():
         wins = [0]
         elo = [1000.0]
         games_played = [0]
+        winrate = []
         
         for i, game in enumerate(self.player.games_played_info):
             # update games played
@@ -177,25 +178,38 @@ class StatisticsBuilder():
                 wins.append(wins[i])
                 points.append(points[i])
                 elo.append(elo[i] + game[7])
+            
+            # track winrate
+            if games_played[i] == 0:
+                pass
+
+            else:
+                winrate.append(100 * (wins[i] / games_played[i]))
 
             
         fig1, ax1 = plt.subplots()
         
-        ax1.plot(games_played, points, label="Points")
+        ax1.plot(games_played, wins, label="Wins")
 
-        ax1.set_title("")
-        ax1.set_xlabel("")
-        ax1.set_ylabel("")
+        ax1.set_title("Wins Plot")
+        ax1.set_xlabel("Games Played")
+        ax1.set_ylabel("Wins")
         
         ax1.legend()
         
         fig2, ax2 = plt.subplots()
         
-        ax2.plot(games_played, wins, label="Wins")
+        copy = games_played.copy()
+        copy.pop(0)
+        copy.pop(0)
         
-        ax2.set_title("Wins Plot")
+        #copy.append(games_played[-1] + 1)
+        
+        ax2.plot(copy, winrate, label="Winrate")
+        
+        ax2.set_title("Winrate Plot")
         ax2.set_xlabel("Games Played")
-        ax2.set_ylabel("Wins")
+        ax2.set_ylabel("Winrate")
         
         ax2.legend()
         
