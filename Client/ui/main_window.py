@@ -5,7 +5,7 @@ from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 
 from database.db import get_connection
 from database.schema import create_tables
-from database.queries import add_player, get_elo_change, get_session_id_by_name, get_semester_id_by_name, make_member, get_player, get_all_players, add_semester, add_session, add_game, get_player_id_by_name
+from database.queries import add_player, get_elo_change, get_session_id_by_name, get_semester_id_by_name, make_member, get_player, get_all_players_name, add_semester, add_session, add_game, get_player_id_by_name
 
 from PySide6.QtWidgets import QMainWindow, QStackedWidget, QSpacerItem, QComboBox, QListWidgetItem, QSizePolicy, QLabel, QGridLayout,  QFrame, QPushButton, QWidget, QListWidget, QMenu, QApplication, QLineEdit, QScrollArea, QHBoxLayout
 from PySide6.QtGui import QAction, QCursor, QFont
@@ -462,47 +462,44 @@ class MainWindow(QMainWindow):
         self.players_list_session.customContextMenuRequested.connect(show_context_menu)
 
     def on_new_statistics(self):
-        
+
+        def player_recived(player):
+            # init stats class
+            stats_builder = StatisticsBuilder(player)
+            player_obj = stats_builder.player
+            
+            # display stats
+            player_name = QLabel(f"{player_obj.name}:")
+            self.stats_container_layout.addWidget(player_name, 0, 0, alignment=Qt.AlignLeft | Qt.AlignTop)
+            
+            player_points = QLabel(f"Points: {player_obj.points}")
+            player_points.setStyleSheet("font-weight: normal;")
+            self.stats_container_layout.addWidget(player_points, 0, 1, alignment=Qt.AlignLeft | Qt.AlignTop)
+            
+            player_games_played = QLabel(f"Games Played: {int(player_obj.num_games_played)}")
+            player_games_played.setStyleSheet("font-weight: normal;")
+            self.stats_container_layout.addWidget(player_games_played, 0, 2, alignment=Qt.AlignLeft | Qt.AlignTop)
+            
+            player_winrate = QLabel(f"Winrate: {player_obj.winrate}%")
+            player_winrate.setStyleSheet("font-weight: normal;")
+            self.stats_container_layout.addWidget(player_winrate, 0, 3, alignment=Qt.AlignLeft | Qt.AlignTop)
+            
+            player_member = QLabel(f"Member: {player_obj.member_displayable}")
+            player_member.setStyleSheet("font-weight: normal;")
+            self.stats_container_layout.addWidget(player_member, 0, 4, alignment=Qt.AlignLeft | Qt.AlignTop)
+            
+            # display graphs
+            graphs_container = QWidget()
+            graphs_container_layout = QGridLayout(graphs_container)
+            
+            self.stats_container_layout.addWidget(graphs_container, 1, 0, 1, 5)
+            
+            graphs = stats_builder.display_player_stats()
+            for i, fig in enumerate(graphs):
+                canvas = FigureCanvas(fig)
+                graphs_container_layout.addWidget(canvas, 0, i, alignment=Qt.AlignLeft)
+
         def on_enter_player():
-
-            def player_recived(player):
-                # init stats class
-                stats_builder = StatisticsBuilder(player)
-                player_obj = stats_builder.player
-                
-                # display stats
-                player_name = QLabel(f"{player_obj.name}:")
-                self.main_layout.addWidget(player_name, 0, 0, alignment=Qt.AlignLeft | Qt.AlignTop)
-                
-                player_points = QLabel(f"Points: {player_obj.points}")
-                player_points.setStyleSheet("font-weight: normal;")
-                self.main_layout.addWidget(player_points, 0, 1, alignment=Qt.AlignLeft | Qt.AlignTop)
-                
-                player_games_played = QLabel(f"Games Played: {int(player_obj.num_games_played)}")
-                player_games_played.setStyleSheet("font-weight: normal;")
-                self.main_layout.addWidget(player_games_played, 0, 2, alignment=Qt.AlignLeft | Qt.AlignTop)
-                
-                player_winrate = QLabel(f"Winrate: {player_obj.winrate}%")
-                player_winrate.setStyleSheet("font-weight: normal;")
-                self.main_layout.addWidget(player_winrate, 0, 3, alignment=Qt.AlignLeft | Qt.AlignTop)
-                
-                player_member = QLabel(f"Member: {player_obj.member_displayable}")
-                player_member.setStyleSheet("font-weight: normal;")
-                self.main_layout.addWidget(player_member, 0, 4, alignment=Qt.AlignLeft | Qt.AlignTop)
-                
-                # display graphs
-                graphs_container = QWidget()
-                graphs_container_layout = QGridLayout(graphs_container)
-                
-                self.main_layout.addWidget(graphs_container, 1, 0, 1, 5)
-                
-                graphs = stats_builder.display_player_stats()
-                for i, fig in enumerate(graphs):
-                    canvas = FigureCanvas(fig)
-                    graphs_container_layout.addWidget(canvas, 0, i, alignment=Qt.AlignLeft)
-                
-            clear_layout(self.main_layout)
-
             # text box for entering player name
             self.text_box = TextBoxWindow(scale=self.scale)
             self.text_box.open_at_cursor()
@@ -510,6 +507,9 @@ class MainWindow(QMainWindow):
             self.text_box.submitted_player.connect(player_recived)
             
             self.text_box.show()
+
+        def on_selected_player(player):
+            player_recived(player.text())
         
         # set up the visulalise menu
         clear_layout(self.main_layout)
@@ -543,12 +543,19 @@ class MainWindow(QMainWindow):
         self.players_list_statistics = QListWidget()
         self.players_list_statistics.setFixedWidth(250 * self.scale)
         self.players_list_statistics.setFont(self.default_font)
-        self.main_layout.addWidget(self.players_list_statistics, 1, 0, alignment=Qt.AlignLeft)
-        
-        players = get_all_players()
+        self.players_list_statistics.itemClicked.connect(on_selected_player)
+        self.main_layout.addWidget(self.players_list_statistics, 0, 0, alignment=Qt.AlignLeft)
+    
+        players = get_all_players_name()
         print(players)
         for player in players:
             self.players_list_statistics.addItem(player)
+
+        # container for statisitcs
+        self.stats_contanier = QWidget()
+        self.stats_container_layout = QGridLayout(self.stats_container)
+
+        self.main_layout.addWidget(self.stats_contanier, 0, 1)
 
     def on_view_leaderboard(self):
         

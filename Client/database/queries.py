@@ -102,7 +102,7 @@ def get_members():
     names = [row[0] for row in rows]
     return names
 
-def get_all_players():
+def get_all_players_name():
     conn = get_connection()
     cursor = conn.cursor()
 
@@ -111,6 +111,16 @@ def get_all_players():
 
     names = [row[0] for row in rows]
     return names
+
+def get_all_players_id():
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT player_id FROM players")
+    rows = cursor.fetchall()
+
+    ids = [row[0] for row in rows]
+    return ids
 
 # Functions to add objects to table
 def add_semester(semester_name):

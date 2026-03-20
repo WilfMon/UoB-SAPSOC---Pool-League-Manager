@@ -1,11 +1,11 @@
 import csv
 import numpy as np
 
-from database.queries import get_all_players
+from database.queries import get_all_players_name
 
 def check_for_new_players(players):
     
-    db_players = get_all_players()
+    db_players = get_all_players_name()
     
     if (set(players) - set(db_players)):
 

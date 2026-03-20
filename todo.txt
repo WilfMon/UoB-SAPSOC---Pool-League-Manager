@@ -1,7 +1,9 @@
 APPLICATION
 
 -- important --
-- add a way to select players in menus that need it
+- change structure of sessions so that players are uploaded to database on confirm players
+- Adding a advanced session view to display winnable and loseable elo from each game
+
 - add data visualization
 - add a configure option to change theme
 - fix leaderboard spacing
@@ -12,7 +14,6 @@ APPLICATION
 - add lowering weight of games that have already been played so that more games can be player
 - add a way to legacy old players so they dont appear in leaderboard and statistics but still exist
 - adjust elo system
-- Adding a advanced session view to display winnable and loseable elo from each game
 
 WEBSITE
 - add data visualization
