@@ -73,7 +73,7 @@ def get_player_points(player_id, semester_id):
     
     return cursor.fetchone()[0]
 
-def get_player_games_played(player_id):
+def get_player_num_games_played(player_id):
     conn = get_connection()
     cursor = conn.cursor()
     
@@ -149,14 +149,14 @@ def get_elo_change(winner_id, loser_id):
         winner_games_played = 0
     else:
         winner_elo = get_player_elo(winner_id)
-        winner_games_played = get_player_games_played(winner_id)
+        winner_games_played = get_player_num_games_played(winner_id)
     
     if loser_id == None:
         loser_elo = 1000.0
         loser_games_played = 0
     else:
         loser_elo = get_player_elo(loser_id)
-        loser_games_played = get_player_games_played(loser_id)
+        loser_games_played = get_player_num_games_played(loser_id)
     
     return calc_elo_change(winner_elo, loser_elo, winner_games_played, loser_games_played)
     

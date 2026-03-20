@@ -226,6 +226,7 @@ class StatisticsBuilder():
         return (fig1, fig2, fig3)
     
 from database.db import get_connection
+from database.queries import get_player_num_games_played, get_player_id_by_name
     
 class Leaderboard():
     def __init__(self):
@@ -366,6 +367,7 @@ class Leaderboard():
         return in_order    
     
     def alltime_points(self):
+        
         conn = get_connection()
         cursor = conn.cursor()
 
@@ -374,6 +376,13 @@ class Leaderboard():
         """)
     
         players = cursor.fetchall()
+        
+        # to remove players that havent played much from the alltime leaderboard
+        for player in players:
+            num_games = get_player_num_games_played(get_player_id_by_name(player[0]))
+            
+            if num_games < 10:
+                players.remove(player)
         
         # order the leaderboard
         in_order = sorted(players, key=lambda x: x[1], reverse=True)
@@ -389,6 +398,13 @@ class Leaderboard():
         """)
     
         players = cursor.fetchall()
+        
+        # to remove players that havent played much from the alltime leaderboard
+        for player in players:
+            num_games = get_player_num_games_played(get_player_id_by_name(player[0]))
+            
+            if num_games < 10:
+                players.remove(player)
 
         in_order = sorted(players, key=lambda x: x[2], reverse=True)
 
