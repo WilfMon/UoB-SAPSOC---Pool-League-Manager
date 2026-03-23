@@ -376,16 +376,17 @@ class Leaderboard():
         """)
     
         players = cursor.fetchall()
+        players_copy = players.copy()
         
         # to remove players that havent played much from the alltime leaderboard
         for player in players:
             num_games = get_player_num_games_played(get_player_id_by_name(player[0]))
             
             if num_games < 10:
-                players.remove(player)
+                players_copy.remove(player)
         
         # order the leaderboard
-        in_order = sorted(players, key=lambda x: x[1], reverse=True)
+        in_order = sorted(players_copy, key=lambda x: x[1], reverse=True)
 
         return in_order
     

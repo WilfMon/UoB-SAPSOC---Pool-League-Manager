@@ -1,17 +1,17 @@
 APPLICATION
 
 -- important --
-- Adding a advanced session view to display winnable and loseable elo from each game
-    - add a way to track all elements in the round frames
-    - rewrite the code that tracks wins before they are saved to make it cleaner
-    - make the elo change update every time a game is changed
-    - change the layout of the advanced mode
-
 - improve data visualization
 - add a configure option to change theme
 - fix leaderboard spacing
 
 -- less important --
+- Adding a advanced session view to display winnable and loseable elo from each game
+    - make the elo change update every time a game is changed
+        - much harder than expected mabye the best way is to have a table that is not saved
+        until the end that tracks games
+    - change the layout of the advanced mode
+
 - make only sessions of the selected semester show up in leaderboard session combo box
 - add a tournement mode
 - add lowering weight of games that have already been played so that more games can be player

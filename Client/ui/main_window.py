@@ -12,11 +12,11 @@ from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 
 from database.db import get_connection
 from database.schema import create_tables
-from database.queries import add_player, get_elo_change, get_session_id_by_name, get_semester_id_by_name, make_member, get_player, get_all_players_name, add_semester, add_session, add_game, get_player_id_by_name
+from database.queries import add_player, get_elo_change, get_player_elo, get_session_id_by_name, get_semester_id_by_name, make_member, get_player, get_all_players_name, add_semester, add_session, add_game, get_player_id_by_name
 
 from PySide6.QtWidgets import QMainWindow, QStackedWidget, QSpacerItem, QComboBox, QListWidgetItem, QSizePolicy, QLabel, QGridLayout,  QFrame, QPushButton, QWidget, QListWidget, QMenu, QApplication, QLineEdit, QScrollArea, QHBoxLayout
 from PySide6.QtGui import QAction, QCursor, QFont
-from PySide6.QtCore import Qt, QSize, QPoint
+from PySide6.QtCore import Qt, QSize, QPoint, Signal, QTimer
 
 from ui.session_setup_window import SetupWindow
 from ui.text_box_window import TextBoxWindow
@@ -173,6 +173,8 @@ class MainWindow(QMainWindow):
                 
                 self.finished_games = [] # martix
                 
+                self.session_items = [] # matrix
+                
                 self.last_round_players = set(players)
                     
                 self.builder = LeagueRoundBuilder(players)
@@ -229,39 +231,62 @@ class MainWindow(QMainWindow):
                 
         """ Called when the new round menu item is pressed """
         def on_new_round():
+            
+            advanced = False
 
             def update_advanced():
-                pass
+                for round_ in self.session_items:
+                    for n, game_ in enumerate(list(round_)):
+                        if n % 2: # if odd, if elo_item
+                            print(game_[0].property("elo_gain"))
+                            print(game_[1].property("elo_gain"))
+                            
+                            print(game_[0].property("base_elo"))
+                            print(game_[1].property("base_elo"))
+                            
+                for _round in self.finished_games:
+                    for _game in _round:
+                        print(_game)
             
-            def toggle_match_state(button):
+            def toggle_match_state(loc):
                 
-                current_color = button.property("color_state")
-                round_num = button.property("round_num")
-                opp = button.property("opp")
-
-                name = button.text()
+                round_num, index, side = loc
                 
-                # toggle button to green for a win and update the finsihed games tracker to reflect the result
-                if current_color is None:
-                    button.setStyleSheet("background-color: green")
-                    button.setProperty("color_state", "green")
+                left, right = self.session_items[round_num][index]
+                
+                if side == "left":
+                    pressed = left
+                    opp = right
                     
-                    # check if this is an adjustment
-                    if [opp, name] in self.finished_games[round_num]:
-                        self.finished_games[round_num].remove([opp, name])
+                if side == "right":
+                    pressed = right
+                    opp = left
                     
-                    if [name, opp] in self.finished_games[round_num]:
-                        self.finished_games[round_num].remove([name, opp])
-                    
-                    self.finished_games[round_num].append([name, opp])
-                    
-                elif current_color == "green":
-                    button.setStyleSheet("background-color: #1f1f1f")
-                    button.setProperty("color_state", None)
-                    
-                    # check if this is an adjustment
-                    if [name, opp] in self.finished_games[round_num]:
-                        self.finished_games[round_num].remove([name, opp])
+                pressed.setStyleSheet("background-color: green")
+                opp.setStyleSheet("background-color: #5e0202")
+                
+                # adjustment therefore remove the previous game stored
+                if (opp.text(), pressed.text()) in self.finished_games[round_num]:
+                    self.finished_games[round_num].remove((opp.text(), pressed.text()))
+                
+                self.finished_games[round_num].add((pressed.text(), opp.text()))
+                
+                if advanced:
+                    update_advanced()
+                
+            def remove_match_state(loc):
+                round_num, index = loc
+                
+                left, right = self.session_items[round_num][index]
+                
+                left.setStyleSheet("background-color: #1f1f1f") # default colour
+                right.setStyleSheet("background-color: #1f1f1f")
+                
+                self.finished_games[round_num].discard((left.text(), right.text()))
+                self.finished_games[round_num].discard((right.text(), left.text()))
+                
+                if advanced:
+                    update_advanced()
             
             # check for new players
             players = set(get_players_from_qlist(self.players_list_session))
@@ -280,7 +305,8 @@ class MainWindow(QMainWindow):
                 
             # Create new round and the bye (None for no bye)
             round_, bye = self.builder.create_round()
-            self.finished_games.append([])
+            self.finished_games.append(set())
+            self.session_items.append([])
             
             self.last_round_players = players
                         
@@ -302,54 +328,49 @@ class MainWindow(QMainWindow):
             
             # create buttons to display players and track wins
             for n, pair in enumerate(round_):
+                if advanced:
+                    n *= 2 # to give space for advanced view
                 
-                left = QPushButton(pair[0])
-                right = QPushButton(pair[1])
-
+                left = CustomButton(pair[0])
+                right = CustomButton(pair[1])
+                
+                left.normalClick.connect(lambda loc=(self.round_number, n, "left"): toggle_match_state(loc))
+                right.normalClick.connect(lambda loc=(self.round_number, n, "right"): toggle_match_state(loc))
+                
+                left.shiftClick.connect(lambda loc=(self.round_number, n): remove_match_state(loc))
+                right.shiftClick.connect(lambda loc=(self.round_number, n): remove_match_state(loc))
+                
+                # adding buttons to the gui
+                round_container_layout.addWidget(left, n + 1, self.round_number)
+                round_container_layout.addWidget(QLabel("v"), n + 1, self.round_number + 1)
+                round_container_layout.addWidget(right, n + 1, self.round_number + 2)
+                
+                # adding buttons to the tracker
+                self.session_items[self.round_number].append((left, right))
+                
                 # for advanced view
-                if False:
-                    n *= 2
+                if advanced:
                 
                     left_id = get_player_id_by_name(pair[0])
                     right_id = get_player_id_by_name(pair[1])
                     
                     left_change, _ = get_elo_change(left_id, right_id)
                     right_change, _ = get_elo_change(right_id, left_id)
-
-                    left_change = round(left_change)
-                    right_change = round(right_change)
                     
-                    elo_left = QLabel(f"+ {left_change}")
-                    elo_right = QLabel(f"+ {right_change}")
+                    elo_left = QLabel(f"+ {round(left_change)}")
+                    elo_right = QLabel(f"+ {round(right_change)}")
                     
                     elo_left.setProperty("elo_gain", left_change)
                     elo_right.setProperty("elo_gain", right_change)
 
-                    #elo_left.setStyleSheet()
+                    elo_left.setProperty("base_elo", get_player_elo(left_id))
+                    elo_right.setProperty("base_elo", get_player_elo(right_id))
                     
                     round_container_layout.addWidget(elo_left, n + 2, self.round_number, alignment=Qt.AlignLeft)
                     round_container_layout.addWidget(elo_right, n + 2, self.round_number + 2, alignment=Qt.AlignRight)
+
+                    self.session_items[self.round_number].append((elo_left, elo_right))
                 
-                left.clicked.connect(lambda _, b=left: toggle_match_state(b))
-                right.clicked.connect(lambda _, b=right: toggle_match_state(b))
-                
-                # to track what round each button is created in
-                left.setProperty("round_num", self.round_number)
-                right.setProperty("round_num", self.round_number)
-                
-                # keep track of the order of buttons and therefore games
-                left.setProperty("index", n)
-                right.setProperty("index", n)
-                
-                # keep track of opponent
-                left.setProperty("opp", pair[1])
-                right.setProperty("opp", pair[0])
-                
-                # adding buttons to the gui
-                round_container_layout.addWidget(left, n + 1, self.round_number)
-                round_container_layout.addWidget(QLabel("v"), n + 1, self.round_number + 1)
-                round_container_layout.addWidget(right, n + 1, self.round_number + 2)
-            
             if bye != None:
                 bye_text = QLabel(f"Bye: {bye}")
             else:
@@ -369,6 +390,7 @@ class MainWindow(QMainWindow):
         def on_remove_round():
             self.builder.remove_round()
             self.finished_games.pop(-1)
+            self.session_items.pop(-1)
             
             # delete display of last round
             item = self.round_container_layout.takeAt(self.round_number - 1)
@@ -390,7 +412,7 @@ class MainWindow(QMainWindow):
             self.session_id = add_session(semester_id=self.semester_id, session_date=self.date)
             
             for round_ in self.finished_games:
-                for game in round_:
+                for game in list(round_):
                     
                     player1_id = get_player_id_by_name(game[0])
                     player2_id = get_player_id_by_name(game[1])
@@ -880,3 +902,15 @@ class MainWindow(QMainWindow):
         self.scale_window.submitted_player.connect(change_scale)
         
         self.scale_window.show()
+        
+class CustomButton(QPushButton):
+    normalClick = Signal()
+    shiftClick = Signal()
+
+    def mousePressEvent(self, event):
+        if event.modifiers() & Qt.ShiftModifier:
+            self.shiftClick.emit()
+        else:
+            self.normalClick.emit()
+
+        super().mousePressEvent(event)
