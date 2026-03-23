@@ -116,7 +116,7 @@ class MainWindow(QMainWindow):
             for name in players:
                 self.players_list_session.addItem(name)
                 
-            print(f"Added to list: {players}")
+            logger.info(f"listWidget updated")
 
         """ Called when the confirm menu is pressed """
         def on_confirm_players():
@@ -137,7 +137,7 @@ class MainWindow(QMainWindow):
         """ Called when players are confirmed in the confirm window """
         def players_confirmed(yesorno):
             if yesorno:
-                print("Proceeding to rounds")
+                logger.info("Players confirmed, proceeding to rounds")
                 players = get_players_from_qlist(self.players_list_session)
                 
                 # Ui stuff
@@ -183,7 +183,7 @@ class MainWindow(QMainWindow):
                 self.players_confimed = True
                     
             else:
-                print("Not proceeding to rounds")
+                logger.info("Players no confirmed")
         
         """ Called when a player is added through right clicking the listWidget """
         def player_recived(player):
@@ -208,16 +208,16 @@ class MainWindow(QMainWindow):
                     
                     self.confimation_window.show()
             
-                print(f"Added to list: {[player]}")
+                logger.info(f"Added to listWifget: {[player]}")
             else:
-                print(f"Player: {[player]} is already in the list")
+                logger.warning(f"Player: {[player]} is already in the list")
 
         """ Called when the session has started and a player is added through right clicking the listWidget """
         def one_player_confirmed(yesorno, players):
             if yesorno:
                 add_player(players[0])
 
-                print(f"Player confirmed: {players[0]}")
+                logger.info(f"Player confirmed: {players[0]}")
 
             else: # remove the player from the listwidget
                 item = self.players_list_session.findItems(players[0], Qt.MatchExactly)
@@ -225,18 +225,20 @@ class MainWindow(QMainWindow):
                 i = self.players_list_session.row(item[0])
                 self.players_list_session.takeItem(i)
 
-                print(f"Player not confirmed: {players[0]}")
+                logger.info(f"Player not confirmed: {players[0]}")
                 
         """ Called when the new round menu item is pressed """
         def on_new_round():
+
+            def update_advanced():
+                pass
             
             def toggle_match_state(button):
                 
                 current_color = button.property("color_state")
                 round_num = button.property("round_num")
-                index = button.property("index")
                 opp = button.property("opp")
-                
+
                 name = button.text()
                 
                 # toggle button to green for a win and update the finsihed games tracker to reflect the result
@@ -301,6 +303,10 @@ class MainWindow(QMainWindow):
             # create buttons to display players and track wins
             for n, pair in enumerate(round_):
                 
+                left = QPushButton(pair[0])
+                right = QPushButton(pair[1])
+
+                # for advanced view
                 if False:
                     n *= 2
                 
@@ -309,17 +315,20 @@ class MainWindow(QMainWindow):
                     
                     left_change, _ = get_elo_change(left_id, right_id)
                     right_change, _ = get_elo_change(right_id, left_id)
+
+                    left_change = round(left_change)
+                    right_change = round(right_change)
                     
-                    elo_left = QLabel(f"+ {round(left_change)}")
-                    elo_right = QLabel(f"+ {round(right_change)}")
+                    elo_left = QLabel(f"+ {left_change}")
+                    elo_right = QLabel(f"+ {right_change}")
                     
+                    elo_left.setProperty("elo_gain", left_change)
+                    elo_right.setProperty("elo_gain", right_change)
+
                     #elo_left.setStyleSheet()
                     
                     round_container_layout.addWidget(elo_left, n + 2, self.round_number, alignment=Qt.AlignLeft)
                     round_container_layout.addWidget(elo_right, n + 2, self.round_number + 2, alignment=Qt.AlignRight)
-                
-                left = QPushButton(pair[0])
-                right = QPushButton(pair[1])
                 
                 left.clicked.connect(lambda _, b=left: toggle_match_state(b))
                 right.clicked.connect(lambda _, b=right: toggle_match_state(b))
@@ -388,7 +397,7 @@ class MainWindow(QMainWindow):
                     
                     add_game(self.session_id, player1_id, player2_id, winner_id=player1_id)
                 
-            print("Saved Session")
+            logger.info("Saved Session")
             
             on_cancel_session()
             
@@ -566,6 +575,10 @@ class MainWindow(QMainWindow):
 
         self.file_menu = self.menu_bar.addMenu("Statistics")
 
+        self.enter_player = QAction("Enter Player", self)
+        self.enter_player.triggered.connect(on_enter_player)
+        self.file_menu.addAction(self.enter_player)
+
         self.select_session = QAction("Select Session", self)
         self.file_menu.addAction(self.select_session)
 
@@ -589,7 +602,6 @@ class MainWindow(QMainWindow):
         self.main_layout.addWidget(self.players_list_statistics, 0, 0, alignment=Qt.AlignLeft)
     
         players = get_all_players_name()
-        print(players)
         for player in players:
             self.players_list_statistics.addItem(player)
 

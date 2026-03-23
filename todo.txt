@@ -1,9 +1,11 @@
 APPLICATION
 
 -- important --
-- change structure of sessions so that players are uploaded to database on confirm players
 - Adding a advanced session view to display winnable and loseable elo from each game
-- add a check when adding players from the list widget during a round to prevent writing to the database spelling mistakes
+    - add a way to track all elements in the round frames
+    - rewrite the code that tracks wins before they are saved to make it cleaner
+    - make the elo change update every time a game is changed
+    - change the layout of the advanced mode
 
 - improve data visualization
 - add a configure option to change theme

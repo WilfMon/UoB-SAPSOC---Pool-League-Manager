@@ -1,3 +1,10 @@
+import logging
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s -- %(levelname)-8s -- %(name)s -- %(message)s",
+)
+logger = logging.getLogger(__name__)
+
 from PySide6.QtWidgets import QMainWindow, QLineEdit, QSizePolicy , QGridLayout, QWidget, QLabel, QPushButton, QListWidget, QMenu, QListWidgetItem
 from PySide6.QtCore import Qt, QPoint, Signal, QSize
 from PySide6.QtGui import QKeySequence, QShortcut, QFont
@@ -79,13 +86,11 @@ class SetupWindow(QMainWindow):
         # check if text is aleady submitted
         if not item:
 
-            print("Submitted:", text)
-
             text = QListWidgetItem(text)
             self.list_widget.addItem(text)
         
         else: 
-            print(f"{text} already submitted")
+            logger.warning(f"Player: {text} already submitted")
 
     def submit_text_typed(self):
         text = self.input_box.text()
@@ -93,10 +98,8 @@ class SetupWindow(QMainWindow):
         text = clean_name(text)
         
         if text == "":
-            print("--Err-- no valid name submitted")
+            logger.warning("No valid name submitted")
             return
-        
-        print("Submitted:", text)
         
         text = QListWidgetItem(text)
         #text.setSizeHint(QSize(0, 18))
