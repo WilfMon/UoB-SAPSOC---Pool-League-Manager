@@ -1,5 +1,12 @@
 import sys
 
+import logging
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s -- %(levelname)-8s -- %(name)s -- %(message)s",
+)
+logger = logging.getLogger(__name__)
+
 from PySide6.QtGui import QFont
 from PySide6.QtWidgets import QApplication
 from PySide6.QtCore import Qt
@@ -31,4 +38,5 @@ def main():
     sys.exit(app.exec())
 
 if __name__ == "__main__":
+    logger.info(f"Running...")
     main()

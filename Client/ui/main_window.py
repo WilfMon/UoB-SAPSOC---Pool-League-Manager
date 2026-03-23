@@ -1,6 +1,13 @@
 import numpy as np
 import datetime
 
+import logging
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s -- %(levelname)-8s -- %(name)s -- %(message)s",
+)
+logger = logging.getLogger(__name__)
+
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 
 from database.db import get_connection
@@ -64,6 +71,8 @@ class MainWindow(QMainWindow):
             add_semester(sem_name)
             self.semester_id = get_semester_id_by_name(sem_name)
 
+        logger.info(f"Semester set to: {sem_name}")
+
     def create_menu_bar(self):
         self.menu_bar = self.menuBar()  # Built-in QMainWindow menu bar
 
@@ -101,7 +110,15 @@ class MainWindow(QMainWindow):
         view_menu.addAction(self.change_scale)
         
     def on_new_session(self):
-        
+
+        """ Called when a new session is created to show setup window and ask what players to add """
+        def players_recived(players):
+            for name in players:
+                self.players_list_session.addItem(name)
+                
+            print(f"Added to list: {players}")
+
+        """ Called when the confirm menu is pressed """
         def on_confirm_players():
             players = get_players_from_qlist(self.players_list_session)
                     
@@ -110,13 +127,14 @@ class MainWindow(QMainWindow):
                 
                 self.confimation_window = ConfirmationWindow(scale=self.scale, new_players=new_players)
                 
-                self.confimation_window.yesorno.connect(players_confirmed)
+                self.confimation_window.signal_to_send.connect(players_confirmed)
                 
                 self.confimation_window.show()
                 
             else:
                 players_confirmed(True)
-                
+        
+        """ Called when players are confirmed in the confirm window """
         def players_confirmed(yesorno):
             if yesorno:
                 print("Proceeding to rounds")
@@ -145,6 +163,11 @@ class MainWindow(QMainWindow):
                 self.remove_round_action.setDisabled(False)
                 self.save_session_action.setDisabled(False)
                 
+                # write to database players
+                players_ = set(get_players_from_qlist(self.players_list_session))
+                for name in players_:
+                    add_player(name)
+
                 # logic for round pairings            
                 self.round_number = 0
                 
@@ -155,10 +178,56 @@ class MainWindow(QMainWindow):
                 self.builder = LeagueRoundBuilder(players)
                 
                 on_new_round() # creates first round
+
+                # update tracker
+                self.players_confimed = True
                     
             else:
                 print("Not proceeding to rounds")
         
+        """ Called when a player is added through right clicking the listWidget """
+        def player_recived(player):
+            # check if the player is already in the session
+            found = False
+            
+            for i in range(self.players_list_session.count()):
+                item = self.players_list_session.item(i)
+                
+                if item.text() == player:
+                    found = True
+                    break
+            
+            # update list accordingly
+            if not found:
+                self.players_list_session.addItem(player)
+
+                if self.players_confimed: # ask to confirm if the rounds have began
+                    self.confimation_window = ConfirmationWindow(scale=self.scale, new_players=[player])
+                    
+                    self.confimation_window.signal_to_send.connect(one_player_confirmed)
+                    
+                    self.confimation_window.show()
+            
+                print(f"Added to list: {[player]}")
+            else:
+                print(f"Player: {[player]} is already in the list")
+
+        """ Called when the session has started and a player is added through right clicking the listWidget """
+        def one_player_confirmed(yesorno, players):
+            if yesorno:
+                add_player(players[0])
+
+                print(f"Player confirmed: {players[0]}")
+
+            else: # remove the player from the listwidget
+                item = self.players_list_session.findItems(players[0], Qt.MatchExactly)
+
+                i = self.players_list_session.row(item[0])
+                self.players_list_session.takeItem(i)
+
+                print(f"Player not confirmed: {players[0]}")
+                
+        """ Called when the new round menu item is pressed """
         def on_new_round():
             
             def toggle_match_state(button):
@@ -287,6 +356,7 @@ class MainWindow(QMainWindow):
 
             self.round_number += 1
         
+        """ Called when the remove round menu item is pressed """
         def on_remove_round():
             self.builder.remove_round()
             self.finished_games.pop(-1)
@@ -305,14 +375,10 @@ class MainWindow(QMainWindow):
             if self.round_number == 0: # no rounds displayed
                 self.remove_round_action.setDisabled(True)
 
+        """ Called when the save session menu item is pressed """
         def on_save_session():
 
             self.session_id = add_session(semester_id=self.semester_id, session_date=self.date)
-            
-            # write to database
-            players = set(get_players_from_qlist(self.players_list_session))
-            for name in players:
-                add_player(name)
             
             for round_ in self.finished_games:
                 for game in round_:
@@ -326,6 +392,7 @@ class MainWindow(QMainWindow):
             
             on_cancel_session()
             
+        """ Called when the cancel session menu item is pressed """
         def on_cancel_session():
         
             # enable new session creation again
@@ -340,31 +407,7 @@ class MainWindow(QMainWindow):
             # clear finished games
             self.finished_games = []
 
-        def player_recived(player): # called when new players are added
-            # check if the player is already in the session
-            found = False
-            
-            for i in range(self.players_list_session.count()):
-                item = self.players_list_session.item(i)
-                
-                if item.text() == player:
-                    found = True
-                    break
-            
-            # update list accordingly
-            if not found:
-                self.players_list_session.addItem(player)
-            
-                print(f"Added to list: {[player]}")
-            else:
-                print(f"Player: {[player]} is already in the list")
-                
-        def players_recived(players): # only called on the initial submition of players
-            for name in players:
-                self.players_list_session.addItem(name)
-                
-            print(f"Added to list: {players}")
-
+        """ Called when the listWidget is right clicked """
         def show_context_menu(position: QPoint): # menu for adding and removing players from left list
             # Get the item under the cursor
             item = self.players_list_session.itemAt(position)
@@ -396,6 +439,7 @@ class MainWindow(QMainWindow):
                     i = self.players_list_session.row(item)
                     self.players_list_session.takeItem(i)
 
+        """ Called when the view menu item is pressed """
         def on_tab_in():
             # remove menus
             remove_menu(self.menu_bar, "Statistics")
@@ -409,6 +453,9 @@ class MainWindow(QMainWindow):
         self.session_setup_window.show()
         
         on_tab_in()
+
+        # create tracker that tracks when players have been confirmed
+        self.players_confimed = False
         
         # remove menus
         remove_menu(self.menu_bar, "Statistics")
@@ -467,6 +514,8 @@ class MainWindow(QMainWindow):
             # init stats class
             stats_builder = StatisticsBuilder(player)
             player_obj = stats_builder.player
+
+            clear_layout(self.stats_container_layout)
             
             # display stats
             player_name = QLabel(f"{player_obj.name}:")
@@ -489,15 +538,15 @@ class MainWindow(QMainWindow):
             self.stats_container_layout.addWidget(player_member, 0, 4, alignment=Qt.AlignLeft | Qt.AlignTop)
             
             # display graphs
-            graphs_container = QWidget()
+            graphs_container = QFrame()
             graphs_container_layout = QGridLayout(graphs_container)
-            
-            self.stats_container_layout.addWidget(graphs_container, 1, 0, 1, 5)
             
             graphs = stats_builder.display_player_stats()
             for i, fig in enumerate(graphs):
                 canvas = FigureCanvas(fig)
                 graphs_container_layout.addWidget(canvas, 0, i, alignment=Qt.AlignLeft)
+
+            self.stats_container_layout.addWidget(graphs_container, 1, 0, 1, 5)
 
         def on_enter_player():
             # text box for entering player name
@@ -516,13 +565,6 @@ class MainWindow(QMainWindow):
         self.central.setCurrentIndex(0)
 
         self.file_menu = self.menu_bar.addMenu("Statistics")
-
-        self.enter_player = QAction("Enter Player", self)
-        self.enter_player.triggered.connect(on_enter_player)
-        self.file_menu.addAction(self.enter_player)
-
-        self.select_player = QAction("Select Player", self)
-        self.file_menu.addAction(self.select_player)
 
         self.select_session = QAction("Select Session", self)
         self.file_menu.addAction(self.select_session)
@@ -553,7 +595,7 @@ class MainWindow(QMainWindow):
 
         # container for statisitcs
         self.stats_contanier = QWidget()
-        self.stats_container_layout = QGridLayout(self.stats_container)
+        self.stats_container_layout = QGridLayout(self.stats_contanier)
 
         self.main_layout.addWidget(self.stats_contanier, 0, 1)
 

@@ -3,15 +3,16 @@ from PySide6.QtCore import Signal
 from PySide6.QtGui import QFont
 
 class ConfirmationWindow(QDialog):
-    yesorno = Signal(bool)
+    signal_to_send = Signal(bool, list)
     
     def __init__(self, scale, new_players):
         super().__init__()
         self.scale = scale
         self.default_font = QFont("Segoe UI", round(self.scale * 18))
-        
+
         self.setWindowTitle("Confirmation")
-        #self.setModal(True)  # Blocks interaction
+
+        self.new_players = new_players
         
         layout = QVBoxLayout()
         
@@ -43,9 +44,9 @@ class ConfirmationWindow(QDialog):
         self.setLayout(layout)
         
     def accept(self):
-        self.yesorno.emit(True)
+        self.signal_to_send.emit(True, self.new_players)
         super().accept()
     
     def reject(self):
-        self.yesorno.emit(False)
+        self.signal_to_send.emit(False, self.new_players)
         super().reject()
