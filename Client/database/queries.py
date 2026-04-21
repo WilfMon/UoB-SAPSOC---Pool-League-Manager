@@ -39,6 +39,10 @@ def remove_member(name):
     conn.close()
     
 def get_player(name):
+    """
+    Get all infomation about a player from name
+    """
+
     conn = get_connection()
     cursor = conn.cursor()
     
@@ -103,6 +107,10 @@ def get_members():
     return names
 
 def get_all_players_name():
+    """
+    Get all the players names
+    """
+
     conn = get_connection()
     cursor = conn.cursor()
 
@@ -113,6 +121,10 @@ def get_all_players_name():
     return names
 
 def get_all_players_id():
+    """
+    Get all the players ids
+    """
+    
     conn = get_connection()
     cursor = conn.cursor()
 

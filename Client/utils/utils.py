@@ -18,6 +18,7 @@ def check_for_new_players(players):
         return []
     
 def clean_name(name):
+    """ Make a input clean as required by the program """
     
     name = name.lower()
     name = name.title()

@@ -6,6 +6,16 @@ QMainWindow {
     color: #ffffff;
 }
 
+QListWidget {
+    background-color: #2b2b2b;
+    color: #ffffff;
+    border-radius: 3px;
+}
+
+QFrame {
+    border-radius: 3px;
+}
+
 /* Labels */
 QLabel {
     color: #ffffff;

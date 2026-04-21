@@ -3,7 +3,6 @@ APPLICATION
 -- important --
 - improve data visualization
 - add a configure option to change theme
-- fix leaderboard spacing
 
 -- less important --
 - Adding a advanced session view to display winnable and loseable elo from each game
@@ -16,8 +15,26 @@ APPLICATION
 - add a tournement mode
 - add lowering weight of games that have already been played so that more games can be player
 - add a way to legacy old players so they dont appear in leaderboard and statistics but still exist
+
+-- Adjustments --
+- add a average winrate to statistics
+- make statistics pretty
 - adjust elo system
+- fix leaderboard spacing
+
+-- Big Additions --
+- add a tools page that allows editing of the database and uploading of data to the website
+- remove session leaderboard and create a way to visualize changes in the semester and alltime
+  on a per session basis to display to the instagram as highlights of the session
 
 WEBSITE
 - add data visualization
 - add a leaderboard
+
+** KNOWN BUGS **
+- divide by zero error selecting player in statistics who hasn't played games before:
+    Fix:
+    have players with zero games not appear on statistics selection
+
+- Styling
+    - QListWidget will not accept having a border radius

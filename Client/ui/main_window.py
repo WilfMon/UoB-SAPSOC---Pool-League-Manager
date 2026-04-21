@@ -18,13 +18,13 @@ from PySide6.QtWidgets import QMainWindow, QStackedWidget, QSpacerItem, QComboBo
 from PySide6.QtGui import QAction, QCursor, QFont
 from PySide6.QtCore import Qt, QSize, QPoint, Signal, QTimer
 
-from ui.session_setup_window import SetupWindow
+from ui.setup_windows import SetupWindow, TournamentSetupWindow
 from ui.text_box_window import TextBoxWindow
 from ui.confimation_window import ConfirmationWindow
 from ui.update_memberships_window import MembershipWindow
 
 from utils.utils import check_for_new_players, save_scale, remove_menu, get_players_from_qlist, clear_layout
-from utils.utils_classes import LeagueRoundBuilder, StatisticsBuilder, Leaderboard
+from utils.utils_classes import SessionBuilder, TournamentBuilder, StatisticsBuilder, Leaderboard
 
 class MainWindow(QMainWindow):
     def __init__(self, scale=1.0):
@@ -38,15 +38,18 @@ class MainWindow(QMainWindow):
         self.central = QStackedWidget()
         self.setCentralWidget(self.central)
         
-        main = QWidget()
-        session = QWidget()
+        self.main_wid = QWidget()
+        self.session_wid = QWidget()
+        self.tournament_wid = QWidget()
         
-        self.central.addWidget(main)
-        self.central.addWidget(session)
+        self.central.addWidget(self.main_wid)
+        self.central.addWidget(self.session_wid)
+        self.central.addWidget(self.tournament_wid)
         
-        self.main_layout = QGridLayout(main)
-        self.main_session_layout = QGridLayout(session)
-        
+        self.main_layout = QGridLayout(self.main_wid)
+        self.main_session_layout = QGridLayout(self.session_wid)
+        self.main_tournament_layout = QGridLayout(self.tournament_wid)
+
         # Create the menu bar
         self.create_menu_bar()
         
@@ -84,11 +87,11 @@ class MainWindow(QMainWindow):
         self.new_session_action.triggered.connect(self.on_new_session)
         self.file_menu.addAction(self.new_session_action)
 
-        self.new_statistics_action = QAction("New Statisctics", self)
-        self.new_statistics_action.triggered.connect(self.on_new_statistics)
-        self.file_menu.addAction(self.new_statistics_action)
+        self.new_tournament_action = QAction("New Tournament", self)
+        self.new_tournament_action.triggered.connect(self.on_new_tournament)
+        self.file_menu.addAction(self.new_tournament_action)  
         
-        self.view_leaderboard = QAction("View Leaderboard", self)
+        self.view_leaderboard = QAction("Leaderboard", self)
         self.view_leaderboard.triggered.connect(self.on_view_leaderboard)
         self.file_menu.addAction(self.view_leaderboard)
 
@@ -108,7 +111,14 @@ class MainWindow(QMainWindow):
         self.change_scale = QAction("Change Scale", self)
         self.change_scale.triggered.connect(self.on_change_scale)
         view_menu.addAction(self.change_scale)
-        
+
+        # Statistics menu
+        self.statistics_menu = self.menu_bar.addMenu("Statistics")
+
+        self.statistics_action = QAction("Statisctics", self)
+        self.statistics_action.triggered.connect(self.on_new_statistics)
+        self.statistics_menu.addAction(self.statistics_action)
+
     def on_new_session(self):
 
         """ Called when a new session is created to show setup window and ask what players to add """
@@ -177,7 +187,7 @@ class MainWindow(QMainWindow):
                 
                 self.last_round_players = set(players)
                     
-                self.builder = LeagueRoundBuilder(players)
+                self.builder = SessionBuilder(players)
                 
                 on_new_round() # creates first round
 
@@ -471,11 +481,8 @@ class MainWindow(QMainWindow):
                     self.players_list_session.takeItem(i)
 
         """ Called when the view menu item is pressed """
-        def on_tab_in():
-            # remove menus
-            remove_menu(self.menu_bar, "Statistics")
-            
-            self.central.setCurrentIndex(1)
+        def on_tab_in():            
+            self.central.setCurrentWidget(self.session_wid)
 
         # logic for new session window
         self.session_setup_window = SetupWindow(scale=self.scale)
@@ -487,9 +494,6 @@ class MainWindow(QMainWindow):
 
         # create tracker that tracks when players have been confirmed
         self.players_confimed = False
-        
-        # remove menus
-        remove_menu(self.menu_bar, "Statistics")
         
         # Session menu
         self.file_menu = self.menu_bar.addMenu("Session")
@@ -538,6 +542,39 @@ class MainWindow(QMainWindow):
         
         self.players_list_session.setContextMenuPolicy(Qt.CustomContextMenu)
         self.players_list_session.customContextMenuRequested.connect(show_context_menu)
+
+    def on_new_tournament(self):
+
+        """ Called when a new tournament is created to show setup window and ask what players to add """
+        def players_recived(players, settings):
+
+            self.tournament_builder = TournamentBuilder(players, settings)
+            init_tournament()
+
+        """ Called when the view menu item is pressed """
+        def on_tab_in():
+            self.central.setCurrentWidget(self.tournament_wid)
+
+        """ Called when tournament is begun """
+        def init_tournament():
+            initial_round = self.tournament_builder.create_initial_pairings()
+
+            print(initial_round)
+
+        # logic for new tournament window
+        self.tournament_setup_window = TournamentSetupWindow(scale=self.scale)
+        self.tournament_setup_window.signal.connect(players_recived)
+        
+        self.tournament_setup_window.show()
+
+        # Session menu
+        self.file_menu = self.menu_bar.addMenu("Tournament")
+        
+        self.new_tournament_action.setDisabled(True)
+
+        self.tab_in_action = QAction("View", self)
+        self.tab_in_action.triggered.connect(on_tab_in)
+        self.file_menu.addAction(self.tab_in_action)
 
     def on_new_statistics(self):
 
@@ -595,25 +632,27 @@ class MainWindow(QMainWindow):
         clear_layout(self.main_layout)
         self.central.setCurrentIndex(0)
 
-        self.file_menu = self.menu_bar.addMenu("Statistics")
+        self.statistics_action.setDisabled(True)
+
+        self.statistics_menu.addSeparator()
 
         self.enter_player = QAction("Enter Player", self)
         self.enter_player.triggered.connect(on_enter_player)
-        self.file_menu.addAction(self.enter_player)
+        self.statistics_menu.addAction(self.enter_player)
 
         self.select_session = QAction("Select Session", self)
-        self.file_menu.addAction(self.select_session)
+        self.statistics_menu.addAction(self.select_session)
 
         self.select_sememster = QAction("Select Semester", self)
-        self.file_menu.addAction(self.select_sememster)
+        self.statistics_menu.addAction(self.select_sememster)
 
         self.select_alltime = QAction("Select Alltime", self)
-        self.file_menu.addAction(self.select_alltime)
+        self.statistics_menu.addAction(self.select_alltime)
 
-        self.file_menu.addSeparator()
+        self.statistics_menu.addSeparator()
 
         self.advanced = QAction("Advanced", self)
-        self.file_menu.addAction(self.advanced)
+        self.statistics_menu.addAction(self.advanced)
         self.advanced.setDisabled(True)
         
         # left side list of players

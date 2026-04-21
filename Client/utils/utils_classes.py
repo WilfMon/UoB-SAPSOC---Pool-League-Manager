@@ -4,7 +4,7 @@ import numpy as np
 
 from networkx import max_weight_matching
 
-class LeagueRoundBuilder():
+class SessionBuilder():
     def __init__(self, players):
 
         self.players = list(players)
@@ -140,6 +140,46 @@ class LeagueRoundBuilder():
             if self.G.has_edge(u, v): # check if the edge exists and if it doesn't don't attempt to remove
                 self.G.remove_edge(u, v)
 
+from database.queries import get_player
+
+class TournamentBuilder():
+    def __init__(self, players, settings):
+
+        self.players_names = players
+        self.settings = settings
+
+        # create graph of players with no connections
+        self.G = nx.Graph()
+        self.G.add_nodes_from(self.players_names)
+
+        self.players = []
+
+        for player in self.players_names:
+            info = get_player(player)
+            
+            self.players.append({"name": player, "elo": info[0][6]})
+
+        # apply settings
+        
+
+    def create_initial_pairings(self):
+        """ Returns a set of the pairings of players, elo matched """
+
+        def weight(p1, p2):
+            diff = abs(p1["elo"] - p2["elo"])
+            return 1 / (1 + diff)
+
+        for a, b in itertools.combinations(self.players, 2): # add connections between players
+            
+            w = weight(a, b)
+
+            self.G.add_edge(a["name"], b["name"], weight=w)
+
+        round_ =  max_weight_matching(self.G, maxcardinality=True)
+
+        return round_
+
+
 import matplotlib.pyplot as plt
 
 from database.queries import get_player, get_player_games
@@ -156,6 +196,9 @@ class StatisticsBuilder():
 
     def display_player_stats(self):
         
+        # cleanup figures
+        plt.close("all")
+
         # visual data
         points = [0]
         wins = [0]
@@ -203,13 +246,13 @@ class StatisticsBuilder():
         copy.pop(0)
         copy.pop(0)
         
-        #copy.append(games_played[-1] + 1)
-        
         ax2.plot(copy, winrate, label="Winrate")
         
         ax2.set_title("Winrate Plot")
         ax2.set_xlabel("Games Played")
         ax2.set_ylabel("Winrate")
+
+        ax2.set_ybound(0, 100)
         
         ax2.legend()
         
