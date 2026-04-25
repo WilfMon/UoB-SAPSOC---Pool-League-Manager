@@ -160,18 +160,36 @@ class TournamentBuilder():
             self.players.append({"name": player, "elo": info[0][6]})
 
         # apply settings
-        
+        print(settings)
+
+        # define weight function as elo based
+        if self.settings["seed"] == "Elo":
+            def weight(p1, p2):
+                diff = abs(p1["elo"] - p2["elo"])
+
+                rng = np.random.default_rng()
+                ran_factor = (rng.random() - 0.5) * (self.settings["ran"] / 10)
+
+                return 1 / (1 + (diff + ran_factor))
+
+        # define weight function as semester leaderboard based
+        if self.settings["seed"] == "Semester Leaderboard":
+            pass
+
+        # define weight function as random
+        if self.settings["ran"] == 100:
+            def weight(p1, p2):
+                rng = np.random.default_rng()
+                return rng.random() * 100
+
+        self.weight_func = weight
 
     def create_initial_pairings(self):
-        """ Returns a set of the pairings of players, elo matched """
-
-        def weight(p1, p2):
-            diff = abs(p1["elo"] - p2["elo"])
-            return 1 / (1 + diff)
+        """ Returns a set of the pairings of players """
 
         for a, b in itertools.combinations(self.players, 2): # add connections between players
             
-            w = weight(a, b)
+            w = self.weight_func(a, b)
 
             self.G.add_edge(a["name"], b["name"], weight=w)
 
@@ -192,6 +210,7 @@ class StatisticsBuilder():
         player_games = get_player_games(player_name)
 
         # make an object that holds all the info on the player
+        print(player_info)
         self.player = PlayerObj(player_info, player_games)
 
     def display_player_stats(self):

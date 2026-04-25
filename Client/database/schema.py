@@ -1,7 +1,7 @@
-from database.db import get_connection
+from .db import get_connection
 
-def create_tables():
-    conn = get_connection()
+def create_tables(dest="league.db"):
+    conn = get_connection(dest)
     cursor = conn.cursor()
     
     cursor.execute("""

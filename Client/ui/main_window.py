@@ -549,7 +549,11 @@ class MainWindow(QMainWindow):
         def players_recived(players, settings):
 
             self.tournament_builder = TournamentBuilder(players, settings)
-            init_tournament()
+            
+            if settings["groups"] == None:
+                init_tournament()
+            else:
+                init_groups()
 
         """ Called when the view menu item is pressed """
         def on_tab_in():
@@ -560,6 +564,10 @@ class MainWindow(QMainWindow):
             initial_round = self.tournament_builder.create_initial_pairings()
 
             print(initial_round)
+
+        """ Called when a group stage is begun """
+        def init_groups():
+            pass
 
         # logic for new tournament window
         self.tournament_setup_window = TournamentSetupWindow(scale=self.scale)
@@ -600,10 +608,14 @@ class MainWindow(QMainWindow):
             player_winrate = QLabel(f"Winrate: {player_obj.winrate}%")
             player_winrate.setStyleSheet("font-weight: normal;")
             self.stats_container_layout.addWidget(player_winrate, 0, 3, alignment=Qt.AlignLeft | Qt.AlignTop)
+
+            player_elo = QLabel(f"Elo: {player_obj.elo}")
+            player_elo.setStyleSheet("font-weight: normal;")
+            self.stats_container_layout.addWidget(player_elo, 0, 4, alignment=Qt.AlignLeft | Qt.AlignTop)
             
             player_member = QLabel(f"Member: {player_obj.member_displayable}")
             player_member.setStyleSheet("font-weight: normal;")
-            self.stats_container_layout.addWidget(player_member, 0, 4, alignment=Qt.AlignLeft | Qt.AlignTop)
+            self.stats_container_layout.addWidget(player_member, 0, 5, alignment=Qt.AlignLeft | Qt.AlignTop)
             
             # display graphs
             graphs_container = QFrame()

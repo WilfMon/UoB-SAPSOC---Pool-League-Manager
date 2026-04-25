@@ -9,6 +9,7 @@ class PlayerObj():
         self.points = round(info[3], 2)
         self.num_games_played = info[4]
         self.wins = info[5]
+        self.elo = info[6]
         
         self.games_played_info = games_array
         

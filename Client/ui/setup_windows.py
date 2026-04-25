@@ -5,7 +5,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-from PySide6.QtWidgets import QMainWindow, QFrame, QLineEdit, QSlider, QComboBox, QSizePolicy , QGridLayout, QVBoxLayout, QWidget, QLabel, QPushButton, QListWidget, QMenu, QListWidgetItem
+from PySide6.QtWidgets import QMainWindow, QFrame, QLineEdit, QScrollArea, QSlider, QComboBox, QSizePolicy , QGridLayout, QVBoxLayout, QWidget, QLabel, QPushButton, QListWidget, QMenu, QListWidgetItem
 from PySide6.QtCore import Qt, QPoint, Signal
 from PySide6.QtGui import QKeySequence, QShortcut, QFont
 
@@ -151,13 +151,20 @@ class TournamentSetupWindow(SetupWindow):
         self.layout_.addWidget(label_text_box, 0, 2)
 
         # frame
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+
         frame = QFrame()
         f_layout = QVBoxLayout(frame)
+
+        # set scroll area
+        scroll.setWidget(frame)
 
         f_layout.setContentsMargins(0, 0, 0, 0)
         f_layout.setAlignment(Qt.AlignTop)
 
-        self.layout_.addWidget(frame, 1, 2, 3, 1)
+        self.layout_.addWidget(scroll, 1, 2, 3, 1)
 
         # title
         title_frame = QFrame()
@@ -198,12 +205,85 @@ class TournamentSetupWindow(SetupWindow):
         self.randomness_slider.setMaximum(100)
         self.randomness_slider.setValue(20)
 
+        elo_count_label = QLabel("Games count towards player elo:")
+        elo_count_label.setStyleSheet("font-size: 15px;font-weight: 500;")
+        self.elo_count_button = QPushButton("No")
+        self.elo_count_button.setStyleSheet("background-color: red")
+
+        def toggle():
+            if self.elo_count_button.text() == "No":
+                self.elo_count_button.setText("Yes")
+                self.elo_count_button.setStyleSheet("background-color: green")
+            else:
+                self.elo_count_button.setText("No")
+                self.elo_count_button.setStyleSheet("background-color: red")
+
+        self.elo_count_button.clicked.connect(toggle)
+
         seed_frame_layout.addWidget(seed_label)
         seed_frame_layout.addWidget(self.seeding_setting_box)
 
         seed_frame_layout.addWidget(ran_label)
         seed_frame_layout.addWidget(self.randomness_slider)
+
+        seed_frame_layout.addWidget(elo_count_label)
+        seed_frame_layout.addWidget(self.elo_count_button)
         f_layout.addWidget(seed_frame)
+
+        # match format selector
+        match_frame = QFrame()
+        match_frame.setStyleSheet("background-color: #2b2b2b;")
+        self.match_frame_layout = QVBoxLayout(match_frame)
+
+        match_format_label = QLabel("Match Format:")
+        match_format_label.setStyleSheet("font-size: 15px;font-weight: 500;")
+
+        match_format_label_n = QLabel("Normal Games:")
+        match_format_label_n.setStyleSheet("font-size: 13px;font-weight: 500;")
+        self.match_format_box_n = QComboBox()
+        self.match_format_box_n.addItem("Best of one", 1)
+        self.match_format_box_n.addItem("Race to 3", 3)
+        self.match_format_box_n.addItem("Race to 4", 4)
+        self.match_format_box_n.addItem("Race to 5", 5)
+        self.match_format_box_n.addItem("Race to 7", 7)
+
+        match_format_label_q = QLabel("Quater-final Games:")
+        match_format_label_q.setStyleSheet("font-size: 13px;font-weight: 500;")
+        self.match_format_box_q = QComboBox()
+        self.match_format_box_q.addItem("Best of one", 1)
+        self.match_format_box_q.addItem("Race to 3", 3)
+        self.match_format_box_q.addItem("Race to 4", 4)
+        self.match_format_box_q.addItem("Race to 5", 5)
+        self.match_format_box_q.addItem("Race to 7", 7)
+
+        match_format_label_s = QLabel("Semi-final Games:")
+        match_format_label_s.setStyleSheet("font-size: 13px;font-weight: 500;")
+        self.match_format_box_s = QComboBox()
+        self.match_format_box_s.addItem("Best of one", 1)
+        self.match_format_box_s.addItem("Race to 3", 3)
+        self.match_format_box_s.addItem("Race to 4", 4)
+        self.match_format_box_s.addItem("Race to 5", 5)
+        self.match_format_box_s.addItem("Race to 7", 7)
+
+        match_format_label_f = QLabel("Final Games:")
+        match_format_label_f.setStyleSheet("font-size: 13px;font-weight: 500;")
+        self.match_format_box_f = QComboBox()
+        self.match_format_box_f.addItem("Best of one", 1)
+        self.match_format_box_f.addItem("Race to 3", 3)
+        self.match_format_box_f.addItem("Race to 4", 4)
+        self.match_format_box_f.addItem("Race to 5", 5)
+        self.match_format_box_f.addItem("Race to 7", 7)
+
+        self.match_frame_layout.addWidget(match_format_label)
+        self.match_frame_layout.addWidget(match_format_label_n)
+        self.match_frame_layout.addWidget(self.match_format_box_n)
+        self.match_frame_layout.addWidget(match_format_label_q)
+        self.match_frame_layout.addWidget(self.match_format_box_q)
+        self.match_frame_layout.addWidget(match_format_label_s)
+        self.match_frame_layout.addWidget(self.match_format_box_s)
+        self.match_frame_layout.addWidget(match_format_label_f)
+        self.match_frame_layout.addWidget(self.match_format_box_f)
+        f_layout.addWidget(match_frame)
 
         # Group stage selector
         group_frame = QFrame()
@@ -221,6 +301,14 @@ class TournamentSetupWindow(SetupWindow):
         self.group_num_label.setStyleSheet("font-size: 15px;font-weight: 500;")
         self.group_num_setting_box = QComboBox()
 
+        # group format
+        self.group_form_label = QLabel("Group Format:")
+        self.group_form_label.setStyleSheet("font-size: 15px;font-weight: 500;")
+        self.group_form_setting_box = QComboBox()
+        self.group_form_setting_box.addItem("Half and Half", 0) # top half go to champs, bottom half go to shield, rounds down when odd
+        self.group_form_setting_box.addItem("Top Half", 1) # top half go to champs, rounds down when odd
+        self.group_form_setting_box.addItem("Top Three", 2) # top three go to champs
+
         self.group_frame_layout.addWidget(groups_yesorno_label, 0, 0)
         self.group_frame_layout.addWidget(self.groups_button, 0, 1)
         f_layout.addWidget(group_frame)
@@ -233,13 +321,19 @@ class TournamentSetupWindow(SetupWindow):
             self.refresh_group_num_setting_box()
 
             self.group_frame_layout.addWidget(self.group_num_label, 1, 0)
-            self.group_frame_layout.addWidget(self.group_num_setting_box, 2, 0, 1, 2)
+            self.group_frame_layout.addWidget(self.group_num_setting_box, 2, 0)
+
+            self.group_frame_layout.addWidget(self.group_form_label, 3, 0)
+            self.group_frame_layout.addWidget(self.group_form_setting_box, 4, 0)
         else:
             self.groups_button.setText("No")
             self.groups_button.setStyleSheet("background-color: red")
 
             self.group_frame_layout.removeWidget(self.group_num_label)
             self.group_frame_layout.removeWidget(self.group_num_setting_box)
+
+            self.group_frame_layout.removeWidget(self.group_form_label)
+            self.group_frame_layout.removeWidget(self.group_form_setting_box)
 
     def refresh_group_num_setting_box(self, carry=0):
             num_players = self.selected_players_list.count() + carry
@@ -267,11 +361,21 @@ class TournamentSetupWindow(SetupWindow):
 
         settings["title"] = self.title_text_box.text()
         settings["seed"] = self.seeding_setting_box.currentText()
-        settings["ran"] = self.randomness_slider.value() / 100
+        settings["ran"] = self.randomness_slider.value()
+        settings["elo_count"] = self.elo_count_button.text()
+
+        settings["match_format"] = dict()
+        settings["match_format"]["normal"] = self.match_format_box_n.currentData()
+        settings["match_format"]["qfinal"] = self.match_format_box_q.currentData()
+        settings["match_format"]["sfinal"] = self.match_format_box_s.currentData()
+        settings["match_format"]["final"] = self.match_format_box_f.currentData()
+
         settings["num_players"] = self.selected_players_list.count()
 
         if self.groups_button.text() == "Yes":
-            settings["groups"] = self.group_num_setting_box.currentData()
+            settings["groups"] = dict()
+            settings["groups"]["num"] = self.group_num_setting_box.currentData()
+            settings["groups"]["form"] = self.group_form_setting_box.currentData()
         else:
             settings["groups"] = None
 
