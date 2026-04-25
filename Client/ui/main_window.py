@@ -195,7 +195,7 @@ class MainWindow(QMainWindow):
                 self.players_confimed = True
                     
             else:
-                logger.info("Players no confirmed")
+                logger.info("Players not confirmed")
         
         """ Called when a player is added through right clicking the listWidget """
         def player_recived(player):
@@ -550,16 +550,45 @@ class MainWindow(QMainWindow):
 
             self.tournament_builder = TournamentBuilder(players, settings)
             
-            if settings["groups"] == None:
-                init_tournament()
+            self.tournament_settings = settings
+            self.tournament_players = players
+            
+            self.tournament_builder.define_weight() # calculates seed order
+                
+            # add players to the list
+            for i, player in enumerate(self.tournament_builder.seed_order):
+                self.players_list_tournament.addItem(f"{i + 1} - {player["name"]}")
+                
+            self.players_list_title.setText(f"Player seeding: ({settings["seed"]})")
+
+        """ Called when the confirm menu is pressed """
+        def on_confirm_players():      
+            new_players = check_for_new_players(self.tournament_players)
+            if new_players != []:
+                
+                self.confimation_window = ConfirmationWindow(scale=self.scale, new_players=new_players)
+                
+                self.confimation_window.signal_to_send.connect(players_confirmed)
+                
+                self.confimation_window.show()
+                
             else:
-                init_groups()
+                players_confirmed(True)
+                
+        """ Called when players are confirmed in the confirm window """
+        def players_confirmed(yesorno):
+            if yesorno:
+                logger.info("Players confirmed, proceeding")
+                
+                if self.tournament_settings["groups"] == None:
+                    init_tournament()
+                else:
+                    init_groups()
+                
+            else:
+                logger.info("Players not confirmed")
 
-        """ Called when the view menu item is pressed """
-        def on_tab_in():
-            self.central.setCurrentWidget(self.tournament_wid)
-
-        """ Called when tournament is begun """
+        """ Called when a tournament is begun """
         def init_tournament():
             initial_round = self.tournament_builder.create_initial_pairings()
 
@@ -568,12 +597,18 @@ class MainWindow(QMainWindow):
         """ Called when a group stage is begun """
         def init_groups():
             pass
+        
+        """ Called when the view menu item is pressed """
+        def on_tab_in():
+            self.central.setCurrentWidget(self.tournament_wid)
 
         # logic for new tournament window
         self.tournament_setup_window = TournamentSetupWindow(scale=self.scale)
         self.tournament_setup_window.signal.connect(players_recived)
         
         self.tournament_setup_window.show()
+        
+        on_tab_in()
 
         # Session menu
         self.file_menu = self.menu_bar.addMenu("Tournament")
@@ -583,6 +618,21 @@ class MainWindow(QMainWindow):
         self.tab_in_action = QAction("View", self)
         self.tab_in_action.triggered.connect(on_tab_in)
         self.file_menu.addAction(self.tab_in_action)
+        
+        self.file_menu.addSeparator()
+        
+        self.confirm_players_action = QAction("Confirm", self)
+        self.confirm_players_action.triggered.connect(on_confirm_players)
+        self.file_menu.addAction(self.confirm_players_action)
+        
+        # logic for main window on new session
+        self.players_list_title = QLabel("Player seeding:")
+        self.main_tournament_layout.addWidget(self.players_list_title, 0, 0, alignment=Qt.AlignLeft)
+        
+        self.players_list_tournament = QListWidget()
+        self.players_list_tournament.setFixedWidth(250 * self.scale)
+        self.players_list_tournament.setFont(self.default_font)
+        self.main_tournament_layout.addWidget(self.players_list_tournament, 1, 0, alignment=Qt.AlignLeft)
 
     def on_new_statistics(self):
 

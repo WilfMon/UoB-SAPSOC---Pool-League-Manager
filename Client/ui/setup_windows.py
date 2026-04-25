@@ -77,7 +77,7 @@ class SetupWindow(QMainWindow):
         self.layout_.addWidget(self.button_accept, 4, 1, alignment=Qt.AlignRight)
 
     def on_populate_list(self): # for debugging
-        players = ["Wilf Moncrieff", "Robert Fry", "Jak Dables", "Wilf Howard", "Dylan Nolan", "Will Vickers", "Paaras Padhair", "Elijah Brook", "Malachi Bielby", "George Worsley", "Evan Morris", "Osain Drake"]
+        players = ["Wilf Moncrieff", "Robert Fry", "Jak Dables", "Wilf Howard", "Dylan Nolan", "Will Vickers", "Paaras Padhiar", "Elijah Brook", "Malachi Bielby", "George Worsley", "Evan Morris", "Osian Drake"]
         
         for player in players:
             self.selected_players_list.addItem(QListWidgetItem(player))

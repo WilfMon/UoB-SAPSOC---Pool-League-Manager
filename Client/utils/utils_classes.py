@@ -159,9 +159,9 @@ class TournamentBuilder():
             
             self.players.append({"name": player, "elo": info[0][6]})
 
-        # apply settings
-        print(settings)
-
+        #print(settings)
+        
+    def define_weight(self):
         # define weight function as elo based
         if self.settings["seed"] == "Elo":
             def weight(p1, p2):
@@ -171,6 +171,9 @@ class TournamentBuilder():
                 ran_factor = (rng.random() - 0.5) * (self.settings["ran"] / 10)
 
                 return 1 / (1 + (diff + ran_factor))
+            
+            # order a list of seed
+            self.seed_order = sorted(self.players, key=lambda x: x["elo"], reverse=True)
 
         # define weight function as semester leaderboard based
         if self.settings["seed"] == "Semester Leaderboard":
