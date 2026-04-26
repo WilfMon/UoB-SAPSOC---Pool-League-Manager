@@ -48,7 +48,7 @@ class MainWindow(QMainWindow):
         
         self.main_layout = QGridLayout(self.main_wid)
         self.main_session_layout = QGridLayout(self.session_wid)
-        self.main_tournament_layout = QGridLayout(self.tournament_wid)
+        self.main_tournament_layout = QGridLayout(self.tournament_wid, alignment=Qt.AlignLeft)
 
         # Create the menu bar
         self.create_menu_bar()
@@ -545,7 +545,7 @@ class MainWindow(QMainWindow):
 
     def on_new_tournament(self):
 
-        """ Called when a new tournament is created to show setup window and ask what players to add """
+        """ Called when a new tournament is created """
         def players_recived(players, settings):
 
             self.tournament_builder = TournamentBuilder(players, settings)
@@ -580,8 +580,10 @@ class MainWindow(QMainWindow):
             if yesorno:
                 logger.info("Players confirmed, proceeding")
                 
+                self.confirm_players_action.setDisabled(True)
+                
                 if self.tournament_settings["groups"] == None:
-                    init_tournament()
+                    init_tournament(self.tournament_builder.player_names)
                 else:
                     init_groups()
                 
@@ -589,10 +591,60 @@ class MainWindow(QMainWindow):
                 logger.info("Players not confirmed")
 
         """ Called when a tournament is begun """
-        def init_tournament():
-            initial_round = self.tournament_builder.create_initial_pairings()
+        def init_tournament(players):
+            initial_round = self.tournament_builder.start_tournament(players)
 
             print(initial_round)
+            
+            crushed_round = crush_round(initial_round)
+            
+            # set up frame
+            scroll = QScrollArea()
+            scroll.setWidgetResizable(True)
+            
+            self.tournament_body = QFrame()
+            self.tournament_body_layout = QGridLayout(self.tournament_body)
+            
+            scroll.setWidget(self.tournament_body)
+            
+            # display tournament            
+            for i in range(self.tournament_builder.num_rounds, 0, -1):
+                
+                # vars to handle spaces
+                tick = False
+                j_acc = 0
+                
+                for j in range(0, 2 ** i):
+                    
+                    nj = j + j_acc
+                    
+                    if i == self.tournament_builder.num_rounds:
+                        button = CustomButton(crushed_round[j])
+                    else:
+                        button = CustomButton("None")
+                    
+                    self.tournament_body_layout.addWidget(button, nj, abs(i - self.tournament_builder.num_rounds))
+                    
+                    # logic to add spaces between each game
+                    if tick:
+                        space = QFrame()
+                        space.setFixedHeight(50)
+                        
+                        self.tournament_body_layout.addWidget(space, nj + 1, abs(i - self.tournament_builder.num_rounds))
+                        j_acc += 1
+                        tick = False
+                    else:
+                        tick = True
+                    
+            self.main_tournament_layout.addWidget(scroll, 1, 1)
+            
+        def crush_round(round):
+            n_round = []
+            
+            for match in round:
+                n_round.append(match[0])
+                n_round.append(match[1])
+            return n_round
 
         """ Called when a group stage is begun """
         def init_groups():

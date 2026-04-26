@@ -351,6 +351,12 @@ class TournamentSetupWindow(SetupWindow):
         self.refresh_group_num_setting_box(1)
 
         super().submit_text_selected(player)
+        
+    def on_populate_list(self): # for debugging
+        players = ["Wilf Moncrieff", "Robert Fry", "Jak Dables", "Wilf Howard", "Dylan Nolan", "Will Vickers", "Paaras Padhiar", "Elijah Brook", "Malachi Bielby", "George Worsley", "Evan Morris", "Osian Drake", "Henry Myatt", "Theo Mason", "Otto Ashton", "Andrew Collins"]
+        
+        for player in players:
+            self.selected_players_list.addItem(QListWidgetItem(player))
 
     def accept(self): # called when accept button is called
         # checks

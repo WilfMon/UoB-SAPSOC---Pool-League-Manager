@@ -28,10 +28,10 @@ def main():
     app.setFont(QFont("Segoe UI", round(scale_factor * 18)))
 
     # Load dark theme
-    #qss_file = Path(__file__).parent / "resources" / "styles" / "dark.qss"
-    #if qss_file.exists():
-    #    with open(qss_file, "r") as f:
-    #        app.setStyleSheet(f.read())
+    qss_file = Path(__file__).parent / "resources" / "styles" / "dark.qss"
+    if qss_file.exists():
+        with open(qss_file, "r") as f:
+            app.setStyleSheet(f.read())
     
     window = MainWindow(scale=scale_factor)
     window.show()

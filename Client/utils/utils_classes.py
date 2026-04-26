@@ -145,21 +145,25 @@ from database.queries import get_player
 class TournamentBuilder():
     def __init__(self, players, settings):
 
-        self.players_names = players
+        self.player_names = players
         self.settings = settings
+        
+        self.rounds = []
 
         # create graph of players with no connections
         self.G = nx.Graph()
-        self.G.add_nodes_from(self.players_names)
+        self.G.add_nodes_from(self.player_names)
 
+        self.get_players_info(self.player_names)
+        
+    def get_players_info(self, player_names):
+        """ From the list of player names, create a list of dicts of name and elo """
         self.players = []
 
-        for player in self.players_names:
+        for player in player_names:
             info = get_player(player)
             
             self.players.append({"name": player, "elo": info[0][6]})
-
-        #print(settings)
         
     def define_weight(self):
         # define weight function as elo based
@@ -187,16 +191,27 @@ class TournamentBuilder():
 
         self.weight_func = weight
 
-    def create_initial_pairings(self):
+    def start_tournament(self, player_names: list[str]) -> list[tuple[str, str]]:
         """ Returns a set of the pairings of players """
+        
+        # calculate amount of rounds
+        for n in range(1, self.settings["num_players"] + 1):
+            if self.settings["num_players"] // (2 ** n) == 1:
+                break
+            
+        self.num_rounds = n
+        
+        # round calculation
+        self.get_players_info(player_names)
 
         for a, b in itertools.combinations(self.players, 2): # add connections between players
             
             w = self.weight_func(a, b)
-
             self.G.add_edge(a["name"], b["name"], weight=w)
 
-        round_ =  max_weight_matching(self.G, maxcardinality=True)
+        round_ =  list(max_weight_matching(self.G, maxcardinality=True))
+        
+        self.rounds.append(round_)
 
         return round_
 
