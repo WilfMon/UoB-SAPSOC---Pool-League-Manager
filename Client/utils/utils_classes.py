@@ -1,6 +1,7 @@
 import networkx as nx
 import itertools
 import numpy as np
+import random
 
 from networkx import max_weight_matching
 
@@ -148,6 +149,8 @@ class TournamentBuilder():
         self.player_names = players
         self.settings = settings
         
+        self.random_amount = 2 # higher = more random
+        
         self.rounds = []
 
         # create graph of players with no connections
@@ -155,6 +158,8 @@ class TournamentBuilder():
         self.G.add_nodes_from(self.player_names)
 
         self.get_players_info(self.player_names)
+        
+        print(settings)
         
     def get_players_info(self, player_names):
         """ From the list of player names, create a list of dicts of name and elo """
@@ -172,7 +177,7 @@ class TournamentBuilder():
                 diff = abs(p1["elo"] - p2["elo"])
 
                 rng = np.random.default_rng()
-                ran_factor = (rng.random() - 0.5) * (self.settings["ran"] / 10)
+                ran_factor = (rng.random() - 0.5) * (self.settings["ran"] * self.random_amount)
 
                 return 1 / (1 + (diff + ran_factor))
             
@@ -184,10 +189,13 @@ class TournamentBuilder():
             pass
 
         # define weight function as random
-        if self.settings["ran"] == 100:
+        if self.settings["seed"] == "Random":
             def weight(p1, p2):
                 rng = np.random.default_rng()
                 return rng.random() * 100
+            
+            self.seed_order = self.players
+            random.shuffle(self.seed_order)
 
         self.weight_func = weight
 

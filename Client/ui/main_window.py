@@ -608,36 +608,63 @@ class MainWindow(QMainWindow):
             scroll.setWidget(self.tournament_body)
             
             # display tournament            
-            for i in range(self.tournament_builder.num_rounds, 0, -1):
+            for i in range(1, self.tournament_builder.num_rounds + 1):
+                
+                # labels for above rounds
+                if i == self.tournament_builder.num_rounds:
+                    label = QLabel(f"Final:")
+                    self.tournament_body_layout.addWidget(label, 0, i - 1)
+                elif i == self.tournament_builder.num_rounds - 1:
+                    label = QLabel(f"Semi-final:")
+                    self.tournament_body_layout.addWidget(label, 0, i - 1)
+                elif i == self.tournament_builder.num_rounds - 2:
+                    label = QLabel(f"Quarter-final:")
+                    self.tournament_body_layout.addWidget(label, 0, i - 1)
+                else:
+                    label = QLabel(f"Round {i}:")
+                    self.tournament_body_layout.addWidget(label, 0, i - 1)
                 
                 # vars to handle spaces
                 tick = False
-                j_acc = 0
+                j_acc = 1
+                j_acc2 = 0
                 
-                for j in range(0, 2 ** i):
+                size_round = 2 ** (abs(i - self.tournament_builder.num_rounds) + 1)
+                
+                for j in range(0, size_round):
                     
                     nj = j + j_acc
                     
-                    if i == self.tournament_builder.num_rounds:
+                    if i == 1:
                         button = CustomButton(crushed_round[j])
                     else:
                         button = CustomButton("None")
                     
-                    self.tournament_body_layout.addWidget(button, nj, abs(i - self.tournament_builder.num_rounds))
+                    self.tournament_body_layout.addWidget(button, nj, i - 1)
                     
-                    # logic to add spaces between each game
-                    if tick:
+                    # logic to add spaces between each game for first round
+                    if tick and i == 1:
                         space = QFrame()
-                        space.setFixedHeight(50)
+                        space.setFixedHeight(30)
                         
-                        self.tournament_body_layout.addWidget(space, nj + 1, abs(i - self.tournament_builder.num_rounds))
-                        j_acc += 1
+                        self.tournament_body_layout.addWidget(space, nj + 1, i - 1)
+                        self.tournament_body_layout.addWidget(space, nj + 2, i - 1)
+                        j_acc += 2
                         tick = False
                     else:
                         tick = True
+                        
+                    # logic for other rounds
+                    if i != 1:        
+                        if not j % 2: # even
+                            j_acc2 = 2**i - 2 + (2**i - 1) * j # maths to correctly layout games
+                        
+                        self.tournament_body_layout.addWidget(button, (j + j_acc2 + 1), i - 1)
+                    
                     
             self.main_tournament_layout.addWidget(scroll, 1, 1)
             
+        """ Used to format the round list """
         def crush_round(round):
             n_round = []
             
@@ -682,7 +709,7 @@ class MainWindow(QMainWindow):
         self.main_tournament_layout.addWidget(self.players_list_title, 0, 0, alignment=Qt.AlignLeft)
         
         self.players_list_tournament = QListWidget()
-        self.players_list_tournament.setFixedWidth(250 * self.scale)
+        self.players_list_tournament.setFixedWidth(300 * self.scale)
         self.players_list_tournament.setFont(self.default_font)
         self.main_tournament_layout.addWidget(self.players_list_tournament, 1, 0, alignment=Qt.AlignLeft)
 
@@ -977,15 +1004,15 @@ class MainWindow(QMainWindow):
         """ Widgets for each leaderboard """
         leaderboard_container_sm = QFrame()
         leaderboard_container_sm.setStyleSheet("background-color: #1f1f1f;")
-        leaderboard_container_layout_sm = QGridLayout(leaderboard_container_sm)
+        leaderboard_container_layout_sm = QGridLayout(leaderboard_container_sm, alignment=Qt.AlignTop)
         
         leaderboard_container_se = QFrame()
         leaderboard_container_se.setStyleSheet("background-color: #1f1f1f;")
-        leaderboard_container_layout_se = QGridLayout(leaderboard_container_se)
+        leaderboard_container_layout_se = QGridLayout(leaderboard_container_se, alignment=Qt.AlignTop)
         
         leaderboard_container_at = QFrame()
         leaderboard_container_at.setStyleSheet("background-color: #1f1f1f;")
-        leaderboard_container_layout_at = QGridLayout(leaderboard_container_at)
+        leaderboard_container_layout_at = QGridLayout(leaderboard_container_at, alignment=Qt.AlignTop)
         
         # first call to init the leaderboards
         refresh_leaderboards(semester_leaderboard[-1], session_leaderboard[-1])

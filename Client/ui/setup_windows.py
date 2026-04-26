@@ -66,6 +66,9 @@ class SetupWindow(QMainWindow):
         self.populate_list = QShortcut(QKeySequence("Ctrl+P"), self)
         self.populate_list.activated.connect(self.on_populate_list)
         
+        self.populate_list2 = QShortcut(QKeySequence("Ctrl+O"), self)
+        self.populate_list2.activated.connect(self.on_populate_list2)
+        
         button_cancel = QPushButton("Cancel")
         button_cancel.adjustSize()
         button_cancel.clicked.connect(self.close)
@@ -77,7 +80,25 @@ class SetupWindow(QMainWindow):
         self.layout_.addWidget(self.button_accept, 4, 1, alignment=Qt.AlignRight)
 
     def on_populate_list(self): # for debugging
-        players = ["Wilf Moncrieff", "Robert Fry", "Jak Dables", "Wilf Howard", "Dylan Nolan", "Will Vickers", "Paaras Padhiar", "Elijah Brook", "Malachi Bielby", "George Worsley", "Evan Morris", "Osian Drake"]
+        players = ["Wilf Moncrieff", "Robert Fry", "Jak Dables", "Wilf Howard", 
+                   "Dylan Nolan", "Will Vickers", "Paaras Padhiar", "Elijah Brook", 
+                   "Malachi Bielby", "George Worsley", "Evan Morris", "Osian Drake", 
+                   "Henry Myatt", "Theo Mason", "Otto Ashton", "Andrew Collins"
+                   ]
+        
+        for player in players:
+            self.selected_players_list.addItem(QListWidgetItem(player))
+            
+    def on_populate_list2(self): # for debugging
+        players = ["Wilf Moncrieff", "Robert Fry", "Jak Dables", "Wilf Howard", 
+                   "Dylan Nolan", "Will Vickers", "Paaras Padhiar", "Elijah Brook", 
+                   "Malachi Bielby", "George Worsley", "Evan Morris", "Osian Drake", 
+                   "Henry Myatt", "Theo Mason", "Otto Ashton", "Andrew Collins",
+                   "Xander Morris", "James Lund", "Alex Hill", "Ryan Chambers",
+                   "Ed Robbins", "Finlay Horn", "David Burgess", "Harry T",
+                   "Will Whitman", "akanksh Shetty", "Callum Tomlinson", "Godrick X",
+                   "Errol Dixon", "Jake Thompson", "Fotis T", "Matt Woodcock"
+                   ]
         
         for player in players:
             self.selected_players_list.addItem(QListWidgetItem(player))
@@ -353,7 +374,25 @@ class TournamentSetupWindow(SetupWindow):
         super().submit_text_selected(player)
         
     def on_populate_list(self): # for debugging
-        players = ["Wilf Moncrieff", "Robert Fry", "Jak Dables", "Wilf Howard", "Dylan Nolan", "Will Vickers", "Paaras Padhiar", "Elijah Brook", "Malachi Bielby", "George Worsley", "Evan Morris", "Osian Drake", "Henry Myatt", "Theo Mason", "Otto Ashton", "Andrew Collins"]
+        players = ["Wilf Moncrieff", "Robert Fry", "Jak Dables", "Wilf Howard", 
+                   "Dylan Nolan", "Will Vickers", "Paaras Padhiar", "Elijah Brook", 
+                   "Malachi Bielby", "George Worsley", "Evan Morris", "Osian Drake", 
+                   "Henry Myatt", "Theo Mason", "Otto Ashton", "Andrew Collins"
+                   ]
+        
+        for player in players:
+            self.selected_players_list.addItem(QListWidgetItem(player))
+            
+    def on_populate_list2(self): # for debugging
+        players = ["Wilf Moncrieff", "Robert Fry", "Jak Dables", "Wilf Howard", 
+                   "Dylan Nolan", "Will Vickers", "Paaras Padhiar", "Elijah Brook", 
+                   "Malachi Bielby", "George Worsley", "Evan Morris", "Osian Drake", 
+                   "Henry Myatt", "Theo Mason", "Otto Ashton", "Andrew Collins",
+                   "Xander Morris", "James Lund", "Alex Hill", "Ryan Chambers",
+                   "Ed Robbins", "Finlay Horn", "David Burgess", "Harry T",
+                   "Will Whitman", "akanksh Shetty", "Callum Tomlinson", "Godrick X",
+                   "Errol Dixon", "Jake Thompson", "Fotis T", "Matt Woodcock"
+                   ]
         
         for player in players:
             self.selected_players_list.addItem(QListWidgetItem(player))
@@ -368,6 +407,10 @@ class TournamentSetupWindow(SetupWindow):
         settings["title"] = self.title_text_box.text()
         settings["seed"] = self.seeding_setting_box.currentText()
         settings["ran"] = self.randomness_slider.value()
+        
+        if settings["ran"] == 100:
+            settings["seed"] = "Random"
+        
         settings["elo_count"] = self.elo_count_button.text()
 
         settings["match_format"] = dict()
