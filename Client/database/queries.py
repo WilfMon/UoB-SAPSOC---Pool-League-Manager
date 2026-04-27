@@ -234,7 +234,7 @@ def get_all_players_name(dest="league.db") -> list[str]:
     rows = cursor.fetchall()
 
     conn.close()
-    return [row[0] for row in rows]
+    return [row[0] for row in rows] # removes tuple
 
 
 def get_all_players_id(dest="league.db") -> list[int]:
@@ -246,6 +246,20 @@ def get_all_players_id(dest="league.db") -> list[int]:
 
     conn.close()
     return [row[0] for row in rows]
+
+
+def get_all_players_info(dest="league.db") -> list[tuple[int, str, bool, float, int, int, float]]:
+    """ returns a list of tuples:
+    (id, name, member, points, games_played, wins, elo)
+    """
+    conn = get_connection(dest)
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT * FROM players")
+    rows = cursor.fetchall()
+
+    conn.close()
+    return rows
     
 
 def get_elo_change(winner_id, loser_id, dest="league.db") -> tuple[float, float]:

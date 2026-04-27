@@ -1,16 +1,19 @@
-from ..queries import add_game, add_player, add_semester, add_session, get_player_id_from_name
-from ..schema import create_tables
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(__file__), ".."))  # adds Client/ to path
 
-create_tables(dest="extradata.db")
+from database.queries import add_game, add_player, add_semester, add_session, get_player_id_from_name
+from database.schema import create_tables
 
-with open("Client/database/prev_data/25-26sm1.txt", "r") as file:
+file_name = "league.db"
+
+create_tables(dest=file_name)
+
+with open("prev_data/25-26sm1.txt", "r") as file:
     sm1 = file.read()
 
-with open("Client/database/prev_data/25-26sm2.txt", "r") as file:
+with open("prev_data/25-26sm2.txt", "r") as file:
     sm2 = file.read()
-
-#with open("client/test.txt", "r") as file:
-#    sm1 = file.read()
 
 # clean data
 sm1 = sm1.split("\n")
@@ -47,10 +50,10 @@ def clean_to_sessions(sessions_data):
 
 def add_sessions_db(sessions, sm):
 
-    sem_id = add_semester(sm, dest="extradata.db")
+    sem_id = add_semester(sm, dest=file_name)
 
     for session in sessions:
-        ses_id = add_session(sem_id, session[0], dest="extradata.db")
+        ses_id = add_session(sem_id, session[0], dest=file_name)
 
         session.pop(0)
 
@@ -74,7 +77,7 @@ def add_sessions_db(sessions, sm):
 
         for player in player_names:
 
-            add_player(player, dest="extradata.db")
+            add_player(player, dest=file_name)
 
         for game in games:
 
@@ -85,10 +88,10 @@ def add_sessions_db(sessions, sm):
                 winner = game[1]
                 loser = game[0]
 
-            winner_id = get_player_id_from_name(winner, dest="extradata.db")
-            loser_id = get_player_id_from_name(loser, dest="extradata.db")
+            winner_id = get_player_id_from_name(winner, dest=file_name)
+            loser_id = get_player_id_from_name(loser, dest=file_name)
 
-            add_game(ses_id, winner_id, loser_id, winner_id, dest="extradata.db")
+            add_game(ses_id, winner_id, loser_id, winner_id, dest=file_name)
 
 sm1_sessions = clean_to_sessions(sm1)
 sm2_sessions = clean_to_sessions(sm2)

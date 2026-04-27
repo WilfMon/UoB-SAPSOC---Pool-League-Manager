@@ -23,12 +23,16 @@ from ui.text_box_window import TextBoxWindow
 from ui.confimation_window import ConfirmationWindow
 from ui.update_memberships_window import MembershipWindow
 
-from utils.utils import check_for_new_players, save_scale, remove_menu, get_players_from_qlist, clear_layout
-from utils.utils_classes import SessionBuilder, TournamentBuilder, StatisticsBuilder, AdvancedStats, Leaderboard
+from utils.utils import check_for_new_players, remove_menu, get_players_from_qlist, clear_layout
+from utils.utils_classes import Settings, SessionBuilder, TournamentBuilder, StatisticsBuilder, AdvancedStats, Leaderboard
 
 class MainWindow(QMainWindow):
-    def __init__(self, scale=1.0):
+    def __init__(self, config, scale=1.0):
         super().__init__()
+        
+        self.config = config
+        print(f"settings: {self.config}")
+        
         self.scale = scale
         self.default_font = QFont("Segoe UI", round(self.scale * 18))
 
@@ -795,6 +799,16 @@ class MainWindow(QMainWindow):
             clear_layout(self.main_statistics_layout)
 
             ad_stats = AdvancedStats()
+            
+            fig = ad_stats.elo_dist()
+
+            graphs_container = QFrame()
+            graphs_container_layout = QGridLayout(graphs_container)
+            
+            canvas = FigureCanvas(fig)
+            
+            graphs_container_layout.addWidget(canvas, 0, 0, alignment=Qt.AlignLeft)
+            self.main_statistics_layout.addWidget(graphs_container, 0, 0)
 
         def on_tab_in():
             self.central.setCurrentWidget(self.statistics_wid)
@@ -825,7 +839,6 @@ class MainWindow(QMainWindow):
         self.advanced.triggered.connect(on_advanced)
         self.file_menu.addAction(self.advanced)
 
-        
     def on_view_leaderboard(self):
         
         def construct(name, leaderboard, layout):
@@ -1087,7 +1100,12 @@ class MainWindow(QMainWindow):
             s = int(scale)
             s = s / 100
         
-            save_scale(s)
+            c = Settings()
+            settings = c.load_settings()
+            
+            settings["scale"] = s
+            
+            c.save_settings(settings)
 
         self.scale_window = TextBoxWindow(scale=self.scale)
         self.scale_window.open_at_cursor()

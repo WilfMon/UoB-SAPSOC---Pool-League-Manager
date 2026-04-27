@@ -1,6 +1,10 @@
 from .db import get_connection
+from utils.utils_classes import Settings
 
 def create_tables(dest="league.db"):
+    s = Settings()
+    default_elo = s.load_settings()["elo_vars"]["default_elo"]
+    
     conn = get_connection(dest)
     cursor = conn.cursor()
     
@@ -9,7 +13,7 @@ def create_tables(dest="league.db"):
     """)
 
     # table of players at the club
-    cursor.execute("""
+    cursor.execute(f"""
     CREATE TABLE IF NOT EXISTS players (
         player_id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT UNIQUE NOT NULL,
@@ -19,7 +23,7 @@ def create_tables(dest="league.db"):
         games_played INTEGER NOT NULL DEFAULT 0,
         wins INTEGER NOT NULL DEFAULT 0,
                    
-        elo FLOAT NOT NULL DEFAULT 1000
+        elo FLOAT NOT NULL DEFAULT {float(default_elo)}
     )
     """)
 

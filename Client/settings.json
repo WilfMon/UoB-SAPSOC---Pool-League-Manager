@@ -1,0 +1,9 @@
+{
+    "scale": 0.75,
+    "elo_vars": {
+        "base": 10,
+        "scale_factor": 400,
+        "placement_factor": 1,
+        "default_elo": 700
+    }
+}

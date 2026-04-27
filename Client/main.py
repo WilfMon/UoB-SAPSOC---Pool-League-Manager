@@ -14,11 +14,14 @@ from pathlib import Path
 
 from ui.main_window import MainWindow
 
-from utils.utils import load_scale
+from utils.utils_classes import Settings
 
 def main():
     
-    scale_factor = load_scale()
+    s = Settings()
+    config = s.load_settings()
+    
+    scale_factor = config["scale"]
     
     # Enable high-DPI scaling
     QApplication.setHighDpiScaleFactorRoundingPolicy(Qt.HighDpiScaleFactorRoundingPolicy.PassThrough)
@@ -33,7 +36,7 @@ def main():
         with open(qss_file, "r") as f:
             app.setStyleSheet(f.read())
     
-    window = MainWindow(scale=scale_factor)
+    window = MainWindow(config=config, scale=scale_factor)
     window.show()
     sys.exit(app.exec())
 

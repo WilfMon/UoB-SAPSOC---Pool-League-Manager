@@ -1,7 +1,7 @@
-import csv
 import numpy as np
 
 from database.queries import get_all_players_name
+from .utils_classes import Settings
 
 def check_for_new_players(players):
     
@@ -25,23 +25,6 @@ def clean_name(name):
     name = name.strip()
     
     return name
-
-def load_scale():
-    with open("Client/config.csv", mode="r") as file:
-        
-        reader = csv.DictReader(file)  # read CSV as dictionary
-        
-        for row in reader:
-            scale = float(row["scale"])
-            return scale
-        
-def save_scale(scale: float):
-    with open("Client/config.csv", mode="w", newline="") as file:
-        
-        writer = csv.writer(file)
-        
-        writer.writerow(["scale"])  # header row
-        writer.writerow([scale])     # data row
 
 def remove_menu(menu_bar, menu_to_remove):
 
@@ -76,15 +59,19 @@ def clear_layout(layout):
                 
 def calc_elo_change(a, b, games_a, games_b) -> tuple[float, float]: # where A is the winner
 
+    s = Settings()
+    config = s.load_settings()["elo_vars"]
+
     # define the constants
-    BASE = 10
-    SCALE_FACTOR = 600 # controls the trend value (thousends)
+    BASE = config["base"]
+    SCALE_FACTOR = config["scale_factor"] # controls the trend value (thousends)
+    P_FACTOR = config["placement_factor"] # controls the strengh of placements
     
     def placement_factor(games):
         # returns a factor when games = 0 of 2.71 (e)
         # drops off slowly until at games = 10 the multiple is 1
         
-        return 1 + np.e - np.e ** (0.1 * games)
+        return 1 + (np.e - np.e ** (0.1 * games)) * P_FACTOR
     
     # controls how much a win or loss effects the elo change
     k_factor_a = 72

@@ -1,7 +1,28 @@
+import itertools, random, os, json
 import networkx as nx
-import itertools
 import numpy as np
-import random
+
+class Settings():
+    def __init__(self):
+        self.DEFAULT_SETTINGS = {
+        "scale": 0.75,
+        }
+
+        self.SETTINGS_FILE = "settings.json"
+
+    def load_settings(self):
+        if os.path.exists(self.SETTINGS_FILE):
+            
+            with open(self.SETTINGS_FILE, "r") as f:
+                return json.load(f)
+            
+        self.save_settings(self.DEFAULT_SETTINGS)
+        return self.DEFAULT_SETTINGS.copy()
+
+    def save_settings(self, settings):
+        
+        with open(self.SETTINGS_FILE, "w") as f:
+            json.dump(settings, f, indent=4)
 
 from networkx import max_weight_matching
 
@@ -225,6 +246,7 @@ class TournamentBuilder():
 
 
 import matplotlib.pyplot as plt
+from matplotlib.figure import Figure
 
 from database.queries import get_player, get_player_games
 from database.objects import PlayerObj
@@ -239,7 +261,7 @@ class StatisticsBuilder():
         print(player_info)
         self.player = PlayerObj(player_info, player_games)
 
-    def get_graphs(self) -> tuple:
+    def get_graphs(self) -> tuple[Figure, Figure, Figure]:
         
         # cleanup figures
         plt.close("all")
@@ -313,12 +335,71 @@ class StatisticsBuilder():
         
         return (fig1, fig2, fig3)
     
+    
+from database.queries import get_all_players_info
 
 class AdvancedStats():
     def __init__(self):
-        pass
+        self.p_data = get_all_players_info()
+        
+    def elo_dist(self, res=50) -> Figure:
+        
+        def floor_(x):
+            return np.floor(x / res) * res
 
-    
+        elo_data = [t[-1] for t in self.p_data] # isolate elo data
+        elo_data_sorted = sorted(elo_data) # sort form lowest to highest
+        
+        low = floor_(elo_data_sorted[0])
+        high = floor_(elo_data_sorted[-1])
+        diff = high - low
+        
+        bins_y = np.zeros(int(diff // res + 1))
+        
+        for i, b in enumerate(bins_y):
+            for elo in elo_data_sorted:
+                if int(floor_(elo)) == int((i*res + low)):
+                    bins_y[i] += 1
+                    
+        x = np.arange(low, high + res, res)
+        
+        s = Settings()
+        config = s.load_settings()["elo_vars"]
+        
+        fig, ax = plt.subplots()
+        
+        ax.plot(x, bins_y)
+        
+        ax.set_title(f"""
+                        SETTINGS:
+                        defaut_elo = {config["default_elo"]}, base = {config["base"]}, 
+                        scale_factor = {config["scale_factor"]}, placement_factor = {config["placement_factor"]}
+                    """)
+        ax.set_xlabel("Elo Bin")
+        ax.set_ylabel("Frequency")
+        
+        data_to_write = {"x": list(x), "y": list(bins_y)}
+        
+        # create folder
+        info = f"{config["default_elo"]}-{config["base"]}-{config["scale_factor"]}-{config["placement_factor"]}"
+        info = info.replace(".", "_")
+        
+        folder = f"prev_data/plots/{info}"
+        
+        # write data
+        os.mkdir(folder)
+        
+        fig.savefig(
+        f"{folder}/{info}",
+        dpi=300,              # resolution (good for print)
+        bbox_inches="tight"  # trims extra whitespace
+        )
+        
+        with open(f"{folder}/data.json", "w") as f:
+            json.dump(data_to_write, f, indent=4)
+        
+        return fig
+            
 
 from database.db import get_connection
 from database.queries import get_player_num_games_played, get_player_id_from_name
