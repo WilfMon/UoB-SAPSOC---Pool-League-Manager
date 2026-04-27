@@ -12,7 +12,7 @@ from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 
 from database.db import get_connection
 from database.schema import create_tables
-from database.queries import add_player, get_elo_change, get_player_elo, get_session_id_by_name, get_semester_id_by_name, make_member, get_player, get_all_players_name, add_semester, add_session, add_game, get_player_id_by_name
+from database.queries import add_player, get_elo_change, get_player_elo, get_session_id_from_name, get_semester_id_from_name, make_member, get_player, get_all_players_name, add_semester, add_session, add_game, get_player_id_from_name
 
 from PySide6.QtWidgets import QMainWindow, QStackedWidget, QSpacerItem, QComboBox, QListWidgetItem, QSizePolicy, QLabel, QGridLayout,  QFrame, QPushButton, QWidget, QListWidget, QMenu, QApplication, QLineEdit, QScrollArea, QHBoxLayout
 from PySide6.QtGui import QAction, QCursor, QFont
@@ -24,7 +24,7 @@ from ui.confimation_window import ConfirmationWindow
 from ui.update_memberships_window import MembershipWindow
 
 from utils.utils import check_for_new_players, save_scale, remove_menu, get_players_from_qlist, clear_layout
-from utils.utils_classes import SessionBuilder, TournamentBuilder, StatisticsBuilder, Leaderboard
+from utils.utils_classes import SessionBuilder, TournamentBuilder, StatisticsBuilder, AdvancedStats, Leaderboard
 
 class MainWindow(QMainWindow):
     def __init__(self, scale=1.0):
@@ -41,14 +41,17 @@ class MainWindow(QMainWindow):
         self.main_wid = QWidget()
         self.session_wid = QWidget()
         self.tournament_wid = QWidget()
+        self.statistics_wid = QWidget()
         
         self.central.addWidget(self.main_wid)
         self.central.addWidget(self.session_wid)
         self.central.addWidget(self.tournament_wid)
+        self.central.addWidget(self.statistics_wid)
         
         self.main_layout = QGridLayout(self.main_wid)
         self.main_session_layout = QGridLayout(self.session_wid)
         self.main_tournament_layout = QGridLayout(self.tournament_wid, alignment=Qt.AlignLeft)
+        self.main_statistics_layout = QGridLayout(self.statistics_wid)
 
         # Create the menu bar
         self.create_menu_bar()
@@ -66,13 +69,13 @@ class MainWindow(QMainWindow):
             sem_name = self.year + ".1"
             
             add_semester(sem_name)
-            self.semester_id = get_semester_id_by_name(sem_name)
+            self.semester_id = get_semester_id_from_name(sem_name)
 
         if 1 <= self.month <= 8:
             sem_name = self.year + ".2"
             
             add_semester(sem_name)
-            self.semester_id = get_semester_id_by_name(sem_name)
+            self.semester_id = get_semester_id_from_name(sem_name)
 
         logger.info(f"Semester set to: {sem_name}")
 
@@ -95,6 +98,10 @@ class MainWindow(QMainWindow):
         self.view_leaderboard.triggered.connect(self.on_view_leaderboard)
         self.file_menu.addAction(self.view_leaderboard)
 
+        self.open_statistics_action = QAction("Statisctics", self)
+        self.open_statistics_action.triggered.connect(self.on_new_statistics)
+        self.file_menu.addAction(self.open_statistics_action)
+
         self.edit_memberships = QAction("Edit Members", self)
         self.edit_memberships.triggered.connect(self.on_edit_memberships)
         self.file_menu.addAction(self.edit_memberships)
@@ -111,13 +118,6 @@ class MainWindow(QMainWindow):
         self.change_scale = QAction("Change Scale", self)
         self.change_scale.triggered.connect(self.on_change_scale)
         view_menu.addAction(self.change_scale)
-
-        # Statistics menu
-        self.statistics_menu = self.menu_bar.addMenu("Statistics")
-
-        self.statistics_action = QAction("Statisctics", self)
-        self.statistics_action.triggered.connect(self.on_new_statistics)
-        self.statistics_menu.addAction(self.statistics_action)
 
     def on_new_session(self):
 
@@ -361,8 +361,8 @@ class MainWindow(QMainWindow):
                 # for advanced view
                 if advanced:
                 
-                    left_id = get_player_id_by_name(pair[0])
-                    right_id = get_player_id_by_name(pair[1])
+                    left_id = get_player_id_from_name(pair[0])
+                    right_id = get_player_id_from_name(pair[1])
                     
                     left_change, _ = get_elo_change(left_id, right_id)
                     right_change, _ = get_elo_change(right_id, left_id)
@@ -424,8 +424,8 @@ class MainWindow(QMainWindow):
             for round_ in self.finished_games:
                 for game in list(round_):
                     
-                    player1_id = get_player_id_by_name(game[0])
-                    player2_id = get_player_id_by_name(game[1])
+                    player1_id = get_player_id_from_name(game[0])
+                    player2_id = get_player_id_from_name(game[1])
                     
                     add_game(self.session_id, player1_id, player2_id, winner_id=player1_id)
                 
@@ -738,7 +738,7 @@ class MainWindow(QMainWindow):
             player_winrate.setStyleSheet("font-weight: normal;")
             self.stats_container_layout.addWidget(player_winrate, 0, 3, alignment=Qt.AlignLeft | Qt.AlignTop)
 
-            player_elo = QLabel(f"Elo: {player_obj.elo}")
+            player_elo = QLabel(f"Elo: {player_obj.elo:.0f}")
             player_elo.setStyleSheet("font-weight: normal;")
             self.stats_container_layout.addWidget(player_elo, 0, 4, alignment=Qt.AlignLeft | Qt.AlignTop)
             
@@ -750,14 +750,16 @@ class MainWindow(QMainWindow):
             graphs_container = QFrame()
             graphs_container_layout = QGridLayout(graphs_container)
             
-            graphs = stats_builder.display_player_stats()
+            graphs = stats_builder.get_graphs()
             for i, fig in enumerate(graphs):
                 canvas = FigureCanvas(fig)
                 graphs_container_layout.addWidget(canvas, 0, i, alignment=Qt.AlignLeft)
 
-            self.stats_container_layout.addWidget(graphs_container, 1, 0, 1, 5)
+            self.stats_container_layout.addWidget(graphs_container, 1, 0, 1, 6)
 
         def on_enter_player():
+            setup()
+
             # text box for entering player name
             self.text_box = TextBoxWindow(scale=self.scale)
             self.text_box.open_at_cursor()
@@ -768,51 +770,62 @@ class MainWindow(QMainWindow):
 
         def on_selected_player(player):
             player_recived(player.text())
+
+        def setup():
+            clear_layout(self.main_statistics_layout)
+
+            # left side list of players
+            self.players_list_statistics = QListWidget()
+            self.players_list_statistics.setFixedWidth(250 * self.scale)
+            self.players_list_statistics.setFont(self.default_font)
+            self.players_list_statistics.itemClicked.connect(on_selected_player)
+            self.main_statistics_layout.addWidget(self.players_list_statistics, 0, 0, alignment=Qt.AlignLeft)
         
-        # set up the visulalise menu
-        clear_layout(self.main_layout)
-        self.central.setCurrentIndex(0)
+            players = get_all_players_name()
+            for player in players:
+                self.players_list_statistics.addItem(player)
 
-        self.statistics_action.setDisabled(True)
+            # container for statisitcs
+            self.stats_contanier = QWidget()
+            self.stats_container_layout = QGridLayout(self.stats_contanier)
 
-        self.statistics_menu.addSeparator()
+            self.main_statistics_layout.addWidget(self.stats_contanier, 0, 1)
+
+        def on_advanced():
+            clear_layout(self.main_statistics_layout)
+
+            ad_stats = AdvancedStats()
+
+        def on_tab_in():
+            self.central.setCurrentWidget(self.statistics_wid)
+        
+        on_tab_in()
+
+        self.open_statistics_action.setDisabled(True)
+
+        self.file_menu = self.menu_bar.addMenu("Statistics")
+
+        self.view = QAction("View", self)
+        self.view.triggered.connect(on_tab_in)
+        self.file_menu.addAction(self.view)
+
+        self.file_menu.addSeparator()
+
+        self.o_statistics = QAction("Open Statistics", self)
+        self.o_statistics.triggered.connect(setup)
+        self.file_menu.addAction(self.o_statistics)
 
         self.enter_player = QAction("Enter Player", self)
         self.enter_player.triggered.connect(on_enter_player)
-        self.statistics_menu.addAction(self.enter_player)
+        self.file_menu.addAction(self.enter_player)
 
-        self.select_session = QAction("Select Session", self)
-        self.statistics_menu.addAction(self.select_session)
+        self.file_menu.addSeparator()
 
-        self.select_sememster = QAction("Select Semester", self)
-        self.statistics_menu.addAction(self.select_sememster)
+        self.advanced = QAction("Open Advanced Statistics", self)
+        self.advanced.triggered.connect(on_advanced)
+        self.file_menu.addAction(self.advanced)
 
-        self.select_alltime = QAction("Select Alltime", self)
-        self.statistics_menu.addAction(self.select_alltime)
-
-        self.statistics_menu.addSeparator()
-
-        self.advanced = QAction("Advanced", self)
-        self.statistics_menu.addAction(self.advanced)
-        self.advanced.setDisabled(True)
         
-        # left side list of players
-        self.players_list_statistics = QListWidget()
-        self.players_list_statistics.setFixedWidth(250 * self.scale)
-        self.players_list_statistics.setFont(self.default_font)
-        self.players_list_statistics.itemClicked.connect(on_selected_player)
-        self.main_layout.addWidget(self.players_list_statistics, 0, 0, alignment=Qt.AlignLeft)
-    
-        players = get_all_players_name()
-        for player in players:
-            self.players_list_statistics.addItem(player)
-
-        # container for statisitcs
-        self.stats_contanier = QWidget()
-        self.stats_container_layout = QGridLayout(self.stats_contanier)
-
-        self.main_layout.addWidget(self.stats_contanier, 0, 1)
-
     def on_view_leaderboard(self):
         
         def construct(name, leaderboard, layout):

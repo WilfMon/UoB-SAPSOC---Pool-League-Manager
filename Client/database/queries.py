@@ -1,7 +1,6 @@
 from .db import get_connection
 
-
-# Functions for players table
+""" Functions for adding to the databse """
 def add_player(name, dest="league.db"):
     conn = get_connection(dest)
     cursor = conn.cursor()
@@ -11,137 +10,6 @@ def add_player(name, dest="league.db"):
     conn.close()
     
 
-def make_member(name, dest="league.db"):
-    conn = get_connection(dest)
-    cursor = conn.cursor()
-    
-    cursor.execute("UPDATE players SET member = 1 WHERE name = ?", (name,))
-    
-    if cursor.rowcount == 0:
-        print(f"No player found with name: {name}")
-    else:
-        print(f"{name} is now a member")
-        
-    conn.commit()
-    conn.close()
-
-
-def remove_member(name, dest="league.db"):
-    conn = get_connection(dest)
-    cursor = conn.cursor()
-    
-    cursor.execute("UPDATE players SET member = 0 WHERE name = ?", (name,))
-    
-    if cursor.rowcount == 0:
-        print(f"No player found with name: {name}")
-    else:
-        print(f"{name} is now not a member")
-        
-    conn.commit()
-    conn.close()
-    
-
-def get_player(name, dest="league.db"):
-    conn = get_connection(dest)
-    cursor = conn.cursor()
-    
-    cursor.execute("SELECT * FROM players WHERE name = ?", (name,))
-    rows = cursor.fetchall()
-    
-    conn.close()
-    return rows
-
-
-def get_player_games(name, dest="league.db"):
-    player_id = get_player_id_by_name(name, dest)
-
-    conn = get_connection(dest)
-    cursor = conn.cursor()
-
-    cursor.execute(
-        "SELECT * FROM games WHERE player1_id = ? OR player2_id = ?",
-        (player_id, player_id)
-    )
-
-    rows = cursor.fetchall()
-    conn.close()
-    return rows
-
-
-def get_player_points(player_id, semester_id, dest="league.db"):
-    conn = get_connection(dest)
-    cursor = conn.cursor()
-    
-    cursor.execute("""
-        SELECT COALESCE(SUM(g.points_to_winner), 0)
-        FROM games g
-        JOIN sessions s   ON g.session_id = s.session_id
-        JOIN semester sem ON s.semester_id = sem.semester_id
-        WHERE g.winner_id = ?
-          AND sem.semester_id = ?
-    """, (player_id, semester_id))
-    
-    result = cursor.fetchone()[0]
-    conn.close()
-    return result
-
-
-def get_player_num_games_played(player_id, dest="league.db"):
-    conn = get_connection(dest)
-    cursor = conn.cursor()
-    
-    cursor.execute("SELECT games_played FROM players WHERE player_id = ?", (player_id,))
-    result = cursor.fetchone()[0]
-    
-    conn.close()
-    return result
-
-
-def get_player_elo(player_id, dest="league.db"):
-    conn = get_connection(dest)
-    cursor = conn.cursor()
-    
-    cursor.execute("SELECT elo FROM players WHERE player_id = ?", (player_id,))
-    result = cursor.fetchone()[0]
-    
-    conn.close()
-    return result
-
-
-def get_members(dest="league.db"):
-    conn = get_connection(dest)
-    cursor = conn.cursor()
-    
-    cursor.execute("SELECT name FROM players WHERE member = ?", (1,))
-    rows = cursor.fetchall()
-    
-    conn.close()
-    return [row[0] for row in rows]
-
-
-def get_all_players_name(dest="league.db"):
-    conn = get_connection(dest)
-    cursor = conn.cursor()
-
-    cursor.execute("SELECT name FROM players")
-    rows = cursor.fetchall()
-
-    conn.close()
-    return [row[0] for row in rows]
-
-
-def get_all_players_id(dest="league.db"):
-    conn = get_connection(dest)
-    cursor = conn.cursor()
-
-    cursor.execute("SELECT player_id FROM players")
-    rows = cursor.fetchall()
-
-    conn.close()
-    return [row[0] for row in rows]
-
-
-# Functions to add objects to table
 def add_semester(semester_name, dest="league.db"):
     conn = get_connection(dest)
     cursor = conn.cursor()
@@ -172,32 +40,7 @@ def add_session(semester_id, session_date, dest="league.db"):
     conn.close()
     
     return session_id
-    
 
-def get_elo_change(winner_id, loser_id, dest="league.db"):
-    from utils.utils import calc_elo_change
-    
-    if winner_id is None:
-        winner_elo = 1000.0
-        winner_games_played = 0
-    else:
-        winner_elo = get_player_elo(winner_id, dest)
-        winner_games_played = get_player_num_games_played(winner_id, dest)
-    
-    if loser_id is None:
-        loser_elo = 1000.0
-        loser_games_played = 0
-    else:
-        loser_elo = get_player_elo(loser_id, dest)
-        loser_games_played = get_player_num_games_played(loser_id, dest)
-    
-    return calc_elo_change(
-        winner_elo,
-        loser_elo,
-        winner_games_played,
-        loser_games_played
-    )
-    
 
 def add_game(session_id, player1_id, player2_id, winner_id, dest="league.db"):
     conn = get_connection(dest)
@@ -273,8 +116,165 @@ def add_game(session_id, player1_id, player2_id, winner_id, dest="league.db"):
     conn.close()
 
 
+""" Functions for updating existing values in the database """
+def make_member(name, dest="league.db"):
+    conn = get_connection(dest)
+    cursor = conn.cursor()
+    
+    cursor.execute("UPDATE players SET member = 1 WHERE name = ?", (name,))
+    
+    if cursor.rowcount == 0:
+        print(f"No player found with name: {name}")
+    else:
+        print(f"{name} is now a member")
+        
+    conn.commit()
+    conn.close()
+
+
+def remove_member(name, dest="league.db"):
+    conn = get_connection(dest)
+    cursor = conn.cursor()
+    
+    cursor.execute("UPDATE players SET member = 0 WHERE name = ?", (name,))
+    
+    if cursor.rowcount == 0:
+        print(f"No player found with name: {name}")
+    else:
+        print(f"{name} is now not a member")
+        
+    conn.commit()
+    conn.close()
+    
+
+""" Functions for retriving data from the database """
+def get_player(name, dest="league.db") -> list:
+    conn = get_connection(dest)
+    cursor = conn.cursor()
+    
+    cursor.execute("SELECT * FROM players WHERE name = ?", (name,))
+    rows = cursor.fetchall()
+    
+    conn.close()
+    return rows
+
+
+def get_player_games(name, dest="league.db") -> list:
+    player_id = get_player_id_from_name(name, dest)
+
+    conn = get_connection(dest)
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "SELECT * FROM games WHERE player1_id = ? OR player2_id = ?",
+        (player_id, player_id)
+    )
+
+    rows = cursor.fetchall()
+    conn.close()
+    return rows
+
+
+def get_player_points(player_id, semester_id, dest="league.db") -> float:
+    conn = get_connection(dest)
+    cursor = conn.cursor()
+    
+    cursor.execute("""
+        SELECT COALESCE(SUM(g.points_to_winner), 0)
+        FROM games g
+        JOIN sessions s   ON g.session_id = s.session_id
+        JOIN semester sem ON s.semester_id = sem.semester_id
+        WHERE g.winner_id = ?
+          AND sem.semester_id = ?
+    """, (player_id, semester_id))
+    
+    result = cursor.fetchone()[0]
+    conn.close()
+    return result
+
+
+def get_player_num_games_played(player_id, dest="league.db") -> int:
+    conn = get_connection(dest)
+    cursor = conn.cursor()
+    
+    cursor.execute("SELECT games_played FROM players WHERE player_id = ?", (player_id,))
+    result = cursor.fetchone()[0]
+    
+    conn.close()
+    return result
+
+
+def get_player_elo(player_id, dest="league.db") -> float:
+    conn = get_connection(dest)
+    cursor = conn.cursor()
+    
+    cursor.execute("SELECT elo FROM players WHERE player_id = ?", (player_id,))
+    result = cursor.fetchone()[0]
+    
+    conn.close()
+    return result
+
+
+def get_members(dest="league.db") -> list[str]:
+    conn = get_connection(dest)
+    cursor = conn.cursor()
+    
+    cursor.execute("SELECT name FROM players WHERE member = ?", (1,))
+    rows = cursor.fetchall()
+    
+    conn.close()
+    return [row[0] for row in rows]
+
+
+def get_all_players_name(dest="league.db") -> list[str]:
+    conn = get_connection(dest)
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT name FROM players")
+    rows = cursor.fetchall()
+
+    conn.close()
+    return [row[0] for row in rows]
+
+
+def get_all_players_id(dest="league.db") -> list[int]:
+    conn = get_connection(dest)
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT player_id FROM players")
+    rows = cursor.fetchall()
+
+    conn.close()
+    return [row[0] for row in rows]
+    
+
+def get_elo_change(winner_id, loser_id, dest="league.db") -> tuple[float, float]:
+    from utils.utils import calc_elo_change
+    
+    if winner_id is None:
+        winner_elo = 1000.0
+        winner_games_played = 0
+    else:
+        winner_elo = get_player_elo(winner_id, dest)
+        winner_games_played = get_player_num_games_played(winner_id, dest)
+    
+    if loser_id is None:
+        loser_elo = 1000.0
+        loser_games_played = 0
+    else:
+        loser_elo = get_player_elo(loser_id, dest)
+        loser_games_played = get_player_num_games_played(loser_id, dest)
+    
+    return calc_elo_change(
+        winner_elo,
+        loser_elo,
+        winner_games_played,
+        loser_games_played
+    )
+    
+
 # Functions to get ids
-def get_semester_id_by_name(semester_name, dest="league.db"):
+def get_semester_id_from_name(semester_name, dest="league.db") -> int:
     conn = get_connection(dest)
     cursor = conn.cursor()
     
@@ -288,7 +288,7 @@ def get_semester_id_by_name(semester_name, dest="league.db"):
     return result[0]
 
 
-def get_semester_id_from_session_id(session_id, dest="league.db"):
+def get_semester_id_from_session_id(session_id, dest="league.db") -> int:
     conn = get_connection(dest)
     cursor = conn.cursor()
     
@@ -302,7 +302,7 @@ def get_semester_id_from_session_id(session_id, dest="league.db"):
     return result[0]
 
 
-def get_session_id_by_name(session_name, dest="league.db"):
+def get_session_id_from_name(session_name, dest="league.db") -> int:
     conn = get_connection(dest)
     cursor = conn.cursor()
     
@@ -316,7 +316,7 @@ def get_session_id_by_name(session_name, dest="league.db"):
     return result[0]
     
 
-def get_player_id_by_name(player_name, dest="league.db"):
+def get_player_id_from_name(player_name, dest="league.db") -> int:
     conn = get_connection(dest)
     cursor = conn.cursor()
     

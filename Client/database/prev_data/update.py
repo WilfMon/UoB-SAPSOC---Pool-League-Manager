@@ -1,4 +1,4 @@
-from ..queries import add_game, add_player, add_semester, add_session, get_player_id_by_name
+from ..queries import add_game, add_player, add_semester, add_session, get_player_id_from_name
 from ..schema import create_tables
 
 create_tables(dest="extradata.db")
@@ -85,8 +85,8 @@ def add_sessions_db(sessions, sm):
                 winner = game[1]
                 loser = game[0]
 
-            winner_id = get_player_id_by_name(winner, dest="extradata.db")
-            loser_id = get_player_id_by_name(loser, dest="extradata.db")
+            winner_id = get_player_id_from_name(winner, dest="extradata.db")
+            loser_id = get_player_id_from_name(loser, dest="extradata.db")
 
             add_game(ses_id, winner_id, loser_id, winner_id, dest="extradata.db")
 

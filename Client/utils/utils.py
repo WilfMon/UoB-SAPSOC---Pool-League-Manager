@@ -74,7 +74,7 @@ def clear_layout(layout):
             if widget is not None:
                 widget.setParent(None)
                 
-def calc_elo_change(a, b, games_a, games_b): # where A is the winner
+def calc_elo_change(a, b, games_a, games_b) -> tuple[float, float]: # where A is the winner
 
     # define the constants
     BASE = 10

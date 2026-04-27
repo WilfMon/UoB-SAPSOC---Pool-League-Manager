@@ -239,7 +239,7 @@ class StatisticsBuilder():
         print(player_info)
         self.player = PlayerObj(player_info, player_games)
 
-    def display_player_stats(self):
+    def get_graphs(self) -> tuple:
         
         # cleanup figures
         plt.close("all")
@@ -313,8 +313,15 @@ class StatisticsBuilder():
         
         return (fig1, fig2, fig3)
     
+
+class AdvancedStats():
+    def __init__(self):
+        pass
+
+    
+
 from database.db import get_connection
-from database.queries import get_player_num_games_played, get_player_id_by_name
+from database.queries import get_player_num_games_played, get_player_id_from_name
     
 class Leaderboard():
     def __init__(self):
@@ -468,7 +475,7 @@ class Leaderboard():
         
         # to remove players that havent played much from the alltime leaderboard
         for player in players:
-            num_games = get_player_num_games_played(get_player_id_by_name(player[0]))
+            num_games = get_player_num_games_played(get_player_id_from_name(player[0]))
             
             if num_games < 10:
                 players_copy.remove(player)
@@ -490,7 +497,7 @@ class Leaderboard():
         
         # to remove players that havent played much from the alltime leaderboard
         for player in players:
-            num_games = get_player_num_games_played(get_player_id_by_name(player[0]))
+            num_games = get_player_num_games_played(get_player_id_from_name(player[0]))
             
             if num_games < 10:
                 players.remove(player)
