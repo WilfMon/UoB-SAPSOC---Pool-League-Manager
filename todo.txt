@@ -20,7 +20,7 @@ APPLICATION
 - add a average winrate to statistics
 - make statistics pretty
 - adjust elo system
-- fix leaderboard spacing
+- add a way to only display "current" players in the alltime leaderboard
 
 -- Big Additions --
 - add a tools page that allows editing of the database and uploading of data to the website

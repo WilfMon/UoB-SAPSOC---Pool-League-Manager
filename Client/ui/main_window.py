@@ -70,13 +70,13 @@ class MainWindow(QMainWindow):
         
         # automatically determine semester and year
         if 9 <= self.month <= 12:
-            sem_name = self.year + ".1"
+            sem_name = f"{int(self.year) - 1}{self.year}.1"
             
             add_semester(sem_name)
             self.semester_id = get_semester_id_from_name(sem_name)
 
         if 1 <= self.month <= 8:
-            sem_name = self.year + ".2"
+            sem_name = f"{int(self.year) - 1}{self.year}.2"
             
             add_semester(sem_name)
             self.semester_id = get_semester_id_from_name(sem_name)
@@ -1048,7 +1048,7 @@ class MainWindow(QMainWindow):
         for sem in semester_leaderboard:
             title = str(sem[-1][0][1]).split(".")
             
-            self.box_to_select_semester.addItem(f"{title[0]} Semester: {title[1]}", sem[-1][0][0])
+            self.box_to_select_semester.addItem(f"{title[0]}-{title[1]} Semester: {title[2]}", sem[-1][0][0])
             
         self.box_to_select_semester.setCurrentIndex(len(semester_leaderboard) - 1) # latest semster
             

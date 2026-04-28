@@ -1,0 +1,2421 @@
+2024.2025.1
+.
+31.10.2024
+Will, Vickers, George, Worsley, 0, 1
+Finlay, Horn, Ernie, Sim, 0, 1
+Malachi, Bielby, Alex, Hill, 0, 1
+Brad, O'Sullivan, Dominic, Ward, 1, 0
+Bilal, S, Marlow, BR, 1, 0
+Jonathan, Roberts, Henry, Brooks, 1, 0
+Wilf, Howard, Dylan, Nolan, 1, 0
+Matt, Woodcock, Miles, Rowbottom, 1, 0
+Ryan, Chambers, Glen, Lim, 1, 0
+Rob, Hall, Henry, Myatt, 1, 0
+
+Will, Vickers, Ernie, Sim, 1, 0
+George, Worsley, Alex, Hill, 0, 1
+Finlay, Horn, Dominic, Ward, 1, 0
+Malachi, Bielby, Marlow, BR, 0, 1
+Brad, O'Sullivan, Henry, Brooks, 0, 1
+Bilal, S, Dylan, Nolan, 1, 0
+Jonathan, Roberts, Miles, Rowbottom, 1, 0
+Wilf, Howard, Glen, Lim, 1, 0
+Matt, Woodcock, Henry, Myatt, 1, 0
+Ryan, Chambers, Rob, Hall, 0, 1
+
+akanksh, Shetty, Alex, Hill, 0, 1
+Ernie, Sim, Marlow, BR, 0, 1
+Will, Vickers, Henry, Brooks, 0, 1
+George, Worsley, Dylan, Nolan, 1, 0
+Finlay, Horn, Miles, Rowbottom, 1, 0
+Malachi, Bielby, Glen, Lim, 1, 0
+Brad, O'Sullivan, Henry, Myatt, 0, 1
+Bilal, S, Rob, Hall, 1, 0
+Jonathan, Roberts, Ryan, Chambers, 0, 1
+Wilf, Howard, Matt, Woodcock, 1, 0
+
+akanksh, Shetty, Marlow, BR, 0, 1
+Alex, Hill, Henry, Brooks, 0, 1
+Ernie, Sim, Dylan, Nolan, 1, 0
+Will, Vickers, Miles, Rowbottom, 0, 1
+George, Worsley, Glen, Lim, 1, 0
+Finlay, Horn, Henry, Myatt, 0, 1
+Malachi, Bielby, Rob, Hall, 0, 1
+Bilal, S, Matt, Woodcock, 1, 0
+Jonathan, Roberts, Wilf, Howard, 1, 0
+
+akanksh, Shetty, Henry, Brooks, 0, 1
+Marlow, BR, Dylan, Nolan, 1, 0
+Alex, Hill, Miles, Rowbottom, 0, 1
+Ernie, Sim, Glen, Lim, 0, 1
+George, Worsley, Rob, Hall, 0, 1
+Finlay, Horn, Ryan, Chambers, 1, 0
+Malachi, Bielby, Matt, Woodcock, 0, 1
+Bilal, S, Jonathan, Roberts, 1, 0
+Wilf, Howard, Will, Vickers, 1, 0
+.
+06.11.2024
+Duncan, Withers, Karam, Uppal, 1, 0
+Joe, Hoare, Max, Robertson, 0, 1
+
+Lawson, Bartlett-Wills, Jonathan, Mulvey, 1, 0
+Duncan, Withers, Max, Robertson, 1, 0
+
+Henry, Myatt, Karam, Uppal, 0, 1
+Lawson, Bartlett-Wills, Max, Robertson, 0, 1
+
+Henry, Myatt, Jonathan, Mulvey, 1, 0
+
+Karam, Uppal, Jonathan, Mulvey, 0, 1
+Henry, Myatt, Max, Robertson, 0, 1
+
+Joshua, Bridges, James, Lund, 0, 1
+Karam, Uppal, Max, Robertson, 1, 0
+.
+07.11.2024
+Rob, Hall, Dylan, Nolan, 1, 0
+Bilal, S, Jamie, Henwood, 1, 0
+Wilf, Howard, Brad, O'Sullivan, 1, 0
+Will, Vickers, Jonathan, Roberts, 0, 1
+Alex, Hill, Ryan, Chambers, 0, 1
+Sam, Acklam, Henry, Brooks, 1, 0
+Ernie, Sim, Joshua, Bridges, 0, 1
+
+Max, Robertson, Jamie, Henwood, 0, 1
+Dylan, Nolan, Brad, O'Sullivan, 0, 1
+George, Worsley, Jonathan, Roberts, 1, 0
+Rob, Hall, Ryan, Chambers, 1, 0
+Bilal, S, Henry, Brooks, 1, 0
+Wilf, Howard, Joshua, Bridges, 1, 0
+Will, Vickers, Ernie, Sim, 1, 0
+Alex, Hill, Sam, Acklam, 1, 0
+
+Max, Robertson, Brad, O'Sullivan, 0, 1
+Jamie, Henwood, Jonathan, Roberts, 0, 1
+Dylan, Nolan, Ryan, Chambers, 0, 1
+George, Worsley, Henry, Brooks, 1, 0
+Rob, Hall, Joshua, Bridges, 0, 1
+Bilal, S, Ernie, Sim, 0, 1
+Wilf, Howard, Sam, Acklam, 1, 0
+Will, Vickers, Alex, Hill, 0, 1
+
+Miles, Rowbottom, Brad, O'Sullivan, 0, 1
+Max, Robertson, Ryan, Chambers, 1, 0
+Jamie, Henwood, Henry, Brooks, 0, 1
+Dylan, Nolan, Joshua, Bridges, 0, 1
+George, Worsley, Ernie, Sim, 1, 0
+Rob, Hall, Sam, Acklam, 0, 1
+Bilal, S, Alex, Hill, 1, 0
+Wilf, Howard, Will, Vickers, 1, 0
+
+Miles, Rowbottom, Jonathan, Roberts, 0, 1
+Brad, O'Sullivan, Ryan, Chambers, 0, 1
+Max, Robertson, Joshua, Bridges, 0, 1
+Jamie, Henwood, Ernie, Sim, 1, 0
+Dylan, Nolan, Sam, Acklam, 0, 1
+George, Worsley, Alex, Hill, 0, 1
+Rob, Hall, Will, Vickers, 1, 0
+Bilal, S, Wilf, Howard, 1, 0
+
+Miles, Rowbottom, Ryan, Chambers, 1, 0
+Jonathan, Roberts, Henry, Brooks, 0, 1
+Brad, O'Sullivan, Joshua, Bridges, 1, 0
+Max, Robertson, Sam, Acklam, 1, 0
+Jamie, Henwood, Alex, Hill, 0, 1
+Dylan, Nolan, Will, Vickers, 1, 0
+George, Worsley, Wilf, Howard, 1, 0
+Rob, Hall, Bilal, S, 1, 0
+.
+20.11.2024
+George, Worsley, Brad, O'Sullivan, 0, 1
+Matt, Woodcock, Will, Vickers, 1, 0
+Dominic, Ward, Jonathan, Roberts, 0, 1
+Finlay, Horn, Marlow, BR, 1, 0
+Wilf, Howard, Bilal, S, 1, 0
+Maravan, K, akanksh, Shetty, 0, 1
+Ryan, Chambers, Dylan, Nolan, 1, 0
+Henry, Brooks, Rob, Hall, 0, 1
+Henry, Myatt, Malachi, Bielby, 1, 0
+
+George, Worsley, Will, Vickers, 1, 0
+Brad, O'Sullivan, Jonathan, Roberts, 1, 0
+Matt, Woodcock, Marlow, BR, 1, 0
+Dominic, Ward, Malachi, Bielby, 0, 1
+Henry, Brooks, Henry, Myatt, 1, 0
+Rob, Hall, akanksh, Shetty, 1, 0
+Wilf, Howard, Dylan, Nolan, 1, 0
+Maravan, K, Ryan, Chambers, 0, 1
+Finlay, Horn, Bilal, S, 1, 0
+
+Brad, O'Sullivan, Will, Vickers, 1, 0
+Henry, Myatt, akanksh, Shetty, 1, 0
+Qasim, H, Hashim, C, 0, 1
+Dylan, Nolan, Bilal, S, 0, 1
+Wilf, Howard, Maravan, K, 1, 0
+Dominic, Ward, Matt, Woodcock, 1, 0
+
+Marlow, BR, Malachi, Bielby, 1, 0
+
+Hashim, C, Will, Vickers, 1, 0
+Qasim, H, Marlow, BR, 0, 1
+Bilal, S, Malachi, Bielby, 1, 0
+Brad, O'Sullivan, Henry, Myatt, 1, 0
+Matt, Woodcock, akanksh, Shetty, 1, 0
+Dominic, Ward, Dylan, Nolan, 1, 0
+Finlay, Horn, Ryan, Chambers, 1, 0
+Henry, Brooks, Maravan, K, 1, 0
+Rob, Hall, Wilf, Howard, 0, 1
+Jonathan, Roberts, Alex, Hill, 0, 1
+
+Alex, Hill, Jonathan, Roberts, 0, 1
+Will, Vickers, Marlow, BR, 0, 1
+Hashim, C, Malachi, Bielby, 0, 1
+Qasim, H, Henry, Myatt, 1, 0
+Bilal, S, akanksh, Shetty, 1, 0
+Brad, O'Sullivan, Dylan, Nolan, 1, 0
+Matt, Woodcock, Ryan, Chambers, 0, 1
+Finlay, Horn, Wilf, Howard, 1, 0
+Henry, Brooks, Rob, Hall, 1, 0
+.
+27.11.2024
+Malachi, Bielby, akanksh, Shetty, 0, 1
+Dylan, Nolan, Ryan, Chambers, 0, 1
+Matt, Woodcock, Henry, Myatt, 0, 1
+Will, Vickers, Finlay, Horn, 1, 0
+Henry, Brooks, Wilf, Howard, 1, 0
+Brad, O'Sullivan, Marlow, BR, 1, 0
+Jonathan, Roberts, Rob, Hall, 0, 1
+
+Bilal, S, akanksh, Shetty, 1, 0
+George, Worsley, Henry, Myatt, 1, 0
+Miles, Rowbottom, Finlay, Horn, 0, 1
+Malachi, Bielby, Wilf, Howard, 0, 1
+Dylan, Nolan, Marlow, BR, 1, 0
+Matt, Woodcock, Rob, Hall, 1, 0
+Will, Vickers, Jonathan, Roberts, 0, 1
+Henry, Brooks, Brad, O'Sullivan, 1, 0
+
+Bilal, S, Ryan, Chambers, 1, 0
+akanksh, Shetty, Henry, Myatt, 0, 1
+George, Worsley, Wilf, Howard, 0, 1
+Miles, Rowbottom, Marlow, BR, 1, 0
+Malachi, Bielby, Rob, Hall, 0, 1
+Dylan, Nolan, Jonathan, Roberts, 0, 1
+Matt, Woodcock, Brad, O'Sullivan, 0, 1
+Will, Vickers, Henry, Brooks, 0, 1
+
+Bilal, S, Henry, Myatt, 1, 0
+Ryan, Chambers, Finlay, Horn, 0, 1
+akanksh, Shetty, Wilf, Howard, 0, 1
+George, Worsley, Rob, Hall, 1, 0
+Miles, Rowbottom, Jonathan, Roberts, 0, 1
+Malachi, Bielby, Brad, O'Sullivan, 0, 1
+Dylan, Nolan, Henry, Brooks, 0, 1
+Matt, Woodcock, Will, Vickers, 1, 0
+
+Bilal, S, Finlay, Horn, 1, 0
+Henry, Myatt, Wilf, Howard, 0, 1
+Ryan, Chambers, Marlow, BR, 1, 0
+akanksh, Shetty, Rob, Hall, 0, 1
+George, Worsley, Brad, O'Sullivan, 1, 0
+Miles, Rowbottom, Henry, Brooks, 0, 1
+Malachi, Bielby, Will, Vickers, 1, 0
+Dylan, Nolan, Matt, Woodcock, 0, 1
+
+Bilal, S, Wilf, Howard, 1, 0
+Finlay, Horn, Marlow, BR, 1, 0
+Henry, Myatt, Rob, Hall, 1, 0
+Ryan, Chambers, Jonathan, Roberts, 1, 0
+akanksh, Shetty, Brad, O'Sullivan, 0, 1
+George, Worsley, Will, Vickers, 1, 0
+Miles, Rowbottom, Matt, Woodcock, 0, 1
+Malachi, Bielby, Dylan, Nolan, 0, 1
+
+Bilal, S, Marlow, BR, 0, 1
+Wilf, Howard, Rob, Hall, 0, 1
+Finlay, Horn, Jonathan, Roberts, 0, 1
+Henry, Myatt, Brad, O'Sullivan, 0, 1
+Ryan, Chambers, Henry, Brooks, 0, 1
+akanksh, Shetty, Will, Vickers, 0, 1
+George, Worsley, Dylan, Nolan, 1, 0
+Miles, Rowbottom, Malachi, Bielby, 1, 0
+.
+04.12.2024
+Brad, O'Sullivan, Wilf, Howard, 1, 0
+Dylan, Nolan, Alex, Hill, 1, 0
+Ahmad, Ameer, George, Worsley, 0, 1
+Bilal, S, Jonathan, Roberts, 0, 1
+Malachi, Bielby, Finlay, Horn, 0, 1
+Marlow, BR, Max, Robertson, 0, 1
+Henry, Brooks, Rob, Hall, 1, 0
+
+Matt, Woodcock, Alex, Hill, 1, 0
+Wilf, Howard, George, Worsley, 1, 0
+Ryan, Chambers, Jonathan, Roberts, 1, 0
+Brad, O'Sullivan, Finlay, Horn, 0, 1
+Dylan, Nolan, Max, Robertson, 0, 1
+Ahmad, Ameer, Rob, Hall, 0, 1
+Bilal, S, Henry, Brooks, 1, 0
+Malachi, Bielby, Marlow, BR, 0, 1
+Maisie, Tuck, Mazen, Sidd, 0, 1
+
+Will, Vickers, Alex, Hill, 1, 0
+Mazen, Sidd, Jonathan, Roberts, 0, 1
+Maisie, Tuck, Finlay, Horn, 0, 1
+Matt, Woodcock, Max, Robertson, 1, 0
+Wilf, Howard, Rob, Hall, 0, 1
+Ryan, Chambers, Henry, Brooks, 1, 0
+Brad, O'Sullivan, Marlow, BR, 0, 1
+Dylan, Nolan, Malachi, Bielby, 0, 1
+Ahmad, Ameer, Bilal, S, 1, 0
+
+Will, Vickers, George, Worsley, 1, 0
+Alex, Hill, Jonathan, Roberts, 1, 0
+Mazen, Sidd, Max, Robertson, 1, 0
+Maisie, Tuck, Rob, Hall, 0, 1
+Matt, Woodcock, Henry, Brooks, 0, 1
+Wilf, Howard, Marlow, BR, 1, 0
+Ryan, Chambers, Malachi, Bielby, 0, 1
+Brad, O'Sullivan, Bilal, S, 0, 1
+Dylan, Nolan, Ahmad, Ameer, 0, 1
+
+Will, Vickers, Jonathan, Roberts, 0, 1
+George, Worsley, Finlay, Horn, 0, 1
+Alex, Hill, Max, Robertson, 1, 0
+Mazen, Sidd, Rob, Hall, 0, 1
+Maisie, Tuck, Henry, Brooks, 0, 1
+Matt, Woodcock, Marlow, BR, 1, 0
+Wilf, Howard, Malachi, Bielby, 1, 0
+Ryan, Chambers, Bilal, S, 0, 1
+Brad, O'Sullivan, Dylan, Nolan, 1, 0
+
+Will, Vickers, Finlay, Horn, 1, 0
+Jonathan, Roberts, Max, Robertson, 1, 0
+George, Worsley, Rob, Hall, 1, 0
+Alex, Hill, Henry, Brooks, 1, 0
+Mazen, Sidd, Marlow, BR, 1, 0
+Maisie, Tuck, Malachi, Bielby, 1, 0
+Matt, Woodcock, Bilal, S, 0, 1
+Wilf, Howard, Dylan, Nolan, 1, 0
+Ryan, Chambers, Brad, O'Sullivan, 0, 1
+
+Finlay, Horn, Rob, Hall, 1, 0
+Jonathan, Roberts, Henry, Brooks, 0, 1
+George, Worsley, Marlow, BR, 0, 1
+Alex, Hill, Malachi, Bielby, 1, 0
+Mazen, Sidd, Bilal, S, 0, 1
+Maisie, Tuck, Dylan, Nolan, 1, 0
+Matt, Woodcock, Brad, O'Sullivan, 0, 1
+Wilf, Howard, Ryan, Chambers, 1, 0
+Will, Vickers, George, Worsley, 0, 1
+.
+08.12.2024
+Henry, Brooks, Brad, O'Sullivan, 0, 1
+Alex, Hill, Dylan, Nolan, 0, 1
+George, Worsley, Jonathan, Roberts, 1, 0
+Matt, Woodcock, Rob, Hall, 0, 1
+Wilf, Howard, Ryan, Chambers, 1, 0
+Dylan, Butt, Bilal, S, 0, 1
+Finlay, Horn, Domi, W, 1, 0
+Marlow, BR, akanksh, Shetty, 1, 0
+Eliott, Rhodes, Miles, Rowbottom, 1, 0
+
+Miles, Rowbottom, Eliott, Rhodes, 0, 1
+Henry, Brooks, Dylan, Nolan, 1, 0
+Brad, O'Sullivan, Jonathan, Roberts, 0, 1
+Alex, Hill, Rob, Hall, 0, 1
+George, Worsley, Ryan, Chambers, 1, 0
+Matt, Woodcock, Bilal, S, 0, 1
+Wilf, Howard, Domi, W, 1, 0
+Dylan, Butt, akanksh, Shetty, 1, 0
+Finlay, Horn, Marlow, BR, 1, 0
+
+Miles, Rowbottom, Dylan, Nolan, 0, 1
+Eliott, Rhodes, Jonathan, Roberts, 0, 1
+Henry, Brooks, Rob, Hall, 1, 0
+Brad, O'Sullivan, Ryan, Chambers, 0, 1
+Alex, Hill, Bilal, S, 1, 0
+George, Worsley, Domi, W, 1, 0
+Matt, Woodcock, akanksh, Shetty, 1, 0
+Wilf, Howard, Marlow, BR, 1, 0
+Dylan, Butt, Finlay, Horn, 0, 1
+
+Miles, Rowbottom, Jonathan, Roberts, 0, 1
+Dylan, Nolan, Rob, Hall, 0, 1
+Eliott, Rhodes, Ryan, Chambers, 1, 0
+Henry, Brooks, Bilal, S, 0, 1
+Brad, O'Sullivan, Domi, W, 1, 0
+Alex, Hill, akanksh, Shetty, 1, 0
+George, Worsley, Marlow, BR, 1, 0
+Matt, Woodcock, Finlay, Horn, 1, 0
+Wilf, Howard, Dylan, Butt, 0, 1
+
+Miles, Rowbottom, Rob, Hall, 0, 1
+Jonathan, Roberts, Ryan, Chambers, 0, 1
+Dylan, Nolan, Bilal, S, 0, 1
+Eliott, Rhodes, Domi, W, 1, 0
+Henry, Brooks, akanksh, Shetty, 1, 0
+Brad, O'Sullivan, Marlow, BR, 1, 0
+Alex, Hill, Finlay, Horn, 0, 1
+George, Worsley, Dylan, Butt, 1, 0
+Matt, Woodcock, Wilf, Howard, 0, 1
+
+Miles, Rowbottom, Ryan, Chambers, 1, 0
+Rob, Hall, Bilal, S, 0, 1
+Jonathan, Roberts, Domi, W, 0, 1
+Dylan, Nolan, akanksh, Shetty, 0, 1
+Eliott, Rhodes, Marlow, BR, 0, 1
+Henry, Brooks, Finlay, Horn, 0, 1
+Brad, O'Sullivan, Dylan, Butt, 0, 1
+Alex, Hill, Wilf, Howard, 0, 1
+George, Worsley, Matt, Woodcock, 0, 1
+######################################################################
+2024.2025.2
+.
+22.01.2025
+Malachi, Bielby, akanksh, Shetty, 1, 0
+Bilal, S, Henry, Brooks, 1, 0
+Henry, Myatt, Dylan, Butt, 1, 0
+Wilf, Howard, Bhapinder, Bains, 1, 0
+Ryan, Chambers, Alex, Hill, 0, 1
+Joshua, Bridges, Dylan, Nolan, 1, 0
+Brad, O'Sullivan, Le, Gao, 1, 0
+Rob, Hall, Paaras, Padhiar, 1, 0
+Jonathan, Roberts, Will, Vickers, 1, 0
+George, Worsley, Finlay, Horn, 1, 0
+Matt, Woodcock, Lucy, Baker, 1, 0
+
+Henry, Brooks, Bhapinder, Bains, 1, 0
+Bilal, S, Dylan, Butt, 1, 0
+Henry, Myatt, akanksh, Shetty, 1, 0
+Wilf, Howard, Alex, Hill, 0, 1
+Max, Robertson, Ben, Back, 1, 0
+Malachi, Bielby, Dylan, Nolan, 0, 1
+Ryan, Chambers, Le, Gao, 1, 0
+Joshua, Bridges, Paaras, Padhiar, 0, 1
+Brad, O'Sullivan, Will, Vickers, 1, 0
+Rob, Hall, Finlay, Horn, 0, 1
+Jonathan, Roberts, Lucy, Baker, 1, 0
+George, Worsley, Matt, Woodcock, 0, 1
+
+Ben, Back, akanksh, Shetty, 1, 0
+Bhapinder, Bains, Alex, Hill, 0, 1
+Max, Robertson, Dylan, Nolan, 0, 1
+Bilal, S, Le, Gao, 0, 1
+Dylan, Nolan, Paaras, Padhiar, 0, 1
+Henry, Brooks, Will, Vickers, 1, 0
+Henry, Myatt, Finlay, Horn, 0, 1
+Wilf, Howard, Lucy, Baker, 1, 0
+Malachi, Bielby, Matt, Woodcock, 0, 1
+Ryan, Chambers, George, Worsley, 0, 1
+Joshua, Bridges, Jonathan, Roberts, 1, 0
+Brad, O'Sullivan, Rob, Hall, 0, 1
+
+Dylan, Nolan, Finlay, Horn, 0, 1
+Ben, Back, Alex, Hill, 0, 1
+akanksh, Shetty, Dylan, Nolan, 0, 1
+Bhapinder, Bains, Le, Gao, 0, 1
+Max, Robertson, Paaras, Padhiar, 1, 0
+Bilal, S, Will, Vickers, 1, 0
+Henry, Brooks, Lucy, Baker, 1, 0
+Henry, Myatt, Matt, Woodcock, 0, 1
+Joshua, Bridges, Brad, O'Sullivan, 0, 1
+Wilf, Howard, George, Worsley, 1, 0
+Malachi, Bielby, Jonathan, Roberts, 0, 1
+Ryan, Chambers, Rob, Hall, 0, 1
+
+Alex, Hill, Le, Gao, 0, 1
+Ben, Back, Dylan, Nolan, 1, 0
+akanksh, Shetty, Paaras, Padhiar, 0, 1
+Max, Robertson, Finlay, Horn, 0, 1
+Dylan, Butt, Matt, Woodcock, 1, 0
+Henry, Brooks, George, Worsley, 0, 1
+Henry, Myatt, Jonathan, Roberts, 0, 1
+Wilf, Howard, Rob, Hall, 1, 0
+Malachi, Bielby, Brad, O'Sullivan, 0, 1
+Ryan, Chambers, Joshua, Bridges, 1, 0
+Bilal, S, Will, Vickers, 1, 0
+
+Dylan, Nolan, Jonathan, Roberts, 1, 0
+Ageet, Chaudhary, Dylan, Nolan, 0, 1
+Le, Gao, Max, Robertson, 0, 1
+Ben, Back, Paaras, Padhiar, 1, 0
+Alex, Hill, Will, Vickers, 0, 1
+akanksh, Shetty, Finlay, Horn, 0, 1
+Max, Robertson, Matt, Woodcock, 1, 0
+Bilal, S, George, Worsley, 0, 1
+Henry, Brooks, Rob, Hall, 1, 0
+Henry, Myatt, Brad, O'Sullivan, 0, 1
+Wilf, Howard, Joshua, Bridges, 0, 1
+Malachi, Bielby, Ryan, Chambers, 0, 1
+.
+29.01.2025
+Alex, Hill, Dylan, Nolan, 1, 0
+Wilf, Howard, Jonathan, Roberts, 0, 1
+Ryan, Chambers, Henry, Brooks, 0, 1
+Matt, Woodcock, Finlay, Horn, 0, 1
+Guillermo, S, Kenzie, Read, 1, 0
+akanksh, Shetty, Henry, Myatt, 0, 1
+Paaras, Padhiar, Domi, W, 1, 0
+Will, Vickers, Malachi, Bielby, 1, 0
+
+Dylan, Nolan, Jonathan, Roberts, 0, 1
+George, Worsley, Henry, Brooks, 0, 1
+Wilf, Howard, Finlay, Horn, 0, 1
+Ryan, Chambers, Kenzie, Read, 0, 1
+Matt, Woodcock, Henry, Myatt, 0, 1
+Guillermo, S, Domi, W, 0, 1
+akanksh, Shetty, Malachi, Bielby, 0, 1
+Paaras, Padhiar, Will, Vickers, 1, 0
+
+Alex, Hill, Jonathan, Roberts, 0, 1
+Dylan, Nolan, Finlay, Horn, 0, 1
+George, Worsley, Kenzie, Read, 1, 0
+Wilf, Howard, Henry, Myatt, 0, 1
+Ryan, Chambers, Domi, W, 0, 1
+Matt, Woodcock, Malachi, Bielby, 0, 1
+Guillermo, S, Will, Vickers, 0, 1
+akanksh, Shetty, Paaras, Padhiar, 0, 1
+
+Rob, Hall, Henry, Brooks, 0, 1
+Jonathan, Roberts, Finlay, Horn, 0, 1
+Alex, Hill, Kenzie, Read, 1, 0
+Dylan, Nolan, Henry, Myatt, 0, 1
+George, Worsley, Domi, W, 1, 0
+Wilf, Howard, Malachi, Bielby, 1, 0
+Ryan, Chambers, Will, Vickers, 1, 0
+Matt, Woodcock, Paaras, Padhiar, 0, 1
+Guillermo, S, akanksh, Shetty, 0, 1
+
+Rob, Hall, Finlay, Horn, 0, 1
+Henry, Brooks, Kenzie, Read, 1, 0
+Jonathan, Roberts, Henry, Myatt, 1, 0
+Alex, Hill, Domi, W, 0, 1
+Dylan, Nolan, Malachi, Bielby, 0, 1
+George, Worsley, Will, Vickers, 1, 0
+Wilf, Howard, Paaras, Padhiar, 0, 1
+Ryan, Chambers, akanksh, Shetty, 0, 1
+Matt, Woodcock, Guillermo, S, 1, 0
+
+Rob, Hall, Kenzie, Read, 1, 0
+Finlay, Horn, Henry, Myatt, 0, 1
+Henry, Brooks, Domi, W, 1, 0
+Jonathan, Roberts, Malachi, Bielby, 0, 1
+Alex, Hill, Will, Vickers, 1, 0
+Dylan, Nolan, Paaras, Padhiar, 0, 1
+George, Worsley, akanksh, Shetty, 0, 1
+Wilf, Howard, Guillermo, S, 1, 0
+Ryan, Chambers, Matt, Woodcock, 0, 1
+
+Rob, Hall, Henry, Myatt, 0, 1
+Kenzie, Read, Domi, W, 0, 1
+Finlay, Horn, Malachi, Bielby, 1, 0
+Henry, Brooks, Will, Vickers, 1, 0
+Jonathan, Roberts, Paaras, Padhiar, 1, 0
+Alex, Hill, akanksh, Shetty, 1, 0
+Dylan, Nolan, Guillermo, S, 1, 0
+George, Worsley, Matt, Woodcock, 1, 0
+Wilf, Howard, Ryan, Chambers, 0, 1
+.
+05.02.2025
+Will, Vickers, Finlay, Horn, 0, 1
+Wilf, Howard, Henry, Myatt, 0, 1
+Paaras, Padhiar, akanksh, Shetty, 1, 0
+Bilal, S, Ryan, Chambers, 0, 1
+Parish, Wright, Dylan, Nolan, 0, 1
+Jonathan, Roberts, Matt, Woodcock, 0, 1
+Rob, Hall, Dominic, Ward, 1, 0
+George, Worsley, Ben, Wylie, 1, 0
+Alex, Hill, Henry, Brooks, 0, 1
+Kenzie, Read, Brad, O'Sullivan, 0, 1
+
+Finlay, Horn, akanksh, Shetty, 1, 0
+Will, Vickers, Henry, Myatt, 0, 1
+Wilf, Howard, Ryan, Chambers, 0, 1
+Paaras, Padhiar, Dylan, Nolan, 1, 0
+Bilal, S, Matt, Woodcock, 1, 0
+Parish, Wright, Dominic, Ward, 0, 1
+Jonathan, Roberts, Ben, Wylie, 0, 1
+Rob, Hall, Gwilym, P, 1, 0
+George, Worsley, Henry, Brooks, 1, 0
+Alex, Hill, Kenzie, Read, 0, 1
+Max, Robertson, Brad, O'Sullivan, 0, 1
+
+Malachi, Bielby, Henry, Myatt, 0, 1
+Max, Robertson, Ryan, Chambers, 1, 0
+Will, Vickers, Dylan, Nolan, 0, 1
+Finlay, Horn, Matt, Woodcock, 1, 0
+Wilf, Howard, Dominic, Ward, 0, 1
+Paaras, Padhiar, Ben, Wylie, 0, 1
+Bilal, S, Gwilym, P, 1, 0
+Parish, Wright, Henry, Brooks, 0, 1
+Jonathan, Roberts, Brad, O'Sullivan, 1, 0
+Rob, Hall, Kenzie, Read, 0, 1
+George, Worsley, Alex, Hill, 1, 0
+
+Malachi, Bielby, akanksh, Shetty, 0, 1
+Henry, Myatt, Ryan, Chambers, 1, 0
+Max, Robertson, Matt, Woodcock, 0, 1
+Will, Vickers, Dominic, Ward, 0, 1
+Finlay, Horn, Ben, Wylie, 1, 0
+Wilf, Howard, Gwilym, P, 1, 0
+Paaras, Padhiar, Henry, Brooks, 1, 0
+Bilal, S, Brad, O'Sullivan, 1, 0
+Parish, Wright, Kenzie, Read, 0, 1
+Jonathan, Roberts, Alex, Hill, 1, 0
+Rob, Hall, George, Worsley, 0, 1
+
+Malachi, Bielby, Ryan, Chambers, 0, 1
+akanksh, Shetty, Dylan, Nolan, 1, 0
+Henry, Myatt, Matt, Woodcock, 1, 0
+Max, Robertson, Ben, Wylie, 1, 0
+Will, Vickers, Gwilym, P, 0, 1
+Finlay, Horn, Henry, Brooks, 0, 1
+Wilf, Howard, Brad, O'Sullivan, 1, 0
+Paaras, Padhiar, Kenzie, Read, 1, 0
+Bilal, S, Alex, Hill, 0, 1
+Parish, Wright, George, Worsley, 0, 1
+Jonathan, Roberts, Rob, Hall, 1, 0
+
+Malachi, Bielby, Dylan, Nolan, 1, 0
+Ryan, Chambers, Matt, Woodcock, 1, 0
+akanksh, Shetty, Henry, Brooks, 0, 1
+Henry, Myatt, Brad, O'Sullivan, 1, 0
+Max, Robertson, Kenzie, Read, 1, 0
+Will, Vickers, Alex, Hill, 0, 1
+Finlay, Horn, George, Worsley, 1, 0
+Wilf, Howard, Rob, Hall, 1, 0
+Paaras, Padhiar, Jonathan, Roberts, 0, 1
+Bilal, S, Parish, Wright, 1, 0
+.
+19.02.2025
+Henry, Brooks, Parish, Wright, 1, 0
+Finlay, Horn, Malachi, Bielby, 1, 0
+Paaras, Padhiar, Rob, Hall, 1, 0
+Will, Vickers, Bilal, S, 0, 1
+Joshua, Bridges, Ryan, Chambers, 1, 0
+George, Worsley, Wilf, Howard, 0, 1
+Dylan, Nolan, akanksh, Shetty, 1, 0
+Henry, Myatt, Jonathan, Roberts, 0, 1
+
+Henry, Brooks, Malachi, Bielby, 1, 0
+Parish, Wright, Rob, Hall, 0, 1
+Finlay, Horn, Bilal, S, 0, 1
+Paaras, Padhiar, Ryan, Chambers, 1, 0
+Will, Vickers, Wilf, Howard, 0, 1
+Joshua, Bridges, akanksh, Shetty, 1, 0
+George, Worsley, Jonathan, Roberts, 0, 1
+Dylan, Nolan, Henry, Myatt, 0, 1
+
+Alex, Hill, Malachi, Bielby, 1, 0
+Henry, Brooks, Bilal, S, 0, 1
+Parish, Wright, Ryan, Chambers, 0, 1
+Finlay, Horn, Wilf, Howard, 1, 0
+Paaras, Padhiar, akanksh, Shetty, 1, 0
+Will, Vickers, Jonathan, Roberts, 0, 1
+Joshua, Bridges, Henry, Myatt, 1, 0
+George, Worsley, Dylan, Nolan, 1, 0
+
+Alex, Hill, Rob, Hall, 1, 0
+Malachi, Bielby, Bilal, S, 0, 1
+Henry, Brooks, Wilf, Howard, 1, 0
+Parish, Wright, akanksh, Shetty, 0, 1
+Finlay, Horn, Jonathan, Roberts, 0, 1
+Paaras, Padhiar, Henry, Myatt, 1, 0
+Will, Vickers, Dylan, Nolan, 0, 1
+Joshua, Bridges, George, Worsley, 1, 0
+
+Alex, Hill, Bilal, S, 0, 1
+Rob, Hall, Ryan, Chambers, 0, 1
+Malachi, Bielby, Wilf, Howard, 0, 1
+Henry, Brooks, Jonathan, Roberts, 1, 0
+Parish, Wright, Henry, Myatt, 0, 1
+Finlay, Horn, Dylan, Nolan, 0, 1
+Paaras, Padhiar, George, Worsley, 1, 0
+Will, Vickers, Joshua, Bridges, 0, 1
+
+Alex, Hill, Ryan, Chambers, 0, 1
+Bilal, S, Wilf, Howard, 1, 0
+Rob, Hall, akanksh, Shetty, 1, 0
+Malachi, Bielby, Jonathan, Roberts, 0, 1
+Henry, Brooks, Dylan, Nolan, 1, 0
+Parish, Wright, George, Worsley, 0, 1
+Finlay, Horn, Joshua, Bridges, 1, 0
+Paaras, Padhiar, Will, Vickers, 1, 0
+
+Alex, Hill, Wilf, Howard, 1, 0
+Ryan, Chambers, akanksh, Shetty, 0, 1
+Bilal, S, Jonathan, Roberts, 1, 0
+Rob, Hall, Henry, Myatt, 1, 0
+Malachi, Bielby, Dylan, Nolan, 1, 0
+Henry, Brooks, Joshua, Bridges, 1, 0
+Parish, Wright, Will, Vickers, 0, 1
+Finlay, Horn, Paaras, Padhiar, 0, 1
+
+Alex, Hill, akanksh, Shetty, 1, 0
+Wilf, Howard, Jonathan, Roberts, 0, 1
+Ryan, Chambers, Henry, Myatt, 0, 1
+Bilal, S, Dylan, Nolan, 1, 0
+Rob, Hall, George, Worsley, 1, 0
+Malachi, Bielby, Joshua, Bridges, 0, 1
+Henry, Brooks, Paaras, Padhiar, 1, 0
+Parish, Wright, Finlay, Horn, 0, 1
+.
+26.02.2025
+Henry, Brooks, George, Worsley, 1, 0
+Bilal, S, Jonathan, Roberts, 1, 0
+Will, Vickers, Wilf, Howard, 0, 1
+Dylan, Butt, Rob, Hall, 0, 1
+akanksh, Shetty, Finlay, Horn, 0, 1
+Alex, Hill, Kenzie, Read, 0, 1
+
+Kenzie, Read, Jonathan, Roberts, 0, 1
+George, Worsley, Wilf, Howard, 0, 1
+Henry, Brooks, Alex, Hill, 0, 1
+Bilal, S, Rob, Hall, 0, 1
+Will, Vickers, Finlay, Horn, 0, 1
+Dylan, Butt, akanksh, Shetty, 1, 0
+
+Kenzie, Read, Wilf, Howard, 1, 0
+Jonathan, Roberts, Alex, Hill, 0, 1
+George, Worsley, Rob, Hall, 1, 0
+Henry, Brooks, Finlay, Horn, 0, 1
+Bilal, S, akanksh, Shetty, 1, 0
+Will, Vickers, Dylan, Butt, 0, 1
+
+Kenzie, Read, Alex, Hill, 0, 1
+Wilf, Howard, Rob, Hall, 1, 0
+Jonathan, Roberts, Finlay, Horn, 1, 0
+George, Worsley, akanksh, Shetty, 1, 0
+Henry, Brooks, Dylan, Butt, 0, 1
+Bilal, S, Will, Vickers, 1, 0
+
+Kenzie, Read, Rob, Hall, 0, 1
+Alex, Hill, Finlay, Horn, 1, 0
+Wilf, Howard, akanksh, Shetty, 1, 0
+Jonathan, Roberts, Dylan, Butt, 1, 0
+George, Worsley, Will, Vickers, 1, 0
+Henry, Brooks, Bilal, S, 1, 0
+
+Kenzie, Read, Finlay, Horn, 0, 1
+Rob, Hall, akanksh, Shetty, 1, 0
+Alex, Hill, Dylan, Butt, 1, 0
+Jonathan, Roberts, Bilal, S, 1, 0
+George, Worsley, Henry, Brooks, 1, 0
+Wilf, Howard, Will, Vickers, 1, 0
+
+Kenzie, Read, akanksh, Shetty, 1, 0
+Finlay, Horn, Dylan, Butt, 1, 0
+Rob, Hall, Will, Vickers, 1, 0
+Alex, Hill, Bilal, S, 0, 1
+Wilf, Howard, Henry, Brooks, 0, 1
+Jonathan, Roberts, George, Worsley, 1, 0
+
+Kenzie, Read, Dylan, Butt, 0, 1
+akanksh, Shetty, Will, Vickers, 0, 1
+Finlay, Horn, Bilal, S, 0, 1
+Rob, Hall, Henry, Brooks, 0, 1
+Alex, Hill, George, Worsley, 0, 1
+Wilf, Howard, Jonathan, Roberts, 0, 1
+
+Kenzie, Read, Will, Vickers, 0, 1
+Dylan, Butt, Bilal, S, 0, 1
+akanksh, Shetty, Henry, Brooks, 0, 1
+Finlay, Horn, George, Worsley, 0, 1
+Rob, Hall, Jonathan, Roberts, 0, 1
+Alex, Hill, Wilf, Howard, 0, 1
+.
+05.03.2025
+George, Worsley, Henry, Myatt, 0, 1
+Henry, Brooks, Paaras, Padhiar, 1, 0
+Wilf, Howard, Alex, Hill, 1, 0
+Dylan, Butt, akanksh, Shetty, 1, 0
+Dylan, Nolan, Jonathan, Roberts, 0, 1
+Bilal, S, Will, Vickers, 1, 0
+Jamie, Henwood, Ryan, Chambers, 0, 1
+Matt, Woodcock, Parish, Wright, 1, 0
+Malachi, Bielby, Finlay, Horn, 1, 0
+Kenzie, Read, Rob, Hall, 0, 1
+
+Rob, Hall, Paaras, Padhiar, 0, 1
+Henry, Myatt, Alex, Hill, 0, 1
+Kenzie, Read, akanksh, Shetty, 1, 0
+Malachi, Bielby, Jonathan, Roberts, 0, 1
+George, Worsley, Will, Vickers, 1, 0
+Henry, Brooks, Ryan, Chambers, 0, 1
+Wilf, Howard, Finlay, Horn, 1, 0
+Dylan, Butt, Parish, Wright, 1, 0
+Dylan, Nolan, Matt, Woodcock, 0, 1
+Bilal, S, Jamie, Henwood, 0, 1
+
+Marlow, BR, Paaras, Padhiar, 0, 1
+Rob, Hall, akanksh, Shetty, 1, 0
+Henry, Myatt, Jonathan, Roberts, 0, 1
+Kenzie, Read, Will, Vickers, 1, 0
+Malachi, Bielby, Ryan, Chambers, 1, 0
+George, Worsley, Finlay, Horn, 0, 1
+Henry, Brooks, Parish, Wright, 1, 0
+Wilf, Howard, Matt, Woodcock, 1, 0
+Dylan, Butt, Jamie, Henwood, 1, 0
+Dylan, Nolan, Bilal, S, 0, 1
+
+Marlow, BR, Alex, Hill, 0, 1
+Paaras, Padhiar, akanksh, Shetty, 1, 0
+Rob, Hall, Will, Vickers, 1, 0
+Henry, Myatt, Ryan, Chambers, 0, 1
+Kenzie, Read, Finlay, Horn, 1, 0
+Malachi, Bielby, Parish, Wright, 1, 0
+George, Worsley, Matt, Woodcock, 1, 0
+Henry, Brooks, Jamie, Henwood, 0, 1
+Wilf, Howard, Bilal, S, 0, 1
+Dylan, Butt, Dylan, Nolan, 1, 0
+
+Marlow, BR, akanksh, Shetty, 0, 1
+Alex, Hill, Jonathan, Roberts, 0, 1
+Paaras, Padhiar, Will, Vickers, 1, 0
+Rob, Hall, Finlay, Horn, 0, 1
+Henry, Myatt, Parish, Wright, 1, 0
+Kenzie, Read, Matt, Woodcock, 1, 0
+Malachi, Bielby, Jamie, Henwood, 1, 0
+George, Worsley, Bilal, S, 1, 0
+Henry, Brooks, Dylan, Nolan, 1, 0
+Wilf, Howard, Dylan, Butt, 1, 0
+
+Marlow, BR, Jonathan, Roberts, 0, 1
+akanksh, Shetty, Will, Vickers, 1, 0
+Alex, Hill, Ryan, Chambers, 1, 0
+Paaras, Padhiar, Finlay, Horn, 1, 0
+Rob, Hall, Matt, Woodcock, 0, 1
+Henry, Myatt, Jamie, Henwood, 0, 1
+Kenzie, Read, Bilal, S, 0, 1
+Malachi, Bielby, Dylan, Nolan, 1, 0
+George, Worsley, Dylan, Butt, 1, 0
+Henry, Brooks, Wilf, Howard, 1, 0
+
+Marlow, BR, Will, Vickers, 0, 1
+Jonathan, Roberts, Ryan, Chambers, 1, 0
+akanksh, Shetty, Finlay, Horn, 1, 0
+Alex, Hill, Parish, Wright, 0, 1
+Paaras, Padhiar, Matt, Woodcock, 0, 1
+Rob, Hall, Bilal, S, 1, 0
+Henry, Myatt, Dylan, Nolan, 1, 0
+Kenzie, Read, Dylan, Butt, 0, 1
+Malachi, Bielby, Wilf, Howard, 0, 1
+George, Worsley, Henry, Brooks, 0, 1
+.
+12.03.2025
+Henry, Brooks, Kenzie, Read, 1, 0
+Matt, Woodcock, Will, Vickers, 1, 0
+Guillermo, S, Finlay, Horn, 0, 1
+Wilf, Howard, Henry, Myatt, 1, 0
+Dylan, Nolan, Marlow, BR, 1, 0
+Malachi, Bielby, Jonathan, Roberts, 0, 1
+Bilal, S, George, Worsley, 1, 0
+akanksh, Shetty, Chris, Kirk-Bayley, 1, 0
+Errol, Dixon, Rob, Hall, 0, 1
+Jamie, Henwood, Evan, Morris, 0, 1
+
+Henry, Brooks, Will, Vickers, 1, 0
+Kenzie, Read, Finlay, Horn, 0, 1
+Matt, Woodcock, Henry, Myatt, 1, 0
+Guillermo, S, Marlow, BR, 0, 1
+Wilf, Howard, Jonathan, Roberts, 0, 1
+Dylan, Nolan, George, Worsley, 1, 0
+Malachi, Bielby, Chris, Kirk-Bayley, 1, 0
+Bilal, S, Rob, Hall, 1, 0
+akanksh, Shetty, Evan, Morris, 0, 1
+Errol, Dixon, Jamie, Henwood, 0, 1
+
+Max, Robertson, Will, Vickers, 0, 1
+Henry, Brooks, Henry, Myatt, 1, 0
+Kenzie, Read, Marlow, BR, 0, 1
+Matt, Woodcock, Jonathan, Roberts, 1, 0
+Guillermo, S, George, Worsley, 0, 1
+Wilf, Howard, Chris, Kirk-Bayley, 1, 0
+Dylan, Nolan, Rob, Hall, 0, 1
+Malachi, Bielby, Evan, Morris, 1, 0
+Bilal, S, Jamie, Henwood, 1, 0
+akanksh, Shetty, Errol, Dixon, 1, 0
+
+Max, Robertson, Finlay, Horn, 0, 1
+Will, Vickers, Henry, Myatt, 1, 0
+Henry, Brooks, Jonathan, Roberts, 1, 0
+Kenzie, Read, George, Worsley, 0, 1
+Matt, Woodcock, Chris, Kirk-Bayley, 1, 0
+Guillermo, S, Rob, Hall, 0, 1
+Wilf, Howard, Evan, Morris, 1, 0
+Dylan, Nolan, Jamie, Henwood, 0, 1
+Malachi, Bielby, Errol, Dixon, 1, 0
+Bilal, S, akanksh, Shetty, 0, 1
+
+Alex, Hill, Henry, Myatt, 0, 1
+Finlay, Horn, Marlow, BR, 1, 0
+Will, Vickers, George, Worsley, 0, 1
+Henry, Brooks, Chris, Kirk-Bayley, 1, 0
+Kenzie, Read, Rob, Hall, 0, 1
+Matt, Woodcock, Evan, Morris, 1, 0
+Guillermo, S, Jamie, Henwood, 0, 1
+Wilf, Howard, Errol, Dixon, 1, 0
+Dylan, Nolan, akanksh, Shetty, 0, 1
+Malachi, Bielby, Bilal, S, 0, 1
+.
+19.03.2025
+Henry, Brooks, Finlay, Horn, 0, 1
+Matt, Woodcock, Ryan, Chambers, 1, 0
+Evan, Morris, Errol, Dixon, 0, 1
+Bilal, S, Paaras, Padhiar, 0, 1
+Will, Vickers, Rob, Hall, 0, 1
+Dylan, Nolan, akanksh, Shetty, 1, 0
+Chris, Kirk-Bayley, Malachi, Bielby, 1, 0
+Wilf, Howard, George, Worsley, 1, 0
+Domi, W, Jamie, Henwood, 0, 1
+Henry, Myatt, Jonathan, Roberts, 0, 1
+
+Henry, Brooks, Ryan, Chambers, 1, 0
+Finlay, Horn, Errol, Dixon, 1, 0
+Matt, Woodcock, Paaras, Padhiar, 1, 0
+Evan, Morris, Rob, Hall, 0, 1
+Bilal, S, akanksh, Shetty, 1, 0
+Will, Vickers, Malachi, Bielby, 1, 0
+Dylan, Nolan, George, Worsley, 1, 0
+Chris, Kirk-Bayley, Jamie, Henwood, 0, 1
+Wilf, Howard, Jonathan, Roberts, 1, 0
+Domi, W, Henry, Myatt, 0, 1
+
+Henry, Brooks, Errol, Dixon, 1, 0
+Ryan, Chambers, Paaras, Padhiar, 0, 1
+Finlay, Horn, Rob, Hall, 1, 0
+Matt, Woodcock, akanksh, Shetty, 1, 0
+Evan, Morris, Malachi, Bielby, 0, 1
+Bilal, S, George, Worsley, 1, 0
+Will, Vickers, Jamie, Henwood, 0, 1
+Dylan, Nolan, Jonathan, Roberts, 0, 1
+Chris, Kirk-Bayley, Henry, Myatt, 0, 1
+Wilf, Howard, Domi, W, 1, 0
+
+Henry, Brooks, Paaras, Padhiar, 0, 1
+Errol, Dixon, Rob, Hall, 0, 1
+Ryan, Chambers, akanksh, Shetty, 0, 1
+Finlay, Horn, Malachi, Bielby, 1, 0
+Matt, Woodcock, George, Worsley, 0, 1
+Evan, Morris, Jamie, Henwood, 0, 1
+Bilal, S, Jonathan, Roberts, 1, 0
+Will, Vickers, Henry, Myatt, 0, 1
+Dylan, Nolan, Domi, W, 1, 0
+Chris, Kirk-Bayley, Wilf, Howard, 0, 1
+
+Henry, Brooks, Rob, Hall, 1, 0
+Paaras, Padhiar, akanksh, Shetty, 1, 0
+Errol, Dixon, Malachi, Bielby, 0, 1
+Ryan, Chambers, George, Worsley, 0, 1
+Finlay, Horn, Jamie, Henwood, 1, 0
+Matt, Woodcock, Jonathan, Roberts, 1, 0
+Evan, Morris, Henry, Myatt, 0, 1
+Bilal, S, Domi, W, 0, 1
+Will, Vickers, Wilf, Howard, 0, 1
+Dylan, Nolan, Chris, Kirk-Bayley, 1, 0
+
+Henry, Brooks, akanksh, Shetty, 1, 0
+Rob, Hall, Malachi, Bielby, 0, 1
+Paaras, Padhiar, George, Worsley, 0, 1
+Errol, Dixon, Jamie, Henwood, 0, 1
+Ryan, Chambers, Jonathan, Roberts, 0, 1
+Finlay, Horn, Henry, Myatt, 0, 1
+Matt, Woodcock, Domi, W, 1, 0
+Evan, Morris, Wilf, Howard, 0, 1
+Bilal, S, Chris, Kirk-Bayley, 1, 0
+Will, Vickers, Dylan, Nolan, 1, 0
+
+Henry, Brooks, Malachi, Bielby, 1, 0
+akanksh, Shetty, George, Worsley, 0, 1
+Rob, Hall, Jamie, Henwood, 1, 0
+Paaras, Padhiar, Jonathan, Roberts, 0, 1
+Errol, Dixon, Henry, Myatt, 0, 1
+Ryan, Chambers, Domi, W, 0, 1
+Finlay, Horn, Wilf, Howard, 0, 1
+Matt, Woodcock, Chris, Kirk-Bayley, 1, 0
+Evan, Morris, Dylan, Nolan, 1, 0
+Bilal, S, Will, Vickers, 0, 1
+.
+29.03.2025
+akanksh, Shetty, George, Worsley, 0, 1
+Paaras, Padhiar, Henry, Myatt, 1, 0
+Wilf, Howard, Will, Vickers, 1, 0
+Rob, Hall, Malachi, Bielby, 0, 1
+Ryan, Chambers, Bilal, S, 0, 1
+Jonathan, Roberts, Dylan, Nolan, 1, 0
+
+akanksh, Shetty, Henry, Myatt, 1, 0
+George, Worsley, Matt, Woodcock, 0, 1
+Paaras, Padhiar, Will, Vickers, 1, 0
+Wilf, Howard, Bilal, S, 0, 1
+Rob, Hall, Dylan, Nolan, 1, 0
+Ryan, Chambers, Jonathan, Roberts, 1, 0
+
+akanksh, Shetty, Matt, Woodcock, 0, 1
+Henry, Myatt, Will, Vickers, 0, 1
+George, Worsley, Malachi, Bielby, 1, 0
+Paaras, Padhiar, Bilal, S, 0, 1
+Wilf, Howard, Jonathan, Roberts, 0, 1
+Dylan, Nolan, Rob, Hall, 1, 0
+
+akanksh, Shetty, Will, Vickers, 0, 1
+Matt, Woodcock, Malachi, Bielby, 0, 1
+Henry, Myatt, Bilal, S, 0, 1
+George, Worsley, Dylan, Nolan, 1, 0
+Paaras, Padhiar, Jonathan, Roberts, 1, 0
+Wilf, Howard, Rob, Hall, 1, 0
+
+akanksh, Shetty, Malachi, Bielby, 0, 1
+Will, Vickers, Bilal, S, 1, 0
+Matt, Woodcock, Dylan, Nolan, 1, 0
+Henry, Myatt, Jonathan, Roberts, 0, 1
+George, Worsley, Rob, Hall, 1, 0
+Paaras, Padhiar, Wilf, Howard, 1, 0
+
+akanksh, Shetty, Bilal, S, 0, 1
+Malachi, Bielby, Dylan, Nolan, 0, 1
+Will, Vickers, Jonathan, Roberts, 1, 0
+Matt, Woodcock, Rob, Hall, 0, 1
+Henry, Myatt, Wilf, Howard, 0, 1
+George, Worsley, Paaras, Padhiar, 0, 1
+
+akanksh, Shetty, Dylan, Nolan, 1, 0
+Bilal, S, Jonathan, Roberts, 1, 0
+Malachi, Bielby, Rob, Hall, 0, 1
+Will, Vickers, Wilf, Howard, 0, 1
+Matt, Woodcock, Paaras, Padhiar, 1, 0
+Henry, Myatt, George, Worsley, 0, 1
+
+akanksh, Shetty, Jonathan, Roberts, 0, 1
+Dylan, Nolan, Rob, Hall, 0, 1
+Bilal, S, Wilf, Howard, 1, 0
+Malachi, Bielby, Paaras, Padhiar, 0, 1
+Matt, Woodcock, George, Worsley, 0, 1
+
+akanksh, Shetty, Rob, Hall, 1, 0
+Jonathan, Roberts, Wilf, Howard, 0, 1
+Dylan, Nolan, Paaras, Padhiar, 0, 1
+Bilal, S, George, Worsley, 1, 0
+Malachi, Bielby, Matt, Woodcock, 0, 1
+
+Tiam, Baharvand, Rob, Hall, 0, 1
+akanksh, Shetty, Paaras, Padhiar, 0, 1
+Jonathan, Roberts, George, Worsley, 1, 0
+Dylan, Nolan, Matt, Woodcock, 0, 1
+Bilal, S, Malachi, Bielby, 0, 1
+
+Tiam, Baharvand, Wilf, Howard, 0, 1
+Rob, Hall, Paaras, Padhiar, 1, 0
+akanksh, Shetty, Matt, Woodcock, 0, 1
+Jonathan, Roberts, Malachi, Bielby, 1, 0
+Dylan, Nolan, Bilal, S, 0, 1
+
+Tiam, Baharvand, Paaras, Padhiar, 0, 1
+Wilf, Howard, George, Worsley, 0, 1
+Rob, Hall, Matt, Woodcock, 1, 0
+akanksh, Shetty, Bilal, S, 0, 1
+Jonathan, Roberts, Dylan, Nolan, 1, 0
+.
+02.04.2025
+George, Worsley, Henry, Myatt, 1, 0
+akanksh, Shetty, Paaras, Padhiar, 0, 1
+Matt, Woodcock, Alex, Hill, 1, 0
+Wilf, Howard, Bilal, S, 0, 1
+Jonathan, Roberts, Dylan, Nolan, 1, 0
+Jamie, Henwood, Finlay, Horn, 1, 0
+Ryan, Chambers, Henry, Brooks, 1, 0
+
+Ryan, Chambers, Henry, Brooks, 1, 0
+Henry, Myatt, Paaras, Padhiar, 0, 1
+George, Worsley, Alex, Hill, 1, 0
+akanksh, Shetty, Bilal, S, 0, 1
+Matt, Woodcock, Dylan, Nolan, 0, 1
+Wilf, Howard, Finlay, Horn, 0, 1
+Jonathan, Roberts, Jamie, Henwood, 1, 0
+Will, Vickers, Parish, Wright, 1, 0
+
+Parish, Wright, Paaras, Padhiar, 0, 1
+Henry, Brooks, Alex, Hill, 1, 0
+Will, Vickers, Bilal, S, 0, 1
+Ryan, Chambers, Dylan, Nolan, 1, 0
+Henry, Myatt, Finlay, Horn, 0, 1
+George, Worsley, Jamie, Henwood, 1, 0
+akanksh, Shetty, Jonathan, Roberts, 0, 1
+Matt, Woodcock, Wilf, Howard, 1, 0
+
+Parish, Wright, Alex, Hill, 0, 1
+Paaras, Padhiar, Bilal, S, 0, 1
+Henry, Brooks, Dylan, Nolan, 1, 0
+Will, Vickers, Finlay, Horn, 0, 1
+Ryan, Chambers, Jamie, Henwood, 1, 0
+Henry, Myatt, Jonathan, Roberts, 0, 1
+George, Worsley, Wilf, Howard, 0, 1
+akanksh, Shetty, Matt, Woodcock, 0, 1
+
+Parish, Wright, Bilal, S, 0, 1
+Alex, Hill, Dylan, Nolan, 1, 0
+Paaras, Padhiar, Finlay, Horn, 1, 0
+Henry, Brooks, Jamie, Henwood, 0, 1
+Will, Vickers, Jonathan, Roberts, 0, 1
+Ryan, Chambers, Wilf, Howard, 1, 0
+Henry, Myatt, Matt, Woodcock, 0, 1
+George, Worsley, akanksh, Shetty, 1, 0
+
+Parish, Wright, Dylan, Nolan, 0, 1
+Bilal, S, Finlay, Horn, 1, 0
+Alex, Hill, Jamie, Henwood, 0, 1
+Paaras, Padhiar, Jonathan, Roberts, 0, 1
+Henry, Brooks, Wilf, Howard, 1, 0
+Will, Vickers, Matt, Woodcock, 0, 1
+Ryan, Chambers, akanksh, Shetty, 0, 0
+Henry, Myatt, George, Worsley, 0, 1
+
+Parish, Wright, Finlay, Horn, 1, 0
+Dylan, Nolan, Jamie, Henwood, 0, 1
+Bilal, S, Jonathan, Roberts, 0, 1
+Alex, Hill, Wilf, Howard, 1, 0
+Paaras, Padhiar, Matt, Woodcock, 0, 1
+Henry, Brooks, akanksh, Shetty, 1, 0
+Will, Vickers, George, Worsley, 0, 1
+Ryan, Chambers, Henry, Myatt, 0, 1
+
+Max, Robertson, Finlay, Horn, 0, 1
+Parish, Wright, Jonathan, Roberts, 0, 1
+Dylan, Nolan, Wilf, Howard, 1, 0
+Bilal, S, Matt, Woodcock, 1, 0
+Alex, Hill, akanksh, Shetty, 0, 1
+Paaras, Padhiar, George, Worsley, 1, 0
+Henry, Brooks, Henry, Myatt, 1, 0
+Will, Vickers, Ryan, Chambers, 1, 0
+
+Max, Robertson, Jamie, Henwood, 1, 0
+Finlay, Horn, Jonathan, Roberts, 1, 0
+Parish, Wright, Matt, Woodcock, 0, 1
+Dylan, Nolan, akanksh, Shetty, 0, 1
+Bilal, S, George, Worsley, 1, 0
+Paaras, Padhiar, Ryan, Chambers, 1, 0
+Henry, Brooks, Will, Vickers, 1, 0
+
+Max, Robertson, Jonathan, Roberts, 0, 1
+Jamie, Henwood, Wilf, Howard, 1, 0
+Finlay, Horn, Matt, Woodcock, 0, 1
+Parish, Wright, George, Worsley, 0, 1
+Dylan, Nolan, Ryan, Chambers, 0, 0
+Bilal, S, Will, Vickers, 1, 0
+Paaras, Padhiar, Henry, Brooks, 0, 1
+######################################################################
+2025.2026.1
+.
+22.10.2025
+Dylan, Nolan, Fotis, T, 1, 0
+Ed, Robbins, James, Lund, 0, 1
+Callum, Tomlinson, Osian, Drake, 1, 0
+Elijah, Brook, Malachi, Bielby, 0, 1
+Paaras, Padhiar, Mackenzie, Lambert, 1, 0
+Will, Whitman, Alex, Hill, 0, 1
+Wilf, Howard, Jonathan, Roberts, 0, 1
+akanksh, Shetty, Matt, Woodcock, 0, 1
+Henry, Brooks, Evan, Morris, 1, 0
+David, Burgess, Henry, Myatt, 0, 1
+Joel, T, Martin, Casey, 0, 1
+akanksh, Shetty, Tolga, Koymen, 0, 1
+Finlay, Horn, Will, Vickers, 1, 0
+Jake, Thompson, Tolga, Koymen, 1, 0
+Ryan, Chambers, Jak, Dables, 0, 1
+George, Worsley, Errol, Dixon, 1, 0
+
+Dylan, Nolan, Jonathan, Roberts, 0, 1
+Harry, T, Matt, Woodcock, 1, 0
+Rob, Hall, James, Lund, 0, 1
+Godrick, X, Malachi, Bielby, 0, 1
+Ed, Robbins, Evan, Morris, 1, 0
+Paaras, Padhiar, Will, Whitman, 1, 0
+Callum, Tomlinson, Fotis, T, 1, 0
+Henry, Brooks, Martin, Casey, 1, 0
+Wilf, Howard, Mackenzie, Lambert, 1, 0
+George, Worsley, Jak, Dables, 0, 1
+Joel, T, Alex, Hill, 0, 1
+Keir, Lorkin, Jensen, James, 1, 0
+Finlay, Horn, David, Burgess, 1, 0
+Ryan, Chambers, Henry, Myatt, 0, 1
+Jake, Thompson, Will, Vickers, 1, 0
+
+Godrick, X, Errol, Dixon, 1, 0
+Jensen, James, Matt, Woodcock, 0, 1
+Keir, Lorkin, Osian, Drake, 1, 0
+James, Lund, Malachi, Bielby, 1, 0
+Rob, Hall, Evan, Morris, 1, 0
+Harry, T, Tolga, Koymen, 1, 0
+Ryan, Chambers, Finlay, Horn, 0, 1
+Jake, Thompson, David, Burgess, 0, 1
+George, Worsley, Henry, Myatt, 0, 1
+Joel, T, Paaras, Padhiar, 0, 1
+akanksh, Shetty, Will, Vickers, 1, 0
+Elijah, Brook, Jak, Dables, 1, 0
+Dylan, Nolan, Mackenzie, Lambert, 1, 0
+Ed, Robbins, Martin, Casey, 1, 0
+Wilf, Howard, Will, Whitman, 1, 0
+Callum, Tomlinson, Jonathan, Roberts, 0, 1
+Henry, Brooks, Alex, Hill, 1, 0
+
+James, Lund, Evan, Morris, 1, 0
+Keir, Lorkin, Malachi, Bielby, 1, 0
+Osian, Drake, Matt, Woodcock, 0, 1
+Henry, Brooks, Henry, Myatt, 1, 0
+Wilf, Howard, Ryan, Chambers, 1, 0
+Ed, Robbins, Jak, Dables, 1, 0
+George, Worsley, Paaras, Padhiar, 0, 1
+Jake, Thompson, Will, Whitman, 0, 1
+Joel, T, Finlay, Horn, 0, 1
+Harry, T, Jonathan, Roberts, 0, 1
+Jensen, James, Fotis, T, 0, 1
+Dylan, Nolan, David, Burgess, 0, 1
+Rob, Hall, Errol, Dixon, 1, 0
+Callum, Tomlinson, Will, Vickers, 1, 0
+Elijah, Brook, Alex, Hill, 0, 1
+akanksh, Shetty, Mackenzie, Lambert, 1, 0
+Godrick, X, Martin, Casey, 0, 1
+.
+29.10.2025
+Matt, Woodcock, James, Lund, 1, 0
+Yu-Heng, Che, Will, Vickers, 1, 0
+Henry, Brooks, Robert, Fry, 1, 0
+Ed, Robbins, Will, Whitman, 1, 0
+Rob, Hall, Finlay, Horn, 1, 0
+Malachi, Bielby, Errol, Dixon, 1, 0
+Jake, Thompson, George, Worsley, 0, 1
+Elijah, Brook, Wilf, Moncrieff, 1, 0
+Alex, Hill, Paaras, Padhiar, 1, 0
+Ryan, Chambers, Henry, Myatt, 0, 1
+Mackenzie, Lambert, Jak, Dables, 0, 1
+Wilf, Howard, Beck, Fuller, 1, 0
+Martin, Casey, Evan, Morris, 1, 0
+
+Henry, Brooks, George, Worsley, 1, 0
+Yu-Heng, Che, Will, Whitman, 1, 0
+Robert, Fry, Finlay, Horn, 0, 1
+Ed, Robbins, Wilf, Moncrieff, 1, 0
+Rob, Hall, Paaras, Padhiar, 0, 1
+Jake, Thompson, James, Lund, 0, 1
+Elijah, Brook, Henry, Myatt, 0, 1
+Malachi, Bielby, Wilf, Howard, 0, 1
+Alex, Hill, Jak, Dables, 0, 1
+Matt, Woodcock, Callum, Tomlinson, 0, 1
+Ryan, Chambers, Evan, Morris, 0, 1
+Martin, Casey, Beck, Fuller, 0, 1
+Mackenzie, Lambert, Errol, Dixon, 0, 1
+
+Ed, Robbins, James, Lund, 0, 1
+Marlow, BR, Will, Whitman, 0, 1
+Yu-Heng, Che, George, Worsley, 0, 1
+Robert, Fry, Wilf, Moncrieff, 0, 1
+Henry, Brooks, Paaras, Padhiar, 1, 0
+Mackenzie, Lambert, Wilf, Howard, 0, 1
+Rob, Hall, Henry, Myatt, 1, 0
+Martin, Casey, Malachi, Bielby, 0, 1
+Jake, Thompson, Jak, Dables, 0, 1
+Elijah, Brook, Callum, Tomlinson, 0, 1
+Alex, Hill, Evan, Morris, 1, 0
+Matt, Woodcock, Errol, Dixon, 1, 0
+Ryan, Chambers, Beck, Fuller, 0, 1
+
+Marlow, BR, Finlay, Horn, 0, 1
+Will, Whitman, George, Worsley, 0, 1
+Yu-Heng, Che, Paaras, Padhiar, 0, 1
+Robert, Fry, James, Lund, 0, 1
+Ryan, Chambers, Malachi, Bielby, 0, 1
+Henry, Brooks, Henry, Myatt, 1, 0
+Ed, Robbins, Jak, Dables, 0, 1
+Rob, Hall, Callum, Tomlinson, 0, 1
+Mackenzie, Lambert, Martin, Casey, 1, 0
+Jake, Thompson, Evan, Morris, 1, 0
+Elijah, Brook, Errol, Dixon, 1, 0
+Alex, Hill, Beck, Fuller, 1, 0
+Matt, Woodcock, Wilf, Howard, 1, 0
+
+Yu-Heng, Che, Henry, Myatt, 0, 1
+Max, Robertson, George, Worsley, 0, 1
+Finlay, Horn, Wilf, Moncrieff, 1, 0
+Marlow, BR, Paaras, Padhiar, 1, 0
+Ryan, Chambers, Mackenzie, Lambert, 0, 1
+Will, Whitman, James, Lund, 0, 1
+Robert, Fry, Jak, Dables, 0, 1
+Henry, Brooks, Callum, Tomlinson, 0, 1
+Jake, Thompson, Beck, Fuller, 1, 0
+Finlay, Horn, Ed, Robbins, 1, 0
+Elijah, Brook, Wilf, Howard, 0, 1
+Rob, Hall, Wilf, Moncrieff, 1, 0
+Alex, Hill, Malachi, Bielby, 0, 1
+Matt, Woodcock, Martin, Casey, 1, 0
+.
+05.11.2025
+Alex, Hill, Malachi, Bielby, 0, 1
+Wilf, Howard, Henry, Brooks, 0, 1
+Jak, Dables, Paaras, Padhiar, 1, 0
+Will, Vickers, Fotis, T, 1, 0
+Finlay, Horn, Callum, Tomlinson, 0, 1
+David, Burgess, Jonathan, Roberts, 0, 1
+Elijah, Brook, Wilf, Moncrieff, 1, 0
+Martin, Casey, George, Worsley, 0, 1
+
+Marlow, BR, Henry, Brooks, 0, 1
+Malachi, Bielby, Paaras, Padhiar, 1, 0
+Alex, Hill, Fotis, T, 1, 0
+Wilf, Howard, Callum, Tomlinson, 1, 0
+Jak, Dables, Jonathan, Roberts, 1, 0
+Will, Vickers, Wilf, Moncrieff, 1, 0
+Finlay, Horn, George, Worsley, 0, 1
+David, Burgess, Martin, Casey, 1, 0
+Elijah, Brook, James, Lund, 0, 1
+
+Marlow, BR, Paaras, Padhiar, 0, 1
+Henry, Brooks, Fotis, T, 1, 0
+Malachi, Bielby, Callum, Tomlinson, 1, 0
+Alex, Hill, Jonathan, Roberts, 0, 1
+Wilf, Howard, Wilf, Moncrieff, 1, 0
+Jak, Dables, George, Worsley, 1, 0
+Will, Vickers, Martin, Casey, 1, 0
+Finlay, Horn, James, Lund, 0, 1
+David, Burgess, Elijah, Brook, 1, 0
+
+Marlow, BR, Fotis, T, 1, 0
+Paaras, Padhiar, Callum, Tomlinson, 1, 0
+Henry, Brooks, Jonathan, Roberts, 1, 0
+Malachi, Bielby, Wilf, Moncrieff, 1, 0
+Alex, Hill, George, Worsley, 1, 0
+Wilf, Howard, Martin, Casey, 1, 0
+Jak, Dables, James, Lund, 0, 1
+Will, Vickers, Elijah, Brook, 0, 1
+Finlay, Horn, David, Burgess, 1, 0
+
+Marlow, BR, Callum, Tomlinson, 1, 0
+Fotis, T, Jonathan, Roberts, 0, 1
+Paaras, Padhiar, Wilf, Moncrieff, 1, 0
+Henry, Brooks, George, Worsley, 1, 0
+Malachi, Bielby, Martin, Casey, 1, 0
+Alex, Hill, James, Lund, 1, 0
+Wilf, Howard, Elijah, Brook, 0, 1
+Jak, Dables, David, Burgess, 1, 0
+Will, Vickers, Finlay, Horn, 0, 1
+
+Marlow, BR, Jonathan, Roberts, 0, 1
+Callum, Tomlinson, Wilf, Moncrieff, 1, 0
+Fotis, T, George, Worsley, 0, 1
+Paaras, Padhiar, Martin, Casey, 1, 0
+Henry, Brooks, James, Lund, 1, 0
+Malachi, Bielby, Elijah, Brook, 0, 1
+Alex, Hill, David, Burgess, 1, 0
+Wilf, Howard, Finlay, Horn, 0, 1
+Jak, Dables, Will, Vickers, 1, 0
+Will, Moore, Elliott, Mallett, 1, 0
+
+Will, Moore, Wilf, Moncrieff, 0, 1
+Jonathan, Roberts, George, Worsley, 1, 0
+Elliott, Mallett, Martin, Casey, 0, 1
+Marlow, BR, James, Lund, 0, 1
+Callum, Tomlinson, Elijah, Brook, 1, 0
+Fotis, T, David, Burgess, 1, 0
+Paaras, Padhiar, Finlay, Horn, 0, 1
+Henry, Brooks, Will, Vickers, 0, 1
+Malachi, Bielby, Jak, Dables, 1, 0
+Alex, Hill, Wilf, Howard, 0, 1
+.
+12.11.2025
+David, Burgess, akanksh, Shetty, 0, 1
+Finlay, Horn, Andrew, Collins, 1, 0
+Dylan, Nolan, Matt, Woodcock, 1, 0
+Wilf, Moncrieff, Errol, Dixon, 1, 0
+Will, Vickers, Wilf, Howard, 1, 0
+George, Worsley, Evan, Morris, 1, 0
+Robert, Fry, Mackenzie, Lambert, 1, 0
+Alex, Hill, Ed, Robbins, 1, 0
+Jak, Dables, Ryan, Chambers, 0, 1
+James, Lund, Martin, Casey, 1, 0
+Henry, Myatt, Elijah, Brook, 1, 0
+Jonathan, Roberts, Paaras, Padhiar, 1, 0
+
+Alex, Hill, Martin, Casey, 1, 0
+Matt, Woodcock, Wilf, Howard, 0, 1
+Dylan, Nolan, akanksh, Shetty, 1, 0
+David, Burgess, Mackenzie, Lambert, 0, 1
+Will, Vickers, Andrew, Collins, 0, 1
+Wilf, Moncrieff, Henry, Myatt, 0, 1
+Robert, Fry, Ed, Robbins, 1, 0
+Finlay, Horn, Ryan, Chambers, 0, 1
+Jak, Dables, Paaras, Padhiar, 0, 1
+Jonathan, Roberts, Errol, Dixon, 1, 0
+George, Worsley, Elijah, Brook, 0, 1
+James, Lund, Evan, Morris, 1, 0
+
+Matt, Woodcock, Andrew, Collins, 1, 0
+Dylan, Nolan, Wilf, Howard, 0, 1
+akanksh, Shetty, Mackenzie, Lambert, 1, 0
+David, Burgess, Ed, Robbins, 0, 1
+Will, Vickers, Ryan, Chambers, 1, 0
+James, Lund, Elijah, Brook, 1, 0
+Jonathan, Roberts, Henry, Myatt, 1, 0
+Robert, Fry, Martin, Casey, 1, 0
+Finlay, Horn, Paaras, Padhiar, 1, 0
+George, Worsley, Wilf, Moncrieff, 1, 0
+Alex, Hill, Evan, Morris, 1, 0
+Jak, Dables, Errol, Dixon, 1, 0
+
+Wilf, Howard, Andrew, Collins, 0, 1
+David, Burgess, Martin, Casey, 0, 1
+Dylan, Nolan, Mackenzie, Lambert, 1, 0
+akanksh, Shetty, Ed, Robbins, 0, 1
+Matt, Woodcock, Ryan, Chambers, 1, 0
+Jak, Dables, Henry, Myatt, 1, 0
+Will, Vickers, Paaras, Padhiar, 0, 1
+Robert, Fry, Evan, Morris, 0, 1
+Finlay, Horn, Errol, Dixon, 1, 0
+Alex, Hill, Elijah, Brook, 1, 0
+James, Lund, Wilf, Moncrieff, 1, 0
+Jonathan, Roberts, George, Worsley, 1, 0
+
+Robert, Fry, Elijah, Brook, 0, 1
+Mackenzie, Lambert, Ed, Robbins, 1, 0
+Dylan, Nolan, Andrew, Collins, 1, 0
+Wilf, Howard, Ryan, Chambers, 1, 0
+akanksh, Shetty, Martin, Casey, 0, 1
+Matt, Woodcock, Paaras, Padhiar, 0, 1
+David, Burgess, Evan, Morris, 0, 1
+Will, Vickers, Errol, Dixon, 1, 0
+James, Lund, Jonathan, Roberts, 1, 0
+Alex, Hill, Wilf, Moncrieff, 1, 0
+Jak, Dables, George, Worsley, 0, 1
+Finlay, Horn, Henry, Myatt, 1, 0
+
+Andrew, Collins, Ryan, Chambers, 0, 1
+Robert, Fry, Wilf, Moncrieff, 0, 1
+Dylan, Nolan, Ed, Robbins, 1, 0
+Mackenzie, Lambert, Martin, Casey, 0, 1
+Finlay, Horn, George, Worsley, 1, 0
+Alex, Hill, Jonathan, Roberts, 0, 1
+Wilf, Howard, Paaras, Padhiar, 0, 1
+akanksh, Shetty, Evan, Morris, 0, 1
+Matt, Woodcock, Errol, Dixon, 0, 1
+Jak, Dables, James, Lund, 1, 0
+David, Burgess, Elijah, Brook, 0, 1
+Will, Vickers, Henry, Myatt, 1, 0
+.
+19.11.2025
+Robert, Fry, Henry, Brooks, 0, 1
+Ryan, Chambers, Beck, Fuller, 1, 0
+Wilf, Moncrieff, Dylan, Nolan, 0, 1
+Paaras, Padhiar, Matt, Woodcock, 0, 1
+Jak, Dables, Evan, Morris, 1, 0
+Alex, Hill, Wilf, Howard, 1, 0
+Elijah, Brook, Will, Vickers, 0, 1
+Rob, Hall, George, Worsley, 0, 1
+Mackenzie, Lambert, Henry, Myatt, 1, 0
+Osian, Drake, Yu-Heng, Che, 0, 1
+Errol, Dixon, James, Lund, 0, 1
+akanksh, Shetty, Callum, Tomlinson, 0, 1
+Finlay, Horn, Jonathan, Roberts, 0, 1
+
+Yu-Heng, Che, Henry, Brooks, 0, 1
+Elliott, Mallett, Dylan, Nolan, 0, 1
+Osian, Drake, Evan, Morris, 1, 0
+Wilf, Moncrieff, George, Worsley, 0, 1
+Paaras, Padhiar, James, Lund, 0, 1
+Robert, Fry, Jonathan, Roberts, 0, 1
+Jak, Dables, Beck, Fuller, 1, 0
+Rob, Hall, Wilf, Howard, 0, 1
+Alex, Hill, akanksh, Shetty, 1, 0
+Mackenzie, Lambert, Elijah, Brook, 0, 1
+Finlay, Horn, Will, Vickers, 1, 0
+Errol, Dixon, Henry, Myatt, 0, 1
+Ryan, Chambers, Callum, Tomlinson, 1, 0
+
+Alex, Hill, Mackenzie, Lambert, 1, 0
+Wilf, Moncrieff, Jonathan, Roberts, 0, 1
+Dylan, Nolan, Henry, Brooks, 1, 0
+Elliott, Mallett, Matt, Woodcock, 0, 1
+Yu-Heng, Che, George, Worsley, 0, 1
+Osian, Drake, James, Lund, 0, 1
+Paaras, Padhiar, Beck, Fuller, 1, 0
+Ryan, Chambers, Elijah, Brook, 1, 0
+Evan, Morris, Joe, Waiman, 1, 0
+Robert, Fry, Wilf, Howard, 0, 1
+Jak, Dables, Henry, Myatt, 0, 1
+Errol, Dixon, Callum, Tomlinson, 0, 1
+Finlay, Horn, akanksh, Shetty, 1, 0
+Rob, Hall, Will, Vickers, 1, 0
+
+Joe, Waiman, Henry, Brooks, 0, 1
+Matt, Woodcock, Evan, Morris, 1, 0
+Robert, Fry, Will, Vickers, 1, 0
+Ryan, Chambers, Alex, Hill, 0, 1
+Elliott, Mallett, George, Worsley, 0, 1
+Dylan, Nolan, James, Lund, 1, 0
+Errol, Dixon, Elijah, Brook, 1, 0
+Yu-Heng, Che, Jonathan, Roberts, 0, 1
+Osian, Drake, Beck, Fuller, 1, 0
+Wilf, Moncrieff, Wilf, Howard, 0, 1
+Paaras, Padhiar, Henry, Myatt, 1, 0
+Rob, Hall, akanksh, Shetty, 1, 0
+Jak, Dables, Callum, Tomlinson, 0, 1
+Finlay, Horn, Mackenzie, Lambert, 1, 0
+
+Wilf, Moncrieff, Callum, Tomlinson, 0, 1
+Max, Robertson, Henry, Brooks, 0, 1
+Osian, Drake, Will, Vickers, 1, 0
+Joe, Waiman, George, Worsley, 1, 0
+Matt, Woodcock, Jonathan, Roberts, 1, 0
+Elliott, Mallett, Beck, Fuller, 0, 1
+Errol, Dixon, Finlay, Horn, 0, 1
+Dylan, Nolan, Wilf, Howard, 0, 1
+Yu-Heng, Che, Henry, Myatt, 0, 1
+Robert, Fry, Elijah, Brook, 0, 1
+Jak, Dables, Alex, Hill, 1, 0
+Rob, Hall, Ryan, Chambers, 1, 0
+Paaras, Padhiar, akanksh, Shetty, 1, 0
+
+Osian, Drake, akanksh, Shetty, 0, 1
+Dylan, Nolan, Will, Vickers, 0, 1
+Jak, Dables, Finlay, Horn, 1, 0
+Robert, Fry, Ryan, Chambers, 0, 1
+Max, Robertson, Evan, Morris, 1, 0
+Henry, Brooks, George, Worsley, 1, 0
+Matt, Woodcock, Wilf, Howard, 1, 0
+Elliott, Mallett, Henry, Myatt, 0, 1
+Yu-Heng, Che, Callum, Tomlinson, 0, 1
+Wilf, Moncrieff, Elijah, Brook, 1, 0
+Paaras, Padhiar, Alex, Hill, 1, 0
+Rob, Hall, Errol, Dixon, 1, 0
+.
+26.11.2025
+Rob, Hall, Martin, Casey, 1, 0
+Wilf, Howard, Theo, Mason, 1, 0
+James, Lund, Elijah, Brook, 1, 0
+Finlay, Horn, Malachi, Bielby, 1, 0
+Wilf, Moncrieff, Robert, Fry, 0, 1
+David, Burgess, George, Worsley, 0, 1
+Dylan, Nolan, Paaras, Padhiar, 0, 1
+Jak, Dables, Will, Vickers, 1, 0
+Jonathan, Roberts, Henry, Brooks, 1, 0
+Ryan, Chambers, akanksh, Shetty, 1, 0
+Jonathan, Turner, Henry, Myatt, 0, 1
+
+David, Burgess, Will, Vickers, 0, 1
+Wilf, Howard, Paaras, Padhiar, 0, 1
+Andrew, Collins, Martin, Casey, 1, 0
+Rob, Hall, Malachi, Bielby, 1, 0
+Ryan, Chambers, Jonathan, Turner, 1, 0
+James, Lund, Robert, Fry, 1, 0
+Osian, Drake, Elijah, Brook, 0, 1
+Finlay, Horn, Theo, Mason, 1, 0
+Wilf, Moncrieff, George, Worsley, 0, 1
+Dylan, Nolan, Henry, Brooks, 1, 0
+Jak, Dables, akanksh, Shetty, 1, 0
+Jonathan, Roberts, Henry, Myatt, 1, 0
+
+Martin, Casey, Malachi, Bielby, 0, 1
+Osian, Drake, Elijah, Brook, 1, 0
+Andrew, Collins, Robert, Fry, 1, 0
+Rob, Hall, Theo, Mason, 1, 0
+James, Lund, George, Worsley, 1, 0
+Finlay, Horn, Paaras, Padhiar, 0, 1
+Jak, Dables, Jonathan, Turner, 1, 0
+Wilf, Moncrieff, Will, Vickers, 1, 0
+Dylan, Nolan, Henry, Myatt, 0, 1
+Jonathan, Roberts, Ryan, Chambers, 0, 1
+Wilf, Howard, Henry, Brooks, 0, 1
+David, Burgess, akanksh, Shetty, 1, 0
+
+Elijah, Brook, Robert, Fry, 1, 0
+James, Lund, Will, Vickers, 1, 0
+Osian, Drake, Malachi, Bielby, 1, 0
+Martin, Casey, Theo, Mason, 1, 0
+Dylan, Nolan, Ryan, Chambers, 0, 1
+Jak, Dables, Jonathan, Roberts, 0, 1
+Andrew, Collins, George, Worsley, 1, 0
+Rob, Hall, Paaras, Padhiar, 1, 0
+Finlay, Horn, Henry, Brooks, 1, 0
+Wilf, Moncrieff, akanksh, Shetty, 1, 0
+Wilf, Howard, Henry, Myatt, 0, 1
+David, Burgess, Jonathan, Turner, 1, 0
+
+Malachi, Bielby, Theo, Mason, 0, 1
+Rob, Hall, Henry, Brooks, 1, 0
+Osian, Drake, Robert, Fry, 1, 0
+Elijah, Brook, George, Worsley, 0, 1
+Martin, Casey, Paaras, Padhiar, 0, 1
+Dylan, Nolan, Jak, Dables, 1, 0
+Wilf, Howard, Ryan, Chambers, 0, 1
+Andrew, Collins, Will, Vickers, 1, 0
+David, Burgess, Jonathan, Roberts, 0, 1
+James, Lund, akanksh, Shetty, 1, 0
+Finlay, Horn, Henry, Myatt, 0, 1
+Wilf, Moncrieff, Jonathan, Turner, 0, 1
+
+David, Burgess, Dylan, Nolan, 0, 1
+Malachi, Bielby, Paaras, Padhiar, 1, 0
+Wilf, Howard, Jak, Dables, 1, 0
+Wilf, Moncrieff, Jonathan, Roberts, 0, 1
+Max, Robertson, Robert, Fry, 0, 1
+Osian, Drake, George, Worsley, 0, 1
+Elijah, Brook, Will, Vickers, 1, 0
+Martin, Casey, Henry, Brooks, 0, 1
+Andrew, Collins, akanksh, Shetty, 1, 0
+Rob, Hall, Henry, Myatt, 0, 1
+James, Lund, Jonathan, Turner, 0, 1
+Finlay, Horn, Ryan, Chambers, 0, 1
+.
+03.12.2025
+James, Lund, Rob, Hall, 1, 0
+Jonathan, Roberts, Henry, Brooks, 0, 1
+Wilf, Moncrieff, Henry, Myatt, 1, 0
+Alex, Hill, Paaras, Padhiar, 0, 1
+Wilf, Howard, Ryan, Chambers, 1, 0
+Mackenzie, Lambert, Evan, Morris, 0, 1
+Elijah, Brook, Martin, Casey, 0, 1
+Finlay, Horn, Matt, Woodcock, 1, 0
+Robert, Fry, Jak, Dables, 0, 1
+David, Burgess, George, Worsley, 0, 1
+Dylan, Nolan, Will, Vickers, 1, 0
+Andrew, Collins, Osian, Drake, 1, 0
+
+Evan, Morris, Rob, Hall, 0, 1
+Wilf, Moncrieff, Jak, Dables, 0, 1
+Elliott, Mallett, Will, Moore, 0, 1
+Wilf, Howard, Finlay, Horn, 1, 0
+Elijah, Brook, Dylan, Nolan, 0, 1
+Henry, Myatt, Paaras, Padhiar, 1, 0
+Robert, Fry, David, Burgess, 1, 0
+Mackenzie, Lambert, Henry, Brooks, 0, 1
+Andrew, Collins, Ryan, Chambers, 1, 0
+Osian, Drake, Martin, Casey, 1, 0
+Jonathan, Roberts, Matt, Woodcock, 1, 0
+James, Lund, George, Worsley, 0, 1
+Alex, Hill, Will, Vickers, 1, 0
+
+Marlow, BR, Rob, Hall, 0, 1
+Elliott, Mallett, Henry, Brooks, 0, 1
+Wilf, Moncrieff, Finlay, Horn, 0, 1
+Will, Moore, Ryan, Chambers, 1, 0
+Evan, Morris, Martin, Casey, 1, 0
+Henry, Myatt, Jak, Dables, 0, 1
+James, Lund, Dylan, Nolan, 1, 0
+Mackenzie, Lambert, George, Worsley, 0, 1
+Jonathan, Roberts, Robert, Fry, 1, 0
+Andrew, Collins, Will, Vickers, 1, 0
+Osian, Drake, Matt, Woodcock, 0, 1
+Wilf, Howard, Elijah, Brook, 1, 0
+Alex, Hill, David, Burgess, 0, 1
+
+Alex, Hill, Elijah, Brook, 1, 0
+Marlow, BR, Paaras, Padhiar, 0, 1
+Rob, Hall, Henry, Brooks, 1, 0
+Elliott, Mallett, Martin, Casey, 0, 1
+Osian, Drake, Dylan, Nolan, 0, 1
+Wilf, Moncrieff, David, Burgess, 1, 0
+Will, Moore, Jak, Dables, 0, 1
+Evan, Morris, George, Worsley, 0, 1
+Henry, Myatt, Will, Vickers, 1, 0
+Jonathan, Roberts, Wilf, Howard, 1, 0
+Mackenzie, Lambert, Matt, Woodcock, 0, 1
+Andrew, Collins, Finlay, Horn, 0, 1
+James, Lund, Robert, Fry, 1, 0
+
+Alex, Hill, Jonathan, Roberts, 0, 1
+Henry, Myatt, Finlay, Horn, 0, 1
+Marlow, BR, Henry, Brooks, 0, 1
+Paaras, Padhiar, Ryan, Chambers, 1, 0
+Wilf, Moncrieff, Elijah, Brook, 0, 1
+Rob, Hall, Martin, Casey, 1, 0
+James, Lund, Wilf, Howard, 1, 0
+Elliott, Mallett, George, Worsley, 0, 1
+Will, Moore, Will, Vickers, 1, 0
+Osian, Drake, Robert, Fry, 0, 1
+Evan, Morris, Matt, Woodcock, 0, 1
+Mackenzie, Lambert, Dylan, Nolan, 0, 1
+Andrew, Collins, David, Burgess, 1, 0
+
+Paaras, Padhiar, Jak, Dables, 0, 1
+Evan, Morris, Dylan, Nolan, 1, 0
+Marlow, BR, Ryan, Chambers, 0, 1
+Henry, Brooks, Martin, Casey, 1, 0
+Rob, Hall, George, Worsley, 0, 1
+Elliott, Mallett, Matt, Woodcock, 0, 1
+James, Lund, Alex, Hill, 0, 1
+Will, Moore, Finlay, Horn, 0, 1
+Wilf, Moncrieff, Jonathan, Roberts, 0, 1
+Henry, Myatt, David, Burgess, 1, 0
+Mackenzie, Lambert, Robert, Fry, 0, 1
+Andrew, Collins, Elijah, Brook, 1, 0
+Osian, Drake, Wilf, Howard, 0, 1
+.
+10.12.2025
+Finlay, Horn, Will, Vickers, 1, 0
+Alex, Hill, Henry, Brooks, 1, 0
+Matt, Woodcock, David, Burgess, 1, 0
+Wilf, Moncrieff, Ryan, Chambers, 0, 1
+George, Worsley, Guillermo, S, 1, 0
+Paaras, Padhiar, Robert, Fry, 1, 0
+Evan, Morris, James, Lund, 0, 1
+Henry, Myatt, Jak, Dables, 1, 0
+Callum, Tomlinson, Elijah, Brook, 1, 0
+Wilf, Howard, Jonathan, Roberts, 0, 1
+
+Mackenzie, Lambert, Will, Vickers, 0, 1
+Wilf, Moncrieff, Jak, Dables, 0, 1
+Osian, Drake, Henry, Brooks, 0, 1
+akanksh, Shetty, Ryan, Chambers, 1, 0
+Alex, Hill, Guillermo, S, 1, 0
+Matt, Woodcock, Robert, Fry, 1, 0
+Finlay, Horn, James, Lund, 0, 1
+Henry, Myatt, Callum, Tomlinson, 0, 1
+George, Worsley, Elijah, Brook, 1, 0
+Paaras, Padhiar, Jonathan, Roberts, 1, 0
+Evan, Morris, Wilf, Howard, 0, 1
+
+George, Worsley, Wilf, Howard, 1, 0
+Alex, Hill, James, Lund, 0, 1
+Osian, Drake, David, Burgess, 0, 1
+Henry, Brooks, Will, Vickers, 1, 0
+Mackenzie, Lambert, Guillermo, S, 1, 0
+akanksh, Shetty, Robert, Fry, 0, 1
+Matt, Woodcock, Jak, Dables, 1, 0
+Finlay, Horn, Elijah, Brook, 1, 0
+Wilf, Moncrieff, Jonathan, Roberts, 0, 1
+Paaras, Padhiar, Callum, Tomlinson, 1, 0
+Evan, Morris, Henry, Myatt, 0, 1
+
+Finlay, Horn, Wilf, Howard, 0, 1
+Alex, Hill, Elijah, Brook, 0, 1
+Osian, Drake, Will, Vickers, 1, 0
+David, Burgess, Ryan, Chambers, 0, 1
+Henry, Brooks, Guillermo, S, 1, 0
+Mackenzie, Lambert, James, Lund, 0, 1
+Paaras, Padhiar, Evan, Morris, 1, 0
+akanksh, Shetty, Jak, Dables, 0, 1
+Matt, Woodcock, Jonathan, Roberts, 1, 0
+Wilf, Moncrieff, Callum, Tomlinson, 0, 1
+George, Worsley, Henry, Myatt, 0, 1
+
+akanksh, Shetty, Jonathan, Roberts, 0, 1
+David, Burgess, James, Lund, 0, 1
+Malachi, Bielby, Ryan, Chambers, 1, 0
+Osian, Drake, Robert, Fry, 0, 1
+Wilf, Moncrieff, Evan, Morris, 1, 0
+Henry, Brooks, Jak, Dables, 0, 1
+Mackenzie, Lambert, Elijah, Brook, 0, 1
+Alex, Hill, Wilf, Howard, 0, 1
+George, Worsley, Paaras, Padhiar, 0, 1
+Matt, Woodcock, Callum, Tomlinson, 1, 0
+Finlay, Horn, Henry, Myatt, 1, 0
+Will, Vickers, Guillermo, S, 1, 0
+
+Will, Vickers, James, Lund, 0, 1
+Malachi, Bielby, Guillermo, S, 0, 1
+Wilf, Moncrieff, George, Worsley, 0, 1
+Ryan, Chambers, Robert, Fry, 0, 1
+Osian, Drake, Jak, Dables, 0, 1
+David, Burgess, Elijah, Brook, 0, 1
+Matt, Woodcock, Evan, Morris, 1, 0
+Henry, Brooks, Jonathan, Roberts, 0, 1
+Mackenzie, Lambert, Wilf, Howard, 0, 1
+akanksh, Shetty, Callum, Tomlinson, 0, 1
+Alex, Hill, Henry, Myatt, 1, 0
+Finlay, Horn, Paaras, Padhiar, 0, 1
+######################################################################
+2025.2026.2
+.
+21.01.2026
+Fotis, T, Henry, Day, 0, 1
+Wilf, Moncrieff, Nathan, Berry, 1, 0
+Ryan, Chambers, akanksh, Shetty, 1, 0
+Matt, Woodcock, Robert, Fry, 0, 1
+Ed, Robbins, Mackenzie, Lambert, 1, 0
+Elliott, Mallett, David, Burgess, 0, 1
+Evan, Morris, Jak, Dables, 0, 1
+Finlay, Horn, Elijah, Brook, 0, 1
+Wilf, Howard, Otto, Ashton, 0, 1
+Malachi, Bielby, Will, Moore, 0, 1
+Jonathan, Roberts, Martin, Casey, 1, 0
+Osian, Drake, George, Worsley, 1, 0
+Dylan, Nolan, Alex, Hill, 0, 1
+Paaras, Padhiar, Henry, Myatt, 1, 0
+
+Paaras, Padhiar, Ed, Robbins, 1, 0
+Osian, Drake, Henry, Day, 0, 1
+Evan, Morris, Alex, Hill, 0, 1
+akanksh, Shetty, Nathan, Berry, 0, 1
+Ryan, Chambers, Robert, Fry, 0, 1
+Fotis, T, David, Burgess, 1, 0
+Tom, Lomas-Walker, Henry, Dawes, 0, 1
+Wilf, Moncrieff, Jak, Dables, 0, 1
+George, Worsley, Mackenzie, Lambert, 1, 0
+Max, Robertson, Will, Vickers, 0, 1
+Dylan, Nolan, Otto, Ashton, 1, 0
+Finlay, Horn, Henry, Myatt, 1, 0
+Matt, Woodcock, Elijah, Brook, 0, 1
+Jonathan, Roberts, Will, Moore, 1, 0
+Elliott, Mallett, Martin, Casey, 1, 0
+Malachi, Bielby, Wilf, Howard, 1, 0
+
+Henry, Day, Robert, Fry, 1, 0
+Tom, Lomas-Walker, Jak, Dables, 0, 1
+Will, Vickers, Nathan, Berry, 0, 1
+Fotis, T, Will, Moore, 0, 1
+Matt, Woodcock, Mackenzie, Lambert, 1, 0
+Max, Robertson, David, Burgess, 1, 0
+Finlay, Horn, Malachi, Bielby, 1, 0
+Henry, Dawes, Elijah, Brook, 0, 1
+Elliott, Mallett, Ed, Robbins, 1, 0
+Evan, Morris, Wilf, Howard, 0, 1
+Osian, Drake, Martin, Casey, 1, 0
+akanksh, Shetty, Alex, Hill, 0, 1
+Jonathan, Roberts, Paaras, Padhiar, 1, 0
+Dylan, Nolan, George, Worsley, 1, 0
+Ryan, Chambers, Henry, Myatt, 0, 1
+Wilf, Moncrieff, Otto, Ashton, 1, 0
+
+Finlay, Horn, George, Worsley, 1, 0
+Henry, Day, Jak, Dables, 0, 1
+Will, Vickers, Robert, Fry, 1, 0
+Max, Robertson, Elijah, Brook, 1, 0
+Evan, Morris, Paaras, Padhiar, 1, 0
+Fotis, T, Mackenzie, Lambert, 1, 0
+Elliott, Mallett, Malachi, Bielby, 0, 1
+Matt, Woodcock, Wilf, Howard, 0, 1
+Jonathan, Roberts, Dylan, Nolan, 1, 0
+Tom, Lomas-Walker, Martin, Casey, 1, 0
+Ryan, Chambers, Otto, Ashton, 0, 1
+Henry, Dawes, Alex, Hill, 0, 1
+Osian, Drake, Henry, Myatt, 1, 0
+akanksh, Shetty, Will, Moore, 1, 0
+Wilf, Moncrieff, Ed, Robbins, 1, 0
+.
+29.01.2026
+Elijah, Brook, Wilf, Howard, 0, 1
+Dylan, Nolan, Henry, Day, 0, 1
+Jonathan, Roberts, Paaras, Padhiar, 1, 0
+Daksh, Moon, Otto, Ashton, 0, 1
+Mackenzie, Lambert, akanksh, Shetty, 0, 1
+Fotis, T, James, Lund, 1, 0
+Alex, Hill, George, Worsley, 0, 1
+Callum, Tomlinson, Jak, Dables, 1, 0
+Wilf, Moncrieff, Rob, Hall, 0, 1
+Will, Vickers, Robert, Fry, 0, 1
+Finlay, Horn, Ryan, Chambers, 0, 1
+Martin, Casey, Henry, Myatt, 0, 1
+
+Elijah, Brook, George, Worsley, 0, 1
+Dylan, Nolan, James, Lund, 0, 1
+Will, Vickers, Henry, Myatt, 0, 1
+Daksh, Moon, Henry, Day, 0, 1
+Paaras, Padhiar, Wilf, Howard, 1, 0
+Wilf, Moncrieff, Ryan, Chambers, 0, 1
+Jonathan, Roberts, akanksh, Shetty, 1, 0
+Mackenzie, Lambert, Jak, Dables, 0, 1
+Finlay, Horn, Martin, Casey, 1, 0
+Fotis, T, Rob, Hall, 0, 1
+Alex, Hill, Robert, Fry, 1, 0
+Callum, Tomlinson, Otto, Ashton, 1, 0
+
+Elijah, Brook, Rob, Hall, 0, 1
+Henry, Day, akanksh, Shetty, 1, 0
+Daksh, Moon, Wilf, Howard, 1, 0
+Paaras, Padhiar, James, Lund, 1, 0
+Wilf, Moncrieff, Martin, Casey, 1, 0
+Jonathan, Roberts, George, Worsley, 1, 0
+Callum, Tomlinson, Henry, Myatt, 0, 1
+Dylan, Nolan, Jak, Dables, 1, 0
+Will, Vickers, Finlay, Horn, 0, 1
+Mackenzie, Lambert, Robert, Fry, 1, 0
+Fotis, T, Otto, Ashton, 1, 0
+Alex, Hill, Ryan, Chambers, 0, 1
+
+Henry, Day, George, Worsley, 0, 1
+Jonathan, Roberts, Rob, Hall, 1, 0
+Nathan, Berry, Wilf, Howard, 1, 0
+Daksh, Moon, James, Lund, 0, 1
+Paaras, Padhiar, Jak, Dables, 1, 0
+Dylan, Nolan, Robert, Fry, 1, 0
+Elijah, Brook, Otto, Ashton, 0, 1
+Mackenzie, Lambert, Ryan, Chambers, 1, 0
+Wilf, Moncrieff, Will, Vickers, 0, 1
+Fotis, T, Henry, Myatt, 0, 1
+Alex, Hill, Martin, Casey, 1, 0
+Callum, Tomlinson, Finlay, Horn, 0, 1
+
+Wilf, Howard, James, Lund, 0, 1
+Daksh, Moon, Jak, Dables, 1, 0
+Nathan, Berry, akanksh, Shetty, 1, 0
+Henry, Day, Rob, Hall, 1, 0
+Callum, Tomlinson, Wilf, Moncrieff, 0, 1
+Paaras, Padhiar, Robert, Fry, 0, 1
+Jonathan, Roberts, Otto, Ashton, 1, 0
+Dylan, Nolan, Ryan, Chambers, 0, 1
+Elijah, Brook, Henry, Myatt, 1, 0
+Fotis, T, Finlay, Horn, 1, 0
+Alex, Hill, Will, Vickers, 1, 0
+Mackenzie, Lambert, Martin, Casey, 0, 1
+.
+04.02.2026
+Matt, Woodcock, Elijah, Brook, 1, 0
+Alex, Hill, James, Lund, 1, 0
+Henry, Myatt, Jak, Dables, 0, 1
+Finlay, Horn, Will, Moore, 0, 1
+Wilf, Moncrieff, Henry, Brooks, 0, 1
+Nathan, Berry, Otto, Ashton, 1, 0
+Malachi, Bielby, Ryan, Chambers, 0, 1
+Paaras, Padhiar, Dylan, Nolan, 1, 0
+Will, Vickers, George, Worsley, 1, 0
+Callum, Tomlinson, Jonathan, Roberts, 0, 1
+Mackenzie, Lambert, Elliott, Mallett, 1, 0
+
+Jak, Dables, Will, Moore, 0, 1
+Wilf, Moncrieff, Otto, Ashton, 1, 0
+Henry, Myatt, Elijah, Brook, 1, 0
+Matt, Woodcock, Henry, Brooks, 0, 1
+Finlay, Horn, James, Lund, 0, 1
+Alex, Hill, Ryan, Chambers, 0, 1
+Nathan, Berry, George, Worsley, 0, 1
+Malachi, Bielby, Jonathan, Roberts, 0, 1
+Will, Vickers, Elliott, Mallett, 1, 0
+Callum, Tomlinson, Dylan, Nolan, 0, 1
+Mackenzie, Lambert, Paaras, Padhiar, 0, 1
+
+Alex, Hill, Jonathan, Roberts, 1, 0
+Malachi, Bielby, Dylan, Nolan, 0, 1
+Henry, Myatt, Will, Moore, 1, 0
+Elijah, Brook, Henry, Brooks, 0, 1
+Jak, Dables, James, Lund, 0, 1
+Callum, Tomlinson, Mackenzie, Lambert, 1, 0
+Matt, Woodcock, Otto, Ashton, 1, 0
+Finlay, Horn, Ryan, Chambers, 1, 0
+Wilf, Moncrieff, George, Worsley, 0, 1
+Nathan, Berry, Elliott, Mallett, 1, 0
+Will, Vickers, Paaras, Padhiar, 0, 1
+
+Alex, Hill, Dylan, Nolan, 1, 0
+Finlay, Horn, Jonathan, Roberts, 1, 0
+Henry, Myatt, Henry, Brooks, 0, 1
+Will, Moore, James, Lund, 0, 1
+Elijah, Brook, Otto, Ashton, 1, 0
+Jak, Dables, Ryan, Chambers, 1, 0
+Matt, Woodcock, George, Worsley, 1, 0
+Will, Vickers, Callum, Tomlinson, 1, 0
+Wilf, Moncrieff, Elliott, Mallett, 1, 0
+Nathan, Berry, Paaras, Padhiar, 0, 1
+Malachi, Bielby, Mackenzie, Lambert, 1, 0
+
+Henry, Myatt, James, Lund, 1, 0
+Elijah, Brook, George, Worsley, 0, 1
+Henry, Brooks, Otto, Ashton, 0, 1
+Will, Moore, Ryan, Chambers, 0, 1
+Jak, Dables, Jonathan, Roberts, 0, 1
+Matt, Woodcock, Elliott, Mallett, 1, 0
+Malachi, Bielby, Will, Vickers, 1, 0
+Finlay, Horn, Dylan, Nolan, 0, 1
+Wilf, Moncrieff, Paaras, Padhiar, 0, 1
+Alex, Hill, Mackenzie, Lambert, 1, 0
+Nathan, Berry, Callum, Tomlinson, 1, 0
+.
+11.02.2026
+Matt, Woodcock, Wilf, Howard, 0, 1
+Alex, Hill, Will, Vickers, 1, 0
+Jonathan, Roberts, Wilf, Moncrieff, 1, 0
+Dylan, Nolan, Henry, Brooks, 0, 1
+Ed, Robbins, Elliott, Mallett, 0, 1
+George, Worsley, Henry, Myatt, 1, 0
+Ryan, Chambers, Finlay, Horn, 0, 1
+Elijah, Brook, Callum, Tomlinson, 0, 1
+Will, Moore, Robert, Fry, 1, 0
+Malachi, Bielby, James, Lund, 0, 1
+
+Matt, Woodcock, Elliott, Mallett, 0, 1
+Alex, Hill, Wilf, Moncrieff, 1, 0
+Will, Vickers, Wilf, Howard, 0, 1
+Jonathan, Roberts, Henry, Brooks, 1, 0
+Dylan, Nolan, Henry, Myatt, 0, 1
+Ed, Robbins, Finlay, Horn, 1, 0
+George, Worsley, Callum, Tomlinson, 1, 0
+Ryan, Chambers, Robert, Fry, 1, 0
+Elijah, Brook, James, Lund, 0, 1
+Will, Moore, Malachi, Bielby, 1, 0
+
+Jonathan, Roberts, Henry, Myatt, 0, 1
+Osian, Drake, Wilf, Moncrieff, 0, 1
+Alex, Hill, Henry, Brooks, 1, 0
+Will, Vickers, Elliott, Mallett, 1, 0
+Matt, Woodcock, Finlay, Horn, 0, 1
+Dylan, Nolan, Callum, Tomlinson, 1, 0
+Ed, Robbins, Robert, Fry, 1, 0
+George, Worsley, James, Lund, 1, 0
+Ryan, Chambers, Malachi, Bielby, 1, 0
+Elijah, Brook, Will, Moore, 0, 1
+
+Tom, Lomas-Walker, Elliott, Mallett, 1, 0
+Henry, Dawes, Henry, Brooks, 0, 1
+Sam, Haywood, Henry, Myatt, 0, 1
+Owen, Lundie, Wilf, Moncrieff, 0, 1
+Osian, Drake, Finlay, Horn, 1, 0
+Ed, Robbins, Elijah, Brook, 1, 0
+Alex, Hill, Callum, Tomlinson, 1, 0
+Will, Vickers, Robert, Fry, 1, 0
+Jonathan, Roberts, James, Lund, 0, 1
+George, Worsley, Ryan, Chambers, 0, 1
+Tom, Lomas-Walker, Wilf, Howard, 0, 1
+Dylan, Nolan, Will, Moore, 1, 0
+Matt, Woodcock, Malachi, Bielby, 0, 1
+
+Owen, Lundie, Henry, Brooks, 0, 1
+Wilf, Howard, Elliott, Mallett, 1, 0
+Dylan, Nolan, Ed, Robbins, 1, 0
+Wilf, Moncrieff, Henry, Myatt, 1, 0
+Henry, Dawes, Callum, Tomlinson, 1, 0
+Tom, Lomas-Walker, Robert, Fry, 0, 1
+Sam, Haywood, James, Lund, 0, 1
+Matt, Woodcock, George, Worsley, 0, 1
+Jonathan, Roberts, Ryan, Chambers, 0, 1
+Osian, Drake, Malachi, Bielby, 0, 1
+Alex, Hill, Will, Moore, 1, 0
+Will, Vickers, Elijah, Brook, 0, 1
+
+Wilf, Moncrieff, Callum, Tomlinson, 0, 1
+Osian, Drake, Elijah, Brook, 1, 0
+Owen, Lundie, Elliott, Mallett, 1, 0
+Henry, Brooks, Henry, Myatt, 1, 0
+Wilf, Howard, Finlay, Horn, 1, 0
+Henry, Dawes, James, Lund, 0, 1
+Tom, Lomas-Walker, Malachi, Bielby, 0, 1
+Jonathan, Roberts, Ed, Robbins, 1, 0
+Matt, Woodcock, Dylan, Nolan, 1, 0
+Sam, Haywood, Will, Moore, 1, 0
+Alex, Hill, Ryan, Chambers, 0, 1
+Will, Vickers, George, Worsley, 0, 1
+.
+20.02.2026
+James, Lund, Henry, Brooks, 1, 0
+Evan, Morris, Otto, Ashton, 1, 0
+Jonathan, Roberts, Matt, Woodcock, 1, 0
+George, Worsley, Malachi, Bielby, 1, 0
+Henry, Myatt, Nathan, Berry, 1, 0
+Finlay, Horn, Paaras, Padhiar, 0, 1
+Leo, Sorsby, Wilf, Moncrieff, 1, 0
+Wilf, Howard, Will, Vickers, 0, 1
+Ryan, Chambers, Dylan, Nolan, 1, 0
+Jak, Dables, Alex, Hill, 0, 1
+Robert, Fry, Elijah, Brook, 0, 1
+
+Evan, Morris, Nathan, Berry, 1, 0
+Finlay, Horn, Alex, Hill, 0, 1
+Mackenzie, Lambert, Henry, Brooks, 0, 1
+Wilf, Howard, Robert, Fry, 1, 0
+Ryan, Palfrey, Matt, Woodcock, 0, 1
+Otto, Ashton, Malachi, Bielby, 0, 1
+Ryan, Chambers, Jak, Dables, 0, 1
+Jonathan, Roberts, Paaras, Padhiar, 1, 0
+George, Worsley, Wilf, Moncrieff, 1, 0
+James, Lund, Will, Vickers, 1, 0
+Leo, Sorsby, Elijah, Brook, 1, 0
+Henry, Myatt, Dylan, Nolan, 1, 0
+
+Otto, Ashton, Wilf, Moncrieff, 1, 0
+Fotis, T, Nathan, Berry, 1, 0
+Kacper, Dyk, Malachi, Bielby, 0, 1
+Matt, Woodcock, Henry, Brooks, 0, 1
+Ryan, Palfrey, Paaras, Padhiar, 0, 1
+Mackenzie, Lambert, Will, Vickers, 0, 1
+Finlay, Horn, Ryan, Chambers, 1, 0
+Evan, Morris, Dylan, Nolan, 0, 1
+Henry, Myatt, Jak, Dables, 0, 1
+Jonathan, Roberts, Alex, Hill, 1, 0
+George, Worsley, Elijah, Brook, 1, 0
+Leo, Sorsby, Wilf, Howard, 0, 1
+James, Lund, Robert, Fry, 1, 0
+
+Finlay, Horn, Leo, Sorsby, 1, 0
+Kacper, Dyk, Henry, Brooks, 0, 1
+George, Worsley, Jak, Dables, 1, 0
+Henry, Myatt, Wilf, Howard, 0, 1
+Malachi, Bielby, Nathan, Berry, 1, 0
+James, Lund, Ryan, Chambers, 0, 1
+Matt, Woodcock, Paaras, Padhiar, 0, 1
+Fotis, T, Wilf, Moncrieff, 0, 1
+Ryan, Palfrey, Will, Vickers, 1, 0
+Otto, Ashton, Dylan, Nolan, 0, 1
+Mackenzie, Lambert, Alex, Hill, 0, 1
+Evan, Morris, Elijah, Brook, 0, 1
+Jonathan, Roberts, Robert, Fry, 1, 0
+
+Fotis, T, Dylan, Nolan, 0, 1
+Malachi, Bielby, Wilf, Moncrieff, 0, 1
+James, Lund, Leo, Sorsby, 1, 0
+George, Worsley, Wilf, Howard, 1, 0
+Henry, Myatt, Finlay, Horn, 1, 0
+Kacper, Dyk, Nathan, Berry, 0, 1
+Henry, Brooks, Paaras, Padhiar, 0, 1
+Matt, Woodcock, Will, Vickers, 1, 0
+Ryan, Palfrey, Alex, Hill, 0, 1
+Otto, Ashton, Elijah, Brook, 0, 1
+Mackenzie, Lambert, Robert, Fry, 0, 1
+Evan, Morris, Jak, Dables, 0, 1
+Jonathan, Roberts, Ryan, Chambers, 0, 1
+.
+26.02.2026
+Elijah, Brook, Dylan, Nolan, 0, 1
+Henry, Myatt, Paaras, Padhiar, 1, 0
+Jonathan, Roberts, akanksh, Shetty, 1, 0
+Evan, Morris, Wilf, Howard, 1, 0
+Alex, Hill, Jak, Dables, 1, 0
+Finlay, Horn, George, Worsley, 1, 0
+Callum, Tomlinson, James, Lund, 1, 0
+Robert, Fry, Wilf, Moncrieff, 0, 1
+Guillermo, S, Will, Vickers, 1, 0
+
+Guillermo, S, Paaras, Padhiar, 0, 1
+Elijah, Brook, Wilf, Howard, 1, 0
+Dylan, Nolan, akanksh, Shetty, 1, 0
+Henry, Myatt, Jak, Dables, 0, 1
+Osian, Drake, Will, Moore, 1, 0
+Jonathan, Roberts, George, Worsley, 1, 0
+Evan, Morris, Will, Vickers, 0, 1
+Alex, Hill, James, Lund, 1, 0
+Finlay, Horn, Wilf, Moncrieff, 1, 0
+Callum, Tomlinson, Robert, Fry, 0, 1
+Nnyal, Khan, Elliott, Mallett, 0, 1
+
+Elliott, Mallett, George, Worsley, 0, 1
+Will, Moore, akanksh, Shetty, 1, 0
+Paaras, Padhiar, Wilf, Howard, 0, 1
+Nnyal, Khan, Jak, Dables, 0, 1
+Osian, Drake, Will, Vickers, 1, 0
+Guillermo, S, James, Lund, 0, 1
+Dylan, Nolan, Wilf, Moncrieff, 0, 1
+Elijah, Brook, Robert, Fry, 0, 1
+Henry, Myatt, Callum, Tomlinson, 0, 1
+Evan, Morris, Alex, Hill, 0, 1
+Jonathan, Roberts, Finlay, Horn, 0, 1
+
+Paaras, Padhiar, George, Worsley, 1, 0
+akanksh, Shetty, Jak, Dables, 0, 1
+Will, Moore, Wilf, Howard, 0, 1
+Nnyal, Khan, Will, Vickers, 0, 1
+Elliott, Mallett, James, Lund, 0, 1
+Jonathan, Roberts, Evan, Morris, 1, 0
+Osian, Drake, Wilf, Moncrieff, 0, 1
+Guillermo, S, Robert, Fry, 0, 1
+Dylan, Nolan, Callum, Tomlinson, 1, 0
+Elijah, Brook, Finlay, Horn, 0, 1
+Henry, Myatt, Alex, Hill, 1, 0
+
+Wilf, Howard, George, Worsley, 1, 0
+Will, Moore, Jak, Dables, 0, 1
+akanksh, Shetty, Will, Vickers, 1, 0
+Paaras, Padhiar, James, Lund, 0, 1
+Nnyal, Khan, Wilf, Moncrieff, 0, 1
+Elliott, Mallett, Robert, Fry, 0, 1
+Osian, Drake, Callum, Tomlinson, 1, 0
+Guillermo, S, Finlay, Horn, 0, 1
+Dylan, Nolan, Alex, Hill, 0, 1
+Henry, Myatt, Jonathan, Roberts, 0, 1
+Elijah, Brook, Evan, Morris, 0, 1
+
+Will, Moore, George, Worsley, 0, 1
+Wilf, Howard, James, Lund, 0, 1
+Jak, Dables, Will, Vickers, 1, 0
+akanksh, Shetty, Wilf, Moncrieff, 0, 1
+Paaras, Padhiar, Robert, Fry, 1, 0
+Nnyal, Khan, Callum, Tomlinson, 0, 1
+Elijah, Brook, Henry, Myatt, 0, 1
+Elliott, Mallett, Finlay, Horn, 0, 1
+Osian, Drake, Alex, Hill, 0, 1
+Guillermo, S, Evan, Morris, 1, 0
+Dylan, Nolan, Jonathan, Roberts, 0, 1
+.
+04.03.2026
+David, Burgess, Dylan, Nolan, 0, 1
+Bilal, S, Finlay, Horn, 0, 1
+Evan, Morris, Alex, Hill, 0, 1
+Xander, Morris, Henry, Myatt, 1, 0
+Jonathan, Roberts, George, Worsley, 1, 0
+James, Lund, Wilf, Howard, 1, 0
+Matt, Woodcock, Andrew, Collins, 0, 1
+Will, Vickers, Will, Moore, 1, 0
+Elliott, Mallett, Callum, Tomlinson, 0, 1
+Ryan, Chambers, Wilf, Moncrieff, 1, 0
+Jak, Dables, Robert, Fry, 0, 1
+Paaras, Padhiar, Elijah, Brook, 1, 0
+
+Xander, Morris, Andrew, Collins, 0, 1
+Evan, Morris, George, Worsley, 0, 1
+Bilal, S, Alex, Hill, 1, 0
+Finlay, Horn, Henry, Myatt, 1, 0
+Jak, Dables, Elijah, Brook, 1, 0
+Jonathan, Roberts, Dylan, Nolan, 1, 0
+Robert, Fry, Osian, Drake, 0, 0
+Matt, Woodcock, Will, Moore, 1, 0
+David, Burgess, Ed, Robbins, 0, 1
+Will, Vickers, Wilf, Moncrieff, 1, 0
+Paaras, Padhiar, James, Lund, 1, 0
+Ryan, Chambers, Callum, Tomlinson, 1, 0
+Elliott, Mallett, Wilf, Howard, 0, 1
+
+Evan, Morris, Will, Moore, 0, 1
+Alex, Hill, George, Worsley, 0, 1
+Osian, Drake, Henry, Myatt, 0, 1
+Bilal, S, Andrew, Collins, 1, 0
+Xander, Morris, Ed, Robbins, 0, 1
+Jak, Dables, James, Lund, 1, 0
+Finlay, Horn, Dylan, Nolan, 1, 0
+Jonathan, Roberts, Wilf, Moncrieff, 1, 0
+Ryan, Chambers, Wilf, Howard, 0, 1
+Matt, Woodcock, Robert, Fry, 1, 0
+David, Burgess, Callum, Tomlinson, 0, 1
+Elliott, Mallett, Paaras, Padhiar, 0, 1
+Will, Vickers, Elijah, Brook, 1, 0
+
+Osian, Drake, George, Worsley, 0, 1
+Finlay, Horn, Ed, Robbins, 1, 0
+Henry, Myatt, Andrew, Collins, 0, 1
+Alex, Hill, Dylan, Nolan, 1, 0
+Bilal, S, Will, Moore, 1, 0
+Evan, Morris, Wilf, Moncrieff, 1, 0
+Xander, Morris, Robert, Fry, 0, 1
+Will, Vickers, James, Lund, 1, 0
+Jak, Dables, Elliott, Mallett, 1, 0
+Jonathan, Roberts, Callum, Tomlinson, 1, 0
+Ryan, Chambers, Paaras, Padhiar, 1, 0
+Matt, Woodcock, Elijah, Brook, 1, 0
+David, Burgess, Wilf, Howard, 0, 1
+
+Ryan, Chambers, Jak, Dables, 0, 1
+Henry, Myatt, Will, Moore, 1, 0
+Jonathan, Roberts, Wilf, Howard, 0, 1
+Osian, Drake, Andrew, Collins, 0, 1
+George, Worsley, Dylan, Nolan, 0, 1
+Alex, Hill, Ed, Robbins, 1, 0
+Bilal, S, Wilf, Moncrieff, 1, 0
+Will, Vickers, Elliott, Mallett, 1, 0
+Finlay, Horn, Robert, Fry, 1, 0
+Evan, Morris, Callum, Tomlinson, 0, 1
+Matt, Woodcock, James, Lund, 0, 1
+David, Burgess, Paaras, Padhiar, 1, 0
+Xander, Morris, Elijah, Brook, 1, 0
+
+Osian, Drake, Dylan, Nolan, 0, 1
+Andrew, Collins, Will, Moore, 1, 0
+Matt, Woodcock, Elliott, Mallett, 1, 0
+George, Worsley, Ed, Robbins, 0, 1
+Henry, Myatt, Wilf, Moncrieff, 1, 0
+Alex, Hill, Robert, Fry, 1, 0
+Bilal, S, Callum, Tomlinson, 1, 0
+Will, Vickers, Ryan, Chambers, 1, 0
+David, Burgess, Jak, Dables, 0, 1
+Jonathan, Roberts, Paaras, Padhiar, 1, 0
+Finlay, Horn, Elijah, Brook, 0, 1
+Evan, Morris, Wilf, Howard, 0, 1
+Xander, Morris, James, Lund, 0, 1
+.
+11.03.2026
+Osian, Drake, Alex, Hill, 0, 1
+George, Worsley, Dylan, Nolan, 1, 0
+Wilf, Howard, Will, Moore, 1, 0
+Henry, Brooks, Henry, Myatt, 0, 1
+Andrew, Collins, Jak, Dables, 1, 0
+Mackenzie, Lambert, Elijah, Brook, 0, 1
+Evan, Morris, Matt, Woodcock, 0, 1
+Malachi, Bielby, Will, Vickers, 1, 0
+Elliott, Mallett, Paaras, Padhiar, 0, 0
+Wilf, Moncrieff, Robert, Fry, 0, 1
+James, Lund, Callum, Tomlinson, 0, 1
+Martin, Casey, David, Burgess, 1, 0
+Xander, Morris, Ed, Robbins, 0, 1
+
+Bilal, S, Will, Vickers, 1, 0
+Jonathan, Roberts, Dylan, Nolan, 0, 1
+Finlay, Horn, Matt, Woodcock, 0, 1
+George, Worsley, Alex, Hill, 1, 0
+Elliott, Mallett, Jak, Dables, 1, 0
+Andrew, Collins, Mackenzie, Lambert, 1, 0
+Wilf, Howard, Paaras, Padhiar, 1, 0
+Evan, Morris, Robert, Fry, 1, 0
+Henry, Brooks, Elijah, Brook, 0, 1
+Malachi, Bielby, Callum, Tomlinson, 1, 0
+Wilf, Moncrieff, David, Burgess, 1, 0
+Osian, Drake, Henry, Myatt, 0, 1
+James, Lund, Ed, Robbins, 1, 0
+Martin, Casey, Xander, Morris, 0, 1
+
+Henry, Brooks, Andrew, Collins, 1, 0
+Henry, Dawes, Will, Vickers, 1, 0
+Evan, Morris, David, Burgess, 0, 1
+William, Portway, Dylan, Nolan, 0, 1
+Max, Robertson, Matt, Woodcock, 0, 1
+Elliott, Mallett, Mackenzie, Lambert, 1, 0
+Tom, Lomas-Walker, Alex, Hill, 0, 1
+Osian, Drake, Elijah, Brook, 0, 1
+Malachi, Bielby, Ed, Robbins, 0, 1
+Wilf, Moncrieff, Xander, Morris, 0, 1
+Jonathan, Roberts, Paaras, Padhiar, 1, 0
+Wilf, Howard, Jak, Dables, 0, 1
+Finlay, Horn, Robert, Fry, 1, 0
+Bilal, S, Callum, Tomlinson, 1, 0
+George, Worsley, Henry, Myatt, 0, 1
+James, Lund, Martin, Casey, 1, 0
+
+William, Portway, Will, Moore, 0, 1
+Dylan, Nolan, Matt, Woodcock, 0, 1
+Bilal, S, Jak, Dables, 1, 0
+Malachi, Bielby, Mackenzie, Lambert, 1, 0
+Osian, Drake, Xander, Morris, 1, 0
+Max, Robertson, Alex, Hill, 1, 0
+Henry, Dawes, Paaras, Padhiar, 1, 0
+Elliott, Mallett, Martin, Casey, 1, 0
+James, Lund, Henry, Brooks, 1, 0
+Evan, Morris, Elijah, Brook, 0, 1
+George, Worsley, David, Burgess, 0, 1
+Wilf, Howard, Ed, Robbins, 1, 0
+Wilf, Moncrieff, Andrew, Collins, 0, 1
+Tom, Lomas-Walker, Robert, Fry, 0, 1
+Jonathan, Roberts, Callum, Tomlinson, 0, 1
+Finlay, Horn, Henry, Myatt, 1, 0
+
+William, Portway, Matt, Woodcock, 0, 1
+Will, Moore, Will, Vickers, 0, 1
+Evan, Morris, Xander, Morris, 0, 1
+Dylan, Nolan, Alex, Hill, 0, 1
+Max, Robertson, Robert, Fry, 0, 1
+Elliott, Mallett, Henry, Brooks, 0, 1
+Bilal, S, Ed, Robbins, 0, 1
+Henry, Dawes, Callum, Tomlinson, 1, 0
+Osian, Drake, Andrew, Collins, 0, 1
+Tom, Lomas-Walker, Henry, Myatt, 0, 1
+Jonathan, Roberts, Jak, Dables, 1, 0
+George, Worsley, Elijah, Brook, 1, 0
+Wilf, Moncrieff, James, Lund, 0, 1
+Finlay, Horn, David, Burgess, 1, 0
+Malachi, Bielby, Martin, Casey, 0, 1
+Wilf, Howard, Mackenzie, Lambert, 0, 1
+.
+19.03.2026
+Henry, Myatt, Ryan, Chambers, 1, 0
+Alex, Hill, Finlay, Horn, 1, 0
+Elliott, Mallett, Callum, Tomlinson, 0, 1
+Will, Vickers, Will, Moore, 1, 0
+Malachi, Bielby, Paaras, Padhiar, 0, 1
+Jonathan, Roberts, Jak, Dables, 0, 1
+Elijah, Brook, David, Burgess, 1, 0
+Ed, Robbins, Henry, Brooks, 1, 0
+James, Lund, Matt, Woodcock, 1, 0
+Wilf, Moncrieff, Robert, Fry, 1, 0
+Andrew, Collins, Fotis, T, 1, 0
+
+Wilf, Moncrieff, Paaras, Padhiar, 0, 1
+David, Burgess, Will, Moore, 0, 1
+Callum, Tomlinson, Ryan, Chambers, 0, 1
+Robert, Fry, Jak, Dables, 0, 1
+Fotis, T, Henry, Brooks, 0, 1
+Alex, Hill, Matt, Woodcock, 1, 0
+Elliott, Mallett, James, Lund, 0, 1
+Will, Vickers, Elijah, Brook, 1, 0
+Henry, Myatt, Ed, Robbins, 0, 1
+Malachi, Bielby, Jonathan, Roberts, 0, 1
+
+Evan, Morris, Jak, Dables, 0, 1
+Will, Moore, Paaras, Padhiar, 0, 1
+David, Burgess, Henry, Brooks, 0, 1
+Callum, Tomlinson, Matt, Woodcock, 1, 0
+Wilf, Moncrieff, James, Lund, 0, 1
+Robert, Fry, Elijah, Brook, 1, 0
+Fotis, T, Ed, Robbins, 0, 1
+Alex, Hill, Jonathan, Roberts, 0, 1
+Elliott, Mallett, Malachi, Bielby, 0, 1
+Will, Vickers, Henry, Myatt, 0, 1
+
+Evan, Morris, Matt, Woodcock, 0, 1
+Ryan, Chambers, Jak, Dables, 1, 0
+Will, Moore, Henry, Brooks, 0, 1
+David, Burgess, James, Lund, 0, 1
+Callum, Tomlinson, Elijah, Brook, 1, 0
+Wilf, Moncrieff, Ed, Robbins, 1, 0
+Robert, Fry, Jonathan, Roberts, 0, 1
+Fotis, T, Malachi, Bielby, 1, 0
+Alex, Hill, Henry, Myatt, 1, 0
+Elliott, Mallett, Will, Vickers, 0, 1
+
+Ryan, Chambers, Matt, Woodcock, 1, 0
+Paaras, Padhiar, Henry, Brooks, 1, 0
+Will, Moore, James, Lund, 0, 1
+Evan, Morris, Elijah, Brook, 1, 0
+David, Burgess, Ed, Robbins, 0, 1
+Callum, Tomlinson, Jonathan, Roberts, 0, 1
+Wilf, Moncrieff, Malachi, Bielby, 1, 0
+Robert, Fry, Henry, Myatt, 0, 1
+Fotis, T, Will, Vickers, 0, 1
+Alex, Hill, Elliott, Mallett, 1, 0
+.
+30.03.2026
+Jak, Dables, Mackenzie, Lambert, 1, 0
+Wilf, Moncrieff, Jonathan, Roberts, 0, 1
+Will, Moore, Paaras, Padhiar, 0, 1
+Elliott, Mallett, Max, Robertson, 0, 1
+Ryan, Chambers, Elijah, Brook, 1, 0
+Ed, Robbins, James, Lund, 0, 1
+Wilf, Howard, Finlay, Horn, 0, 1
+Matt, Woodcock, Callum, Tomlinson, 1, 0
+Henry, Myatt, George, Worsley, 0, 1
+Dylan, Nolan, akanksh, Shetty, 1, 0
+Will, Vickers, Evan, Morris, 1, 0
+
+Henry, Myatt, George, Worsley, 1, 0
+Jonathan, Roberts, Max, Robertson, 1, 0
+Wilf, Moncrieff, Paaras, Padhiar, 1, 0
+Will, Moore, Elijah, Brook, 1, 0
+Will, Vickers, Evan, Morris, 0, 1
+Elliott, Mallett, James, Lund, 0, 1
+Ryan, Chambers, Finlay, Horn, 0, 1
+Ed, Robbins, Mackenzie, Lambert, 1, 0
+Wilf, Howard, akanksh, Shetty, 1, 0
+Jak, Dables, Callum, Tomlinson, 1, 0
+Matt, Woodcock, Dylan, Nolan, 0, 1
+
+Jak, Dables, George, Worsley, 1, 0
+Wilf, Moncrieff, Paaras, Padhiar, 0, 1
+Jonathan, Roberts, James, Lund, 1, 0
+Will, Moore, Finlay, Horn, 0, 1
+Elliott, Mallett, Mackenzie, Lambert, 1, 0
+Ryan, Chambers, akanksh, Shetty, 1, 0
+Ed, Robbins, Callum, Tomlinson, 0, 1
+Wilf, Howard, Dylan, Nolan, 0, 1
+Henry, Myatt, Will, Vickers, 1, 0
+Matt, Woodcock, Elijah, Brook, 0, 1
+
+Paaras, Padhiar, James, Lund, 1, 0
+Wilf, Moncrieff, Elijah, Brook, 0, 1
+Jonathan, Roberts, Finlay, Horn, 0, 1
+Will, Moore, Mackenzie, Lambert, 1, 0
+Elliott, Mallett, akanksh, Shetty, 0, 1
+Ryan, Chambers, Callum, Tomlinson, 0, 1
+Ed, Robbins, Dylan, Nolan, 1, 0
+Wilf, Howard, George, Worsley, 0, 1
+Jak, Dables, Will, Vickers, 0, 1
+Matt, Woodcock, Henry, Myatt, 0, 1
+
+Paaras, Padhiar, Mackenzie, Lambert, 1, 0
+Wilf, Moncrieff, James, Lund, 0, 1
+Elijah, Brook, Finlay, Horn, 0, 1
+Jonathan, Roberts, akanksh, Shetty, 1, 0
+Will, Moore, Callum, Tomlinson, 0, 1
+Elliott, Mallett, Dylan, Nolan, 0, 1
+Ryan, Chambers, George, Worsley, 0, 1
+Ed, Robbins, Will, Vickers, 0, 1
+Wilf, Howard, Henry, Myatt, 0, 1
+Jak, Dables, Matt, Woodcock, 1, 0
+
+James, Lund, Mackenzie, Lambert, 1, 0
+Elijah, Brook, akanksh, Shetty, 1, 0
+Paaras, Padhiar, Callum, Tomlinson, 1, 0
+Jonathan, Roberts, Dylan, Nolan, 0, 1
+Will, Moore, George, Worsley, 1, 0
+Elliott, Mallett, Will, Vickers, 1, 0
+Ryan, Chambers, Henry, Myatt, 0, 1
+Ed, Robbins, Matt, Woodcock, 1, 0
+Wilf, Howard, Jak, Dables, 0, 1

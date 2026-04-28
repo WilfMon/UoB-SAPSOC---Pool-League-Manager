@@ -9,18 +9,40 @@ file_name = "league.db"
 
 create_tables(dest=file_name)
 
-with open("prev_data/25-26sm1.txt", "r") as file:
-    sm1 = file.read()
+with open("prev_data/raw_data.txt", "r") as file:
+    raw_data = file.read()
 
-with open("prev_data/25-26sm2.txt", "r") as file:
-    sm2 = file.read()
+clean_data = raw_data.split("######################################################################")
 
-# clean data
-sm1 = sm1.split("\n")
-sm1 = list(filter(lambda x: x != "", sm1))
+#print(clean_data)
 
-sm2 = sm2.split("\n")
-sm2 = list(filter(lambda x: x != "", sm2))
+raw_semesters = []
+
+for sem in clean_data:
+    s = sem.split("\n")
+    #print(s)
+    s = list(filter(lambda x: x != "", s))
+    #print(s)
+
+    raw_semesters.append(s)
+
+def split_to_sessions(semester_data):
+    result = []
+    current = []
+
+    for item in semester_data:
+        if item == ".":
+            result.append(current)
+            current = []
+        else:
+            current.append(item)
+
+    result.append(current)
+
+    result.append(result[0])
+    
+    result.pop(0)
+    return result
 
 def clean_to_sessions(sessions_data):
     sessions_data_copy = sessions_data.copy()
@@ -46,9 +68,14 @@ def clean_to_sessions(sessions_data):
     for session in sessions:
         session.pop(0)
 
+
+    sessions.append(sessions_data[0])
     return sessions
 
-def add_sessions_db(sessions, sm):
+def add_sessions_db(sessions):
+
+    sm = sessions[-1][0]
+    sessions.pop(-1)
 
     sem_id = add_semester(sm, dest=file_name)
 
@@ -93,8 +120,10 @@ def add_sessions_db(sessions, sm):
 
             add_game(ses_id, winner_id, loser_id, winner_id, dest=file_name)
 
-sm1_sessions = clean_to_sessions(sm1)
-sm2_sessions = clean_to_sessions(sm2)
+semesters = []
 
-add_sessions_db(sm1_sessions, "2025-2026.1")
-add_sessions_db(sm2_sessions, "2025-2026.2")
+for sem in raw_semesters:
+    semesters.append(split_to_sessions(sem))
+
+for sem in semesters:
+    add_sessions_db(sem)
