@@ -5,6 +5,8 @@ sys.path.append(os.path.join(os.path.dirname(__file__), ".."))  # adds Client/ t
 from database.queries import add_game, add_player, add_semester, add_session, get_player_id_from_name
 from database.schema import create_tables
 
+from utils.utils import clean_name
+
 file_name = "league.db"
 
 create_tables(dest=file_name)
@@ -97,8 +99,8 @@ def add_sessions_db(sessions):
 
             game = [p1, p2, game[4], game[5]]
 
-            player_names.add(game[0])
-            player_names.add(game[1])
+            player_names.add(clean_name(game[0]))
+            player_names.add(clean_name(game[1]))
 
             games.append(game)
 
@@ -109,11 +111,11 @@ def add_sessions_db(sessions):
         for game in games:
 
             if game[2] == "1":
-                winner = game[0]
-                loser = game[1]
+                winner = clean_name(game[0])
+                loser = clean_name(game[1])
             if game[3] == "1":
-                winner = game[1]
-                loser = game[0]
+                winner = clean_name(game[1])
+                loser = clean_name(game[0])
 
             winner_id = get_player_id_from_name(winner, dest=file_name)
             loser_id = get_player_id_from_name(loser, dest=file_name)

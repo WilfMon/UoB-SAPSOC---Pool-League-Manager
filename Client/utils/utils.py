@@ -3,9 +3,9 @@ import numpy as np
 from database.queries import get_all_players_name
 from .utils_classes import Settings
 
-def check_for_new_players(players):
+def check_for_new_players(players, dest):
     
-    db_players = get_all_players_name()
+    db_players = get_all_players_name(dest)
     
     if (set(players) - set(db_players)):
 

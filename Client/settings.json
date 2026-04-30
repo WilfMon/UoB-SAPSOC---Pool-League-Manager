@@ -1,5 +1,7 @@
 {
-    "scale": 0.75,
+    "scale": 1.0,
+    "forget_factor": 10,
+    "dest": "league.db",
     "elo_vars": {
         "base": 10,
         "scale_factor": 600,

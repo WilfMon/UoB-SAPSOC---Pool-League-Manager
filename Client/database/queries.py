@@ -57,9 +57,7 @@ def add_game(session_id, player1_id, player2_id, winner_id, dest="league.db"):
     if loser_points - winner_points >= 10:
         points_to_add = 1 + loser_points * 0.1
         
-    winner_elo_change, loser_elo_change = get_elo_change(
-        winner_id, loser_id, dest
-    )
+    winner_elo_change, loser_elo_change = get_elo_change(winner_id, loser_id, dest)
 
     cursor.execute("""
         INSERT INTO games (
@@ -226,7 +224,12 @@ def get_members(dest="league.db") -> list[str]:
     return [row[0] for row in rows]
 
 
-def get_all_players_name(dest="league.db") -> list[str]:
+def get_all_players_name(forget_factor: int = 4, dest: str ="league.db") -> list[str]:
+    """ 
+    Return a list of the names of all players\n
+    - forget_factor is how many consecutive sessions a player must be absent to no longer be included in this
+    """
+    
     conn = get_connection(dest)
     cursor = conn.cursor()
 

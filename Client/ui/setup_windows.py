@@ -17,11 +17,14 @@ class SetupWindow(QMainWindow):
     # Define a signal that sends a list
     submitted_players = Signal(list)
     
-    def __init__(self, scale=1.0):
+    def __init__(self, dest, scale=1.0):
         super().__init__()
+
+        self.dest = dest
 
         self.scale = scale
         self.default_font = QFont("Segoe UI", round(self.scale * 18))
+
         
         self.setWindowTitle("Setup")
         self.setMinimumSize(int(800 * scale), int(800 * scale))
@@ -49,7 +52,7 @@ class SetupWindow(QMainWindow):
         self.selection_list.itemClicked.connect(self.submit_text_selected)
         self.layout_.addWidget(self.selection_list, 3, 0)
 
-        for player in get_all_players_name():
+        for player in get_all_players_name(dest=self.dest):
             self.selection_list.addItem(player)
 
         label_text_box = QLabel("Players Selected:")
@@ -160,8 +163,8 @@ class TournamentSetupWindow(SetupWindow):
     # Define a signal that sends a list
     signal = Signal(list, dict)
 
-    def __init__(self, scale=1.0):
-        super().__init__()
+    def __init__(self, dest, scale=1.0):
+        super().__init__(dest, scale)
 
         self.setMinimumSize(int(1000 * scale), int(800 * scale))
 

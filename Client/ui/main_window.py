@@ -10,9 +10,8 @@ logger = logging.getLogger(__name__)
 
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 
-from database.db import get_connection
 from database.schema import create_tables
-from database.queries import add_player, get_elo_change, get_player_elo, get_session_id_from_name, get_semester_id_from_name, make_member, get_player, get_all_players_name, add_semester, add_session, add_game, get_player_id_from_name
+from database.queries import add_player, get_elo_change, get_player_elo, get_semester_id_from_name, get_all_players_name, add_semester, add_session, add_game, get_player_id_from_name
 
 from PySide6.QtWidgets import QMainWindow, QStackedWidget, QSpacerItem, QComboBox, QListWidgetItem, QSizePolicy, QLabel, QGridLayout,  QFrame, QPushButton, QWidget, QListWidget, QMenu, QApplication, QLineEdit, QScrollArea, QHBoxLayout
 from PySide6.QtGui import QAction, QCursor, QFont
@@ -27,17 +26,19 @@ from utils.utils import check_for_new_players, remove_menu, get_players_from_qli
 from utils.utils_classes import Settings, SessionBuilder, TournamentBuilder, StatisticsBuilder, AdvancedStats, Leaderboard
 
 class MainWindow(QMainWindow):
-    def __init__(self, config, scale=1.0):
+    def __init__(self, config):
         super().__init__()
         
         self.config = config
         print(f"settings: {self.config}")
+
+        self.dest = self.config["dest"]
         
-        self.scale = scale
+        self.scale = config["scale"]
         self.default_font = QFont("Segoe UI", round(self.scale * 18))
 
         self.setWindowTitle("My Dark Themed PySide6 App")
-        self.setMinimumSize(int(1920 * scale), int(1080 * scale))
+        self.setMinimumSize(int(1920 * self.scale), int(1080 * self.scale))
         
         self.central = QStackedWidget()
         self.setCentralWidget(self.central)
@@ -66,20 +67,20 @@ class MainWindow(QMainWindow):
         self.year = date_time.strftime("%Y")
         self.month = int(date_time.strftime("%m"))
         
-        create_tables()
+        create_tables(self.dest)
         
         # automatically determine semester and year
         if 9 <= self.month <= 12:
             sem_name = f"{int(self.year) - 1}{self.year}.1"
             
-            add_semester(sem_name)
-            self.semester_id = get_semester_id_from_name(sem_name)
+            add_semester(sem_name, dest=self.dest)
+            self.semester_id = get_semester_id_from_name(sem_name, dest=self.dest)
 
         if 1 <= self.month <= 8:
             sem_name = f"{int(self.year) - 1}{self.year}.2"
             
-            add_semester(sem_name)
-            self.semester_id = get_semester_id_from_name(sem_name)
+            add_semester(sem_name, dest=self.dest)
+            self.semester_id = get_semester_id_from_name(sem_name, dest=self.dest)
 
         logger.info(f"Semester set to: {sem_name}")
 
@@ -136,7 +137,8 @@ class MainWindow(QMainWindow):
         def on_confirm_players():
             players = get_players_from_qlist(self.players_list_session)
                     
-            new_players = check_for_new_players(players)
+            new_players = check_for_new_players(players, dest=self.dest)
+            print(new_players)
             if new_players != []:
                 
                 self.confimation_window = ConfirmationWindow(scale=self.scale, new_players=new_players)
@@ -180,7 +182,7 @@ class MainWindow(QMainWindow):
                 # write to database players
                 players_ = set(get_players_from_qlist(self.players_list_session))
                 for name in players_:
-                    add_player(name)
+                    add_player(name, dest=self.dest)
 
                 # logic for round pairings            
                 self.round_number = 0
@@ -231,7 +233,7 @@ class MainWindow(QMainWindow):
         """ Called when the session has started and a player is added through right clicking the listWidget """
         def one_player_confirmed(yesorno, players):
             if yesorno:
-                add_player(players[0])
+                add_player(players[0], dest=self.dest)
 
                 logger.info(f"Player confirmed: {players[0]}")
 
@@ -365,11 +367,11 @@ class MainWindow(QMainWindow):
                 # for advanced view
                 if advanced:
                 
-                    left_id = get_player_id_from_name(pair[0])
-                    right_id = get_player_id_from_name(pair[1])
+                    left_id = get_player_id_from_name(pair[0], dest=self.dest)
+                    right_id = get_player_id_from_name(pair[1], dest=self.dest)
                     
-                    left_change, _ = get_elo_change(left_id, right_id)
-                    right_change, _ = get_elo_change(right_id, left_id)
+                    left_change, _ = get_elo_change(left_id, right_id, dest=self.dest)
+                    right_change, _ = get_elo_change(right_id, left_id, dest=self.dest)
                     
                     elo_left = QLabel(f"+ {round(left_change)}")
                     elo_right = QLabel(f"+ {round(right_change)}")
@@ -377,8 +379,8 @@ class MainWindow(QMainWindow):
                     elo_left.setProperty("elo_gain", left_change)
                     elo_right.setProperty("elo_gain", right_change)
 
-                    elo_left.setProperty("base_elo", get_player_elo(left_id))
-                    elo_right.setProperty("base_elo", get_player_elo(right_id))
+                    elo_left.setProperty("base_elo", get_player_elo(left_id, dest=self.dest))
+                    elo_right.setProperty("base_elo", get_player_elo(right_id, dest=self.dest))
                     
                     round_container_layout.addWidget(elo_left, n + 2, self.round_number, alignment=Qt.AlignLeft)
                     round_container_layout.addWidget(elo_right, n + 2, self.round_number + 2, alignment=Qt.AlignRight)
@@ -423,15 +425,15 @@ class MainWindow(QMainWindow):
         """ Called when the save session menu item is pressed """
         def on_save_session():
 
-            self.session_id = add_session(semester_id=self.semester_id, session_date=self.date)
+            self.session_id = add_session(semester_id=self.semester_id, session_date=self.date, dest=self.dest)
             
             for round_ in self.finished_games:
                 for game in list(round_):
                     
-                    player1_id = get_player_id_from_name(game[0])
-                    player2_id = get_player_id_from_name(game[1])
+                    player1_id = get_player_id_from_name(game[0], dest=self.dest)
+                    player2_id = get_player_id_from_name(game[1], dest=self.dest)
                     
-                    add_game(self.session_id, player1_id, player2_id, winner_id=player1_id)
+                    add_game(self.session_id, player1_id, player2_id, winner_id=player1_id, dest=self.dest)
                 
             logger.info("Saved Session")
             
@@ -489,7 +491,7 @@ class MainWindow(QMainWindow):
             self.central.setCurrentWidget(self.session_wid)
 
         # logic for new session window
-        self.session_setup_window = SetupWindow(scale=self.scale)
+        self.session_setup_window = SetupWindow(dest=self.dest, scale=self.scale)
         self.session_setup_window.submitted_players.connect(players_recived)
         
         self.session_setup_window.show()
@@ -567,7 +569,7 @@ class MainWindow(QMainWindow):
 
         """ Called when the confirm menu is pressed """
         def on_confirm_players():      
-            new_players = check_for_new_players(self.tournament_players)
+            new_players = check_for_new_players(self.tournament_players, dest=self.dest)
             if new_players != []:
                 
                 self.confimation_window = ConfirmationWindow(scale=self.scale, new_players=new_players)
@@ -686,7 +688,7 @@ class MainWindow(QMainWindow):
             self.central.setCurrentWidget(self.tournament_wid)
 
         # logic for new tournament window
-        self.tournament_setup_window = TournamentSetupWindow(scale=self.scale)
+        self.tournament_setup_window = TournamentSetupWindow(dest=self.dest, scale=self.scale)
         self.tournament_setup_window.signal.connect(players_recived)
         
         self.tournament_setup_window.show()
@@ -785,7 +787,7 @@ class MainWindow(QMainWindow):
             self.players_list_statistics.itemClicked.connect(on_selected_player)
             self.main_statistics_layout.addWidget(self.players_list_statistics, 0, 0, alignment=Qt.AlignLeft)
         
-            players = get_all_players_name()
+            players = get_all_players_name(dest=self.dest)
             for player in players:
                 self.players_list_statistics.addItem(player)
 
@@ -1008,9 +1010,13 @@ class MainWindow(QMainWindow):
         self.menu_bar = remove_menu(self.menu_bar, "Statistics")
 
         # get leaderboards
-        L = Leaderboard()
-        semester_leaderboard, session_leaderboard, alltime_leaderboard_points_sorted, alltime_leaderboard_elo_sorted = L.collect_leaderboards()
-        
+        L = Leaderboard(self.dest)
+        try:
+            semester_leaderboard, session_leaderboard, alltime_leaderboard_points_sorted, alltime_leaderboard_elo_sorted = L.collect_leaderboards()
+        except Exception as e:
+            logger.warning(f"database empty - no leaderboard")
+            return
+
         # ui setup
         """ Whole window widget to allow vertical scrolling """
         leaderboard_area = QScrollArea()

@@ -36,7 +36,7 @@ def main():
         with open(qss_file, "r") as f:
             app.setStyleSheet(f.read())
     
-    window = MainWindow(config=config, scale=scale_factor)
+    window = MainWindow(config=config)
     window.show()
     sys.exit(app.exec())
 

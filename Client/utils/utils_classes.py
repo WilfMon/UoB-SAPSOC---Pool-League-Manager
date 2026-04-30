@@ -405,8 +405,10 @@ from database.db import get_connection
 from database.queries import get_player_num_games_played, get_player_id_from_name
     
 class Leaderboard():
-    def __init__(self):
-        conn = get_connection()
+    def __init__(self, dest="league.db"):
+        self.dest = dest
+
+        conn = get_connection(dest)
         cursor = conn.cursor()
         
         cursor.execute("""
@@ -441,7 +443,7 @@ class Leaderboard():
         conn.close()
     
     def semester(self):
-        conn = get_connection()
+        conn = get_connection(self.dest)
         cursor = conn.cursor()
 
         # list of all semester ids
@@ -492,7 +494,7 @@ class Leaderboard():
         return in_order    
 
     def session(self):
-        conn = get_connection()
+        conn = get_connection(self.dest)
         cursor = conn.cursor()
 
         # list of all session ids
@@ -544,7 +546,7 @@ class Leaderboard():
     
     def alltime_points(self):
         
-        conn = get_connection()
+        conn = get_connection(self.dest)
         cursor = conn.cursor()
 
         cursor.execute("""
@@ -556,7 +558,7 @@ class Leaderboard():
         
         # to remove players that havent played much from the alltime leaderboard
         for player in players:
-            num_games = get_player_num_games_played(get_player_id_from_name(player[0]))
+            num_games = get_player_num_games_played(get_player_id_from_name(player[0], dest=self.dest), dest=self.dest)
             
             if num_games < 10:
                 players_copy.remove(player)
@@ -567,7 +569,7 @@ class Leaderboard():
         return in_order
     
     def alltime_elo(self):
-        conn = get_connection()
+        conn = get_connection(self.dest)
         cursor = conn.cursor()
 
         cursor.execute("""
@@ -578,7 +580,7 @@ class Leaderboard():
         
         # to remove players that havent played much from the alltime leaderboard
         for player in players:
-            num_games = get_player_num_games_played(get_player_id_from_name(player[0]))
+            num_games = get_player_num_games_played(get_player_id_from_name(player[0], dest=self.dest), dest=self.dest)
             
             if num_games < 10:
                 players.remove(player)
