@@ -144,6 +144,17 @@ def remove_member(name, dest="league.db"):
     conn.commit()
     conn.close()
     
+    
+""" Functions for removing data from the database """
+def remove_player(player_id, dest="league.db") -> None:
+    conn = get_connection(dest)
+    cursor = conn.cursor()
+    
+    cursor.execute("DELETE FROM players WHERE player_id = ?", (player_id,))
+    
+    conn.commit()
+    conn.close()
+
 
 """ Functions for retriving data from the database """
 def get_player(name, dest="league.db") -> list:
@@ -290,7 +301,7 @@ def get_elo_change(winner_id, loser_id, dest="league.db") -> tuple[float, float]
     )
     
 
-# Functions to get ids
+""" Functions to get ids """
 def get_semester_id_from_name(semester_name, dest="league.db") -> int:
     conn = get_connection(dest)
     cursor = conn.cursor()

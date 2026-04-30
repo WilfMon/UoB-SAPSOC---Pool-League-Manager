@@ -5,7 +5,7 @@ from PySide6.QtGui import QFont
 class ConfirmationWindow(QDialog):
     signal_to_send = Signal(bool, list)
     
-    def __init__(self, scale, new_players):
+    def __init__(self, scale, new_players, message="New players (haven't ever played before)"):
         super().__init__()
         self.scale = scale
         self.default_font = QFont("Segoe UI", round(self.scale * 18))
@@ -16,7 +16,7 @@ class ConfirmationWindow(QDialog):
         
         layout = QVBoxLayout()
         
-        label1 = QLabel("New players (haven't ever played before)")
+        label1 = QLabel(message)
         layout.addWidget(label1)
         
         list_wid = QListWidget()

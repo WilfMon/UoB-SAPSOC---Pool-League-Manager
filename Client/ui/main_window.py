@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 
 from database.schema import create_tables
-from database.queries import add_player, get_elo_change, get_player_elo, get_semester_id_from_name, get_all_players_name, add_semester, add_session, add_game, get_player_id_from_name
+from database.queries import add_player, remove_player, get_elo_change, get_player_elo, get_semester_id_from_name, get_all_players_name, add_semester, add_session, add_game, get_player_id_from_name
 
 from PySide6.QtWidgets import QMainWindow, QStackedWidget, QSpacerItem, QComboBox, QListWidgetItem, QSizePolicy, QLabel, QGridLayout,  QFrame, QPushButton, QWidget, QListWidget, QMenu, QApplication, QLineEdit, QScrollArea, QHBoxLayout
 from PySide6.QtGui import QAction, QCursor, QFont
@@ -20,7 +20,7 @@ from PySide6.QtCore import Qt, QSize, QPoint, Signal, QTimer
 from ui.setup_windows import SetupWindow, TournamentSetupWindow
 from ui.text_box_window import TextBoxWindow
 from ui.confimation_window import ConfirmationWindow
-from ui.update_memberships_window import MembershipWindow
+from ui.update_database_windows import MembershipWindow, DataWindow
 
 from utils.utils import check_for_new_players, remove_menu, get_players_from_qlist, clear_layout
 from utils.utils_classes import Settings, SessionBuilder, TournamentBuilder, StatisticsBuilder, AdvancedStats, Leaderboard
@@ -38,7 +38,7 @@ class MainWindow(QMainWindow):
         self.default_font = QFont("Segoe UI", round(self.scale * 18))
 
         self.setWindowTitle("My Dark Themed PySide6 App")
-        self.setMinimumSize(int(1920 * self.scale), int(1080 * self.scale))
+        self.setMinimumSize(int(1280 * self.scale), int(720 * self.scale))
         
         self.central = QStackedWidget()
         self.setCentralWidget(self.central)
@@ -110,7 +110,11 @@ class MainWindow(QMainWindow):
         self.edit_memberships = QAction("Edit Members", self)
         self.edit_memberships.triggered.connect(self.on_edit_memberships)
         self.file_menu.addAction(self.edit_memberships)
-
+        
+        self.edit_data = QAction("Edit Data", self)
+        self.edit_data.triggered.connect(self.on_edit_data)
+        self.file_menu.addAction(self.edit_data)
+        
         self.file_menu.addSeparator()
 
         exit_action = QAction("Exit", self)
@@ -329,7 +333,7 @@ class MainWindow(QMainWindow):
             # creating display of round pairings
             round_container = QFrame()
             round_container.setStyleSheet("background-color: #1f1f1f;")
-            round_container_layout = QGridLayout(round_container)
+            round_container_layout = QGridLayout(round_container, alignment=Qt.AlignTop)
             
             round_container_layout.addWidget(QLabel(f"Round: {self.round_number + 1}"), 0, self.round_number)
             
@@ -1096,9 +1100,14 @@ class MainWindow(QMainWindow):
         leaderboard_container_layout.addWidget(leaderboard_container_at, 0, 2)
 
     def on_edit_memberships(self):
-        self.update_membership_window = MembershipWindow(scale=self.scale)
+        self.update_membership_window = MembershipWindow(scale=self.scale, dest=self.dest)
         
         self.update_membership_window.show()
+
+    def on_edit_data(self):
+        self.update_database_window = DataWindow(sest=self.dest, scale=self.scale)
+        
+        self.update_database_window.show()
 
     def on_change_scale(self):
 
