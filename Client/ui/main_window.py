@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 
 from database.schema import create_tables
-from database.queries import add_player, remove_player, get_elo_change, get_player_elo, get_semester_id_from_name, get_all_players_name, add_semester, add_session, add_game, get_player_id_from_name
+from database.queries import *
 
 from PySide6.QtWidgets import QMainWindow, QStackedWidget, QSpacerItem, QComboBox, QListWidgetItem, QSizePolicy, QLabel, QGridLayout,  QFrame, QPushButton, QWidget, QListWidget, QMenu, QApplication, QLineEdit, QScrollArea, QHBoxLayout
 from PySide6.QtGui import QAction, QCursor, QFont
@@ -117,6 +117,10 @@ class MainWindow(QMainWindow):
         
         self.file_menu.addSeparator()
 
+        self.test_action = QAction("Test", self)
+        self.test_action.triggered.connect(self.on_test)
+        self.file_menu.addAction(self.test_action)
+
         exit_action = QAction("Exit", self)
         exit_action.triggered.connect(self.close)  # Built-in close method
         self.file_menu.addAction(exit_action)
@@ -127,6 +131,15 @@ class MainWindow(QMainWindow):
         self.change_scale = QAction("Change Scale", self)
         self.change_scale.triggered.connect(self.on_change_scale)
         view_menu.addAction(self.change_scale)
+
+    def on_test(self):
+        def test(yesorno, players):
+            print(yesorno)
+            print(players)
+
+        self.conf = ConfirmationWindow(self.scale, display_items=["Wilf Moncrieff"], message="Test")
+        self.conf.signal_to_send.connect(test)
+        self.conf.show()
 
     def on_new_session(self):
 
@@ -145,7 +158,8 @@ class MainWindow(QMainWindow):
             print(new_players)
             if new_players != []:
                 
-                self.confimation_window = ConfirmationWindow(scale=self.scale, new_players=new_players)
+                m = "New players (haven't ever played before)"
+                self.confimation_window = ConfirmationWindow(scale=self.scale, display_items=new_players, message=m)
                 
                 self.confimation_window.signal_to_send.connect(players_confirmed)
                 
@@ -224,7 +238,8 @@ class MainWindow(QMainWindow):
                 self.players_list_session.addItem(player)
 
                 if self.players_confimed: # ask to confirm if the rounds have began
-                    self.confimation_window = ConfirmationWindow(scale=self.scale, new_players=[player])
+                    m = "New player (hasn't ever played before)"
+                    self.confimation_window = ConfirmationWindow(scale=self.scale, display_items=[player], message=m)
                     
                     self.confimation_window.signal_to_send.connect(one_player_confirmed)
                     
@@ -576,7 +591,8 @@ class MainWindow(QMainWindow):
             new_players = check_for_new_players(self.tournament_players, dest=self.dest)
             if new_players != []:
                 
-                self.confimation_window = ConfirmationWindow(scale=self.scale, new_players=new_players)
+                m = "New players (haven't ever played before)"
+                self.confimation_window = ConfirmationWindow(scale=self.scale, display_items=new_players, message=m)
                 
                 self.confimation_window.signal_to_send.connect(players_confirmed)
                 
@@ -1105,7 +1121,7 @@ class MainWindow(QMainWindow):
         self.update_membership_window.show()
 
     def on_edit_data(self):
-        self.update_database_window = DataWindow(sest=self.dest, scale=self.scale)
+        self.update_database_window = DataWindow(dest=self.dest, scale=self.scale)
         
         self.update_database_window.show()
 

@@ -1,3 +1,21 @@
+""" 
+Rebuild class:
+UpdateDatabase
+- Allow updating who is a member
+
+- Allow removing and adding players
+- Allow removing and adding sessions
+- Allow removing and adding semesters
+- Allow removing and adding games
+    - Have a confimation step
+    - Dont delete permanently, create a backup database that is deleted after 30 days before changes were made
+
+UploadDatabse
+- Allow logging in and uploading to the website the current database
+- Allow retriving the current database without logging in
+"""
+
+
 import logging
 logging.basicConfig(
     level=logging.INFO,
@@ -10,7 +28,7 @@ from PySide6.QtCore import Qt, QPoint, QSize
 from PySide6.QtGui import QFont
 
 from utils.utils import clean_name
-from database.queries import get_members, make_member, remove_member, get_all_players_name, remove_player, add_player, get_player_id_from_name
+from database.queries import get_members, up_make_member, up_remove_member, get_all_players_name, re_remove_player, add_player, get_player_id_from_name
 
 from .confimation_window import ConfirmationWindow
 
@@ -137,7 +155,7 @@ class MembershipWindow(QMainWindow):
         players_to_make_member = [self.list_widget.item(i).text() for i in range(self.list_widget.count())]
     
         for name in players_to_make_member:
-            make_member(name, dest=self.dest)
+            up_make_member(name, dest=self.dest)
             
         self.display_players()
     
@@ -145,14 +163,14 @@ class MembershipWindow(QMainWindow):
         players_to_make_member = [self.list_widget.item(i).text() for i in range(self.list_widget.count())]
     
         for name in players_to_make_member:
-            remove_member(name, dest=self.dest)
+            up_remove_member(name, dest=self.dest)
             
         self.display_players()
         
 
 class DataWindow(MembershipWindow):
-    def __init__(self, scale=1):
-        super().__init__(scale)
+    def __init__(self, dest="league.db", scale=1):
+        super().__init__(dest, scale)
         
         self.setWindowTitle("Update Database")
         
@@ -189,12 +207,12 @@ class DataWindow(MembershipWindow):
             for name in players_to_remove:
                 
                 player_id = get_player_id_from_name(name, dest=self.dest)
-                remove_player(player_id, dest=self.dest)
+                re_remove_player(player_id, dest=self.dest)
                 
             self.display_players()
         
         players_to_remove = [self.list_widget.item(i).text() for i in range(self.list_widget.count())]
     
-        self.confimation_window =  ConfirmationWindow(scale=self.scale, new_players=players_to_remove, message="Are you sure you want to delete these players? (cannot be undone)")
+        self.confimation_window =  ConfirmationWindow(scale=self.scale, display_items=players_to_remove, message="Are you sure you want to delete these players? (cannot be undone)")
         self.confimation_window.signal_to_send.connect(players_confirmed)
         self.confimation_window.show()

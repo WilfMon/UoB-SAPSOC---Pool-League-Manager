@@ -1,5 +1,19 @@
 from .db import get_connection
 
+"""
+add prefix:
+function primarily adds to the database
+
+up prefix:
+function primarily updates existing database values
+
+re prefix:
+function primarily removes existing database values
+
+get prefix:
+function primarily retrives database values
+"""
+
 """ Functions for adding to the databse """
 def add_player(name, dest="league.db"):
     conn = get_connection(dest)
@@ -115,7 +129,7 @@ def add_game(session_id, player1_id, player2_id, winner_id, dest="league.db"):
 
 
 """ Functions for updating existing values in the database """
-def make_member(name, dest="league.db"):
+def up_make_member(name, dest="league.db"):
     conn = get_connection(dest)
     cursor = conn.cursor()
     
@@ -130,7 +144,7 @@ def make_member(name, dest="league.db"):
     conn.close()
 
 
-def remove_member(name, dest="league.db"):
+def up_remove_member(name, dest="league.db"):
     conn = get_connection(dest)
     cursor = conn.cursor()
     
@@ -146,7 +160,7 @@ def remove_member(name, dest="league.db"):
     
     
 """ Functions for removing data from the database """
-def remove_player(player_id, dest="league.db") -> None:
+def re_remove_player(player_id, dest="league.db") -> None:
     conn = get_connection(dest)
     cursor = conn.cursor()
     

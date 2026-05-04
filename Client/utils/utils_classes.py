@@ -253,13 +253,8 @@ from database.objects import PlayerObj
 
 class StatisticsBuilder():
     def __init__(self, player_name):
-        # player object
-        player_info = get_player(player_name)
-        player_games = get_player_games(player_name)
-
         # make an object that holds all the info on the player
-        print(player_info)
-        self.player = PlayerObj(player_info, player_games)
+        self.player = PlayerObj(player_name)
 
     def get_graphs(self) -> tuple[Figure, Figure, Figure]:
         
