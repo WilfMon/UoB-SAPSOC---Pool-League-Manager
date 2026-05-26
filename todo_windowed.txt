@@ -1,0 +1,24 @@
+Concept:
+- sessions and tournaments will have seperate windows to manage theme
+- open into a homepage with some stats and quick acsess
+- be able to open every previous session and torunament
+- when creating a new session or torunament have a config window prompt before
+
+Sessions:
+- have a "ghost round" that can be configured to automatically be confirmed depending on
+  a configured number of tables
+- change layout to have current round on the left
+
+Tournament:
+- clean up config page its ugly and hard to understand (have groups part be greyed-out 
+  until groups are selected, ect..)
+- have a sidebar that tracks ongoing games and tracks score with a part that also shows
+  which game is next up
+- clean up the torunament display as it is the wrong scale and also disfunctional
+  currently
+- sort out odd number of players for groups and for the torunament (perlimiary round)
+- figure out how to save the torunament (as a .json or as a database?)
+
+Editor:
+- be able to edit all aspects of the database (games, sessions, semsters, players)
+- be able to update members and people included in the database
