@@ -2,6 +2,16 @@ import itertools, random, os, json
 import networkx as nx
 import numpy as np
 
+
+class IdGen:
+    def __init__(self, start=0):
+        self._next_id = start
+
+    def generate(self):
+        id_ = self._next_id
+        self._next_id += 1
+        return id_
+
 class Settings():
     def __init__(self):
         self.DEFAULT_SETTINGS = {
@@ -162,6 +172,7 @@ class SessionBuilder():
             if self.G.has_edge(u, v): # check if the edge exists and if it doesn't don't attempt to remove
                 self.G.remove_edge(u, v)
 
+import string
 from database.queries import get_player
 
 class TournamentBuilder():
@@ -173,6 +184,12 @@ class TournamentBuilder():
         self.random_amount = 2 # higher = more random
         
         self.rounds = []
+        self.groups = None
+        
+        self.player_labels = None
+        
+        letters = string.ascii_lowercase
+        self.possible_player_labels = [''.join(pair) for pair in itertools.product(letters, repeat=2)]
 
         # create graph of players with no connections
         self.G = nx.Graph()
@@ -207,7 +224,7 @@ class TournamentBuilder():
 
         # define weight function as semester leaderboard based
         if self.settings["seed"] == "Semester Leaderboard":
-            pass
+            self.seed_order = []
 
         # define weight function as random
         if self.settings["seed"] == "Random":
@@ -221,7 +238,7 @@ class TournamentBuilder():
         self.weight_func = weight
 
     def start_tournament(self, player_names: list[str]) -> list[tuple[str, str]]:
-        """ Returns a set of the pairings of players """
+        """ Returns a set of the initial pairings of players """
         
         # calculate amount of rounds
         for n in range(1, self.settings["num_players"] + 1):
@@ -239,10 +256,52 @@ class TournamentBuilder():
             self.G.add_edge(a["name"], b["name"], weight=w)
 
         round_ =  list(max_weight_matching(self.G, maxcardinality=True))
-        
-        self.rounds.append(round_)
+
+        #round_ = {"aa": round_}
+
+        self.rounds = round_
 
         return round_
+    
+    def start_groups(self):
+        
+        self.num_groups = self.settings["groups"]["num_groups"]
+        
+        # calc group sizes
+        base, remainder = divmod(self.settings["num_players"], self.num_groups)
+        group_sizes = [base + 1] * remainder + [base] * (self.num_groups - remainder)
+        group_sizes.sort(reverse=False) # smallest groups first for better layout
+        
+        possible_group_names = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]
+        groups: dict[str, list[str, int]] = {}
+        for i, size in enumerate(group_sizes):
+            groups[possible_group_names[i]] = []
+            
+            for k in range(size):
+                
+                k = k + sum(group_sizes[:i]) # offset k by the number of players in previous groups
+                groups[possible_group_names[i]].append([self.seed_order[k], 0]) # add player with 0 points to group
+                
+        self.groups = groups
+        
+        print(self.groups)
+        
+        names_by_group = {
+            group: [player[0]['name'] for player in players]
+            for group, players in self.groups.items()
+        }
+        
+        self.matches_by_group = {
+            group: list(itertools.combinations(names, 2))
+            for group, names in names_by_group.items()
+        }
+
+        print(self.matches_by_group)
+        
+        for sublist in self.matches_by_group.values():
+            self.rounds.extend(sublist)
+            
+        print(self.rounds)
 
 
 import matplotlib.pyplot as plt

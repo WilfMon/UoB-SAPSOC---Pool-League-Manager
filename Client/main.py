@@ -1,6 +1,7 @@
 import sys
 
 import logging
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s -- %(levelname)-8s -- %(name)s -- %(message)s",
@@ -16,6 +17,8 @@ from ui.main_window import MainWindow
 
 from utils.utils_classes import Settings
 
+from resources.colours import DARK
+
 def main():
     
     s = Settings()
@@ -30,11 +33,14 @@ def main():
     
     app.setFont(QFont("Segoe UI", round(scale_factor * 18)))
 
-    # Load dark theme
-    qss_file = Path(__file__).parent / "resources" / "styles" / "dark.qss"
-    if qss_file.exists():
-        with open(qss_file, "r") as f:
-            app.setStyleSheet(f.read())
+    if False:   
+        # Load dark theme
+        qss_file = Path(__file__).parent / "resources" / "styles" / "dark.qss"
+        if qss_file.exists():
+            with open(qss_file, "r") as f:
+                app.setStyleSheet(f.read())
+                
+    app.setStyleSheet(f"QMainWindow {{ background:{DARK}; }}")
     
     window = MainWindow(config=config)
     window.show()

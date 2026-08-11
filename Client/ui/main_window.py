@@ -17,10 +17,14 @@ from PySide6.QtWidgets import QMainWindow, QStackedWidget, QSpacerItem, QComboBo
 from PySide6.QtGui import QAction, QCursor, QFont
 from PySide6.QtCore import Qt, QSize, QPoint, Signal, QTimer
 
+from ui.custom_widgets import CustomButton
+
 from ui.setup_windows import SetupWindow, TournamentSetupWindow
 from ui.text_box_window import TextBoxWindow
 from ui.confimation_window import ConfirmationWindow
 from ui.update_database_windows import MembershipWindow, DataWindow
+
+from ui.tournament_window import MainTournamentWindow
 
 from utils.utils import check_for_new_players, remove_menu, get_players_from_qlist, clear_layout
 from utils.utils_classes import Settings, SessionBuilder, TournamentBuilder, StatisticsBuilder, AdvancedStats, Leaderboard
@@ -691,37 +695,41 @@ class MainWindow(QMainWindow):
         def on_tab_in():
             self.central.setCurrentWidget(self.tournament_wid)
 
-        # logic for new tournament window
-        self.tournament_setup_window = TournamentSetupWindow(dest=self.dest, scale=self.scale)
-        self.tournament_setup_window.signal.connect(players_recived)
-        
-        self.tournament_setup_window.show()
-        
-        on_tab_in()
+        self.main_tournament_window = MainTournamentWindow(dest=self.dest, scale=self.scale)
+        self.main_tournament_window.show()
 
-        # Session menu
-        self.file_menu = self.menu_bar.addMenu("Tournament")
-        
-        self.new_tournament_action.setDisabled(True)
+        if False:   
+            # logic for new tournament window
+            self.tournament_setup_window = TournamentSetupWindow(dest=self.dest, scale=self.scale)
+            self.tournament_setup_window.signal.connect(players_recived)
+            
+            self.tournament_setup_window.show()
+            
+            on_tab_in()
 
-        self.tab_in_action = QAction("View", self)
-        self.tab_in_action.triggered.connect(on_tab_in)
-        self.file_menu.addAction(self.tab_in_action)
-        
-        self.file_menu.addSeparator()
-        
-        self.confirm_players_action = QAction("Confirm", self)
-        self.confirm_players_action.triggered.connect(on_confirm_players)
-        self.file_menu.addAction(self.confirm_players_action)
-        
-        # logic for main window on new session
-        self.players_list_title = QLabel("Player seeding:")
-        self.main_tournament_layout.addWidget(self.players_list_title, 0, 0, alignment=Qt.AlignLeft)
-        
-        self.players_list_tournament = QListWidget()
-        self.players_list_tournament.setFixedWidth(300 * self.scale)
-        self.players_list_tournament.setFont(self.default_font)
-        self.main_tournament_layout.addWidget(self.players_list_tournament, 1, 0, alignment=Qt.AlignLeft)
+            # Session menu
+            self.file_menu = self.menu_bar.addMenu("Tournament")
+            
+            self.new_tournament_action.setDisabled(True)
+
+            self.tab_in_action = QAction("View", self)
+            self.tab_in_action.triggered.connect(on_tab_in)
+            self.file_menu.addAction(self.tab_in_action)
+            
+            self.file_menu.addSeparator()
+            
+            self.confirm_players_action = QAction("Confirm", self)
+            self.confirm_players_action.triggered.connect(on_confirm_players)
+            self.file_menu.addAction(self.confirm_players_action)
+            
+            # logic for main window on new session
+            self.players_list_title = QLabel("Player seeding:")
+            self.main_tournament_layout.addWidget(self.players_list_title, 0, 0, alignment=Qt.AlignLeft)
+            
+            self.players_list_tournament = QListWidget()
+            self.players_list_tournament.setFixedWidth(300 * self.scale)
+            self.players_list_tournament.setFont(self.default_font)
+            self.main_tournament_layout.addWidget(self.players_list_tournament, 1, 0, alignment=Qt.AlignLeft)
 
     def on_new_statistics(self):
 
@@ -1057,6 +1065,7 @@ class MainWindow(QMainWindow):
         self.box_to_select_semester = QComboBox()
         for sem in semester_leaderboard:
             title = str(sem[-1][0][1]).split(".")
+            print(title)
             
             self.box_to_select_semester.addItem(f"{title[0]}-{title[1]} Semester: {title[2]}", sem[-1][0][0])
             
@@ -1128,15 +1137,3 @@ class MainWindow(QMainWindow):
         self.scale_window.submitted_player.connect(change_scale)
         
         self.scale_window.show()
-        
-class CustomButton(QPushButton):
-    normalClick = Signal()
-    shiftClick = Signal()
-
-    def mousePressEvent(self, event):
-        if event.modifiers() & Qt.ShiftModifier:
-            self.shiftClick.emit()
-        else:
-            self.normalClick.emit()
-
-        super().mousePressEvent(event)

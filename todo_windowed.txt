@@ -10,7 +10,7 @@ Sessions:
 - change layout to have current round on the left
 
 Tournament:
-- clean up config page its ugly and hard to understand (have groups part be greyed-out 
+- clean up config page its ugly and hard to understand (have groups part be greyed-out
   until groups are selected, ect..)
 - have a sidebar that tracks ongoing games and tracks score with a part that also shows
   which game is next up

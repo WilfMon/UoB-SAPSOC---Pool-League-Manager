@@ -1,0 +1,7 @@
+DARK  = "#1e1e1e"
+HEAD  = "#2b2b2b"
+PANEL_COL = "#252525"
+LINE  = "#383838"
+TEXT  = "#d4d4d4"
+MUTED = "#888888"
+ACCENT = "#4a9eff"
