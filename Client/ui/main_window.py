@@ -25,8 +25,9 @@ from ui.confimation_window import ConfirmationWindow
 from ui.update_database_windows import MembershipWindow, DataWindow
 
 from ui.tournament_window import MainTournamentWindow
+from ui.session_window import MainSessionWindow
 
-from utils.utils import check_for_new_players, remove_menu, get_players_from_qlist, clear_layout
+from utils.utils import check_for_new_players, remove_menu, get_items_from_qlist, clear_layout
 from utils.utils_classes import Settings, SessionBuilder, TournamentBuilder, StatisticsBuilder, AdvancedStats, Leaderboard
 
 class MainWindow(QMainWindow):
@@ -41,7 +42,7 @@ class MainWindow(QMainWindow):
         self.scale = config["scale"]
         self.default_font = QFont("Segoe UI", round(self.scale * 18))
 
-        self.setWindowTitle("My Dark Themed PySide6 App")
+        self.setWindowTitle("UoB SaPSoc Pool League Manager")
         self.setMinimumSize(int(1280 * self.scale), int(720 * self.scale))
         
         self.central = QStackedWidget()
@@ -124,6 +125,10 @@ class MainWindow(QMainWindow):
         exit_action = QAction("Exit", self)
         exit_action.triggered.connect(self.close)  # Built-in close method
         self.file_menu.addAction(exit_action)
+        
+        test_action = QAction("Test", self)
+        test_action.triggered.connect(self.on_new_session_test)
+        self.file_menu.addAction(test_action)
 
         # View menu
         view_menu = self.menu_bar.addMenu("View")
@@ -131,6 +136,12 @@ class MainWindow(QMainWindow):
         self.change_scale = QAction("Change Scale", self)
         self.change_scale.triggered.connect(self.on_change_scale)
         view_menu.addAction(self.change_scale)
+
+    def on_new_session_test(self):
+        
+        self.session_window = MainSessionWindow(dest=self.dest, scale=self.scale)
+        
+        self.session_window.show()
 
     def on_new_session(self):
 
@@ -143,7 +154,7 @@ class MainWindow(QMainWindow):
 
         """ Called when the confirm menu is pressed """
         def on_confirm_players():
-            players = get_players_from_qlist(self.players_list_session)
+            players = get_items_from_qlist(self.players_list_session)
                     
             new_players = check_for_new_players(players, dest=self.dest)
             print(new_players)
@@ -162,7 +173,7 @@ class MainWindow(QMainWindow):
         def players_confirmed(yesorno):
             if yesorno:
                 logger.info("Players confirmed, proceeding to rounds")
-                players = get_players_from_qlist(self.players_list_session)
+                players = get_items_from_qlist(self.players_list_session)
                 
                 # Ui stuff
                 self.round_title = QLabel("Rounds:")
@@ -188,7 +199,7 @@ class MainWindow(QMainWindow):
                 self.save_session_action.setDisabled(False)
                 
                 # write to database players
-                players_ = set(get_players_from_qlist(self.players_list_session))
+                players_ = set(get_items_from_qlist(self.players_list_session))
                 for name in players_:
                     add_player(name, dest=self.dest)
 
@@ -256,22 +267,6 @@ class MainWindow(QMainWindow):
         """ Called when the new round menu item is pressed """
         def on_new_round():
             
-            advanced = False
-
-            def update_advanced():
-                for round_ in self.session_items:
-                    for n, game_ in enumerate(list(round_)):
-                        if n % 2: # if odd, if elo_item
-                            print(game_[0].property("elo_gain"))
-                            print(game_[1].property("elo_gain"))
-                            
-                            print(game_[0].property("base_elo"))
-                            print(game_[1].property("base_elo"))
-                            
-                for _round in self.finished_games:
-                    for _game in _round:
-                        print(_game)
-            
             def toggle_match_state(loc):
                 
                 round_num, index, side = loc
@@ -295,9 +290,6 @@ class MainWindow(QMainWindow):
                 
                 self.finished_games[round_num].add((pressed.text(), opp.text()))
                 
-                if advanced:
-                    update_advanced()
-                
             def remove_match_state(loc):
                 round_num, index = loc
                 
@@ -308,12 +300,9 @@ class MainWindow(QMainWindow):
                 
                 self.finished_games[round_num].discard((left.text(), right.text()))
                 self.finished_games[round_num].discard((right.text(), left.text()))
-                
-                if advanced:
-                    update_advanced()
             
             # check for new players
-            players = set(get_players_from_qlist(self.players_list_session))
+            players = set(get_items_from_qlist(self.players_list_session))
             difference_in_players = players ^ self.last_round_players
             if difference_in_players != set(): # if there is a difference in players from last round
                 
@@ -352,8 +341,6 @@ class MainWindow(QMainWindow):
             
             # create buttons to display players and track wins
             for n, pair in enumerate(round_):
-                if advanced:
-                    n *= 2 # to give space for advanced view
                 
                 left = CustomButton(pair[0])
                 right = CustomButton(pair[1])
@@ -371,29 +358,6 @@ class MainWindow(QMainWindow):
                 
                 # adding buttons to the tracker
                 self.session_items[self.round_number].append((left, right))
-                
-                # for advanced view
-                if advanced:
-                
-                    left_id = get_player_id_from_name(pair[0], dest=self.dest)
-                    right_id = get_player_id_from_name(pair[1], dest=self.dest)
-                    
-                    left_change, _ = get_elo_change(left_id, right_id, dest=self.dest)
-                    right_change, _ = get_elo_change(right_id, left_id, dest=self.dest)
-                    
-                    elo_left = QLabel(f"+ {round(left_change)}")
-                    elo_right = QLabel(f"+ {round(right_change)}")
-                    
-                    elo_left.setProperty("elo_gain", left_change)
-                    elo_right.setProperty("elo_gain", right_change)
-
-                    elo_left.setProperty("base_elo", get_player_elo(left_id, dest=self.dest))
-                    elo_right.setProperty("base_elo", get_player_elo(right_id, dest=self.dest))
-                    
-                    round_container_layout.addWidget(elo_left, n + 2, self.round_number, alignment=Qt.AlignLeft)
-                    round_container_layout.addWidget(elo_right, n + 2, self.round_number + 2, alignment=Qt.AlignRight)
-
-                    self.session_items[self.round_number].append((elo_left, elo_right))
                 
             if bye != None:
                 bye_text = QLabel(f"Bye: {bye}")

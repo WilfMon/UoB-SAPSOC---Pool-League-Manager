@@ -1,6 +1,6 @@
-from PySide6.QtCore import QPoint, Qt, Signal
-from PySide6.QtWidgets import QWidget, QHBoxLayout, QLabel, QMenu, QPushButton, QSizePolicy, QApplication, QPlainTextEdit, QLineEdit, QVBoxLayout
-from PySide6.QtGui import QAction
+from PySide6.QtCore import QPoint, Qt, Signal, QPropertyAnimation, QEasingCurve, Property
+from PySide6.QtWidgets import QWidget, QHBoxLayout, QLabel, QMenu, QPushButton, QSizePolicy, QApplication, QPlainTextEdit, QLineEdit, QVBoxLayout, QSplitter, QCheckBox
+from PySide6.QtGui import QAction, QPainter, QColor
 
 from resources.colours import HEAD, LINE, TEXT, ACCENT
 
@@ -17,8 +17,68 @@ class CustomButton(QPushButton):
             self.shiftClick.emit()
         else:
             self.normalClick.emit()
+
+
+class ToggleSwitch(QCheckBox):
+    """A modern pill-shaped toggle switch, styled like an iOS switch.
+
+    Behaves like a QCheckBox (isChecked/setChecked/toggled/stateChanged all
+    work normally) but paints itself instead of using the platform's default
+    checkbox indicator.
+    """
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setCursor(Qt.PointingHandCursor)
+        self.setFixedSize(42, 24)
+        self.setStyleSheet("background: transparent;")
+
+        self._circle_pos = 3.0
+        self._anim = QPropertyAnimation(self, b"circle_pos", self)
+        self._anim.setDuration(160)
+        self._anim.setEasingCurve(QEasingCurve.InOutCubic)
+
+        self.stateChanged.connect(self._animate_to_state)
+
+    def _animate_to_state(self, state):
+        end = self.width() - self.height() + 3 if state else 3.0
+        self._anim.stop()
+        self._anim.setStartValue(self._circle_pos)
+        self._anim.setEndValue(float(end))
+        self._anim.start()
+
+    def _get_circle_pos(self):
+        return self._circle_pos
+
+    def _set_circle_pos(self, pos):
+        self._circle_pos = pos
+        self.update()
+
+    circle_pos = Property(float, _get_circle_pos, _set_circle_pos)
+
+    def hitButton(self, pos: QPoint) -> bool:
+        return self.contentsRect().contains(pos)
+
+    def paintEvent(self, event):
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.Antialiasing)
+        painter.setPen(Qt.NoPen)
+
+        rect = self.rect()
+        radius = rect.height() / 2
+
+        track_color = QColor(ACCENT) if self.isChecked() else QColor(LINE)
+        painter.setBrush(track_color)
+        painter.drawRoundedRect(rect, radius, radius)
+
+        knob_diameter = rect.height() - 6
+        painter.setBrush(QColor("#ffffff"))
+        painter.drawEllipse(int(self._circle_pos), 3, knob_diameter, knob_diameter)
         
 class CustomHeaderBar(QWidget):
+    panelVisibilityChanged = Signal()
+    tabsResized = Signal(list)  # emitted with new sizes when the user drags a tab handle
+
     def __init__(self, panels, panel_widgets: dict, parent=None):
         
         super().__init__(parent)
@@ -27,35 +87,63 @@ class CustomHeaderBar(QWidget):
         self.setFixedHeight(32)
         self.setContextMenuPolicy(Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self._show_menu)
-        self.setStyleSheet(f"background:{HEAD};")
 
-        self._layout = QHBoxLayout(self)
-        self._layout.setContentsMargins(0, 0, 0, 0)
-        self._layout.setSpacing(0)
+        # WA_StyledBackground is needed for a plain QWidget subclass to
+        # actually paint stylesheet background/border properties.
+        self.setAttribute(Qt.WA_StyledBackground, True)
+        self.setStyleSheet(f"""
+            background: {HEAD};
+            border: none;
+            border-bottom: 1px solid {LINE};
+        """)
+
+        outer_layout = QHBoxLayout(self)
+        outer_layout.setContentsMargins(0, 0, 0, 0)
+        outer_layout.setSpacing(0)
+
+        # A real splitter (same handle width/colour as the panel splitter)
+        # gives the tabs an actual draggable divider, and its handles are
+        # kept in sync with the panel splitter's from MainSessionWindow.
+        self.tabs_splitter = QSplitter(Qt.Horizontal, self)
+        self.tabs_splitter.setHandleWidth(3)
+        self.tabs_splitter.setChildrenCollapsible(False)
+        self.tabs_splitter.setStyleSheet(f"""
+            QSplitter {{ background: transparent; border: none; }}
+            QSplitter::handle {{ background:{LINE}; }}
+            QSplitter::handle:hover {{ background:#777; }}
+        """)
+        outer_layout.addWidget(self.tabs_splitter)
 
         self._labels: dict[str, QLabel] = {}
         for pid, label, visible, _ in panels:
             lbl = QLabel(label)
             lbl.setAlignment(Qt.AlignVCenter | Qt.AlignLeft)
-            lbl.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
             lbl.setFixedHeight(32)
-            lbl.setMinimumWidth(120)
             lbl.setStyleSheet(f"""
                 QLabel {{
                     color: #c8c8c8; font-size: 12px; font-weight: 600;
                     padding-left: 10px;
-                    border-right: 1px solid {LINE};
-                    border-bottom: 2px solid #555;
-                    background: {HEAD};
+                    background: transparent;
                 }}
                 QLabel:hover {{ background: #353535; }}
             """)
-            self._layout.addWidget(lbl)
+            # Match the panel's minimum width so both splitters share the
+            # same constraints. Without this, dragging a tab narrower than
+            # its panel's minimum causes the panel splitter to silently
+            # clamp/redistribute differently than the tab splitter did,
+            # and the two permanently drift out of sync.
+            panel_widget = panel_widgets.get(pid)
+            if panel_widget is not None and panel_widget.minimumWidth() > 0:
+                lbl.setMinimumWidth(panel_widget.minimumWidth())
+            self.tabs_splitter.addWidget(lbl)
             self._labels[pid] = lbl
             if not visible:
                 lbl.hide()
 
-        self._layout.addStretch()
+        self.tabs_splitter.splitterMoved.connect(self._on_tabs_resized)
+
+    def _on_tabs_resized(self, *args):
+        self.tabsResized.emit(self.tabs_splitter.sizes())
 
     def _show_menu(self, pos: QPoint):
         menu = QMenu(self)
@@ -95,6 +183,7 @@ class CustomHeaderBar(QWidget):
                 def toggle(checked):
                     self._labels[panel_id].setVisible(checked)
                     self.panel_widgets[panel_id].setVisible(checked)
+                    self.panelVisibilityChanged.emit()
                 return toggle
 
             action.toggled.connect(make_toggle(pid))
@@ -105,6 +194,7 @@ class CustomHeaderBar(QWidget):
     def set_panel_visible(self, panel_id, visible):
         self._labels[panel_id].setVisible(visible)
         self.panel_widgets[panel_id].setVisible(visible)
+        self.panelVisibilityChanged.emit()
 
 class ConsoleWidget(QWidget):
     commandEntered = Signal(str)
@@ -115,11 +205,31 @@ class ConsoleWidget(QWidget):
         self.output = QPlainTextEdit()
         self.output.setReadOnly(True)
         self.output.setLineWrapMode(QPlainTextEdit.NoWrap)
+        self.output.setFrameShape(QPlainTextEdit.NoFrame)
+        self.output.setStyleSheet(f"""
+            QPlainTextEdit {{
+                background: transparent;
+                border: none;
+                color: {TEXT};
+            }}
+        """)
 
         self.input = QLineEdit()
         self.input.setPlaceholderText("...")
+        self.input.setFrame(False)
+        self.input.setStyleSheet(f"""
+            QLineEdit {{
+                background: transparent;
+                border: none;
+                border-top: 1px solid {LINE};
+                padding: 6px 4px;
+                color: {TEXT};
+            }}
+        """)
 
         layout = QVBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
         layout.addWidget(self.output)
         layout.addWidget(self.input)
 

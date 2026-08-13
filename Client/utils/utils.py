@@ -1,5 +1,7 @@
 import numpy as np
 
+from PySide6.QtCore import Qt
+
 from database.queries import get_all_players_name
 from .utils_classes import Settings
 
@@ -38,7 +40,7 @@ def remove_menu(menu_bar, menu_to_remove):
 
     return menu_bar
 
-def get_players_from_qlist(q_list):
+def get_items_from_qlist(q_list):
     players = []
     
     for i in range(q_list.count()):
@@ -46,6 +48,15 @@ def get_players_from_qlist(q_list):
         players.append(item.text())
         
     return players
+
+def remove_item_from_qlist(list_widget, text):
+    matches = list_widget.findItems(text, Qt.MatchFlag.MatchExactly)
+    
+    for item in matches:
+        row = list_widget.row(item)
+        removed_item = list_widget.takeItem(row)
+        
+        del removed_item
 
 def clear_layout(layout):
     if layout is not None:

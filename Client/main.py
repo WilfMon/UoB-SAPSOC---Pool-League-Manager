@@ -32,13 +32,6 @@ def main():
     app = QApplication(sys.argv)
     
     app.setFont(QFont("Segoe UI", round(scale_factor * 18)))
-
-    if False:   
-        # Load dark theme
-        qss_file = Path(__file__).parent / "resources" / "styles" / "dark.qss"
-        if qss_file.exists():
-            with open(qss_file, "r") as f:
-                app.setStyleSheet(f.read())
                 
     app.setStyleSheet(f"QMainWindow {{ background:{DARK}; }}")
     
