@@ -2,22 +2,7 @@ import numpy as np
 
 from PySide6.QtCore import Qt
 
-from database.queries import get_all_players_name
 from .utils_classes import Settings
-
-def check_for_new_players(players, dest):
-    
-    db_players = get_all_players_name(dest)
-    
-    if (set(players) - set(db_players)):
-
-        new_players = list(set(players) - set(db_players))
-        print("New players:", new_players)
-        
-        return new_players
-        
-    else:
-        return []
     
 def clean_name(name):
     """ Make a input clean as required by the program """
