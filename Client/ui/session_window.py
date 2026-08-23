@@ -7,20 +7,23 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 import numpy as np
+import datetime
 
 from PySide6.QtWidgets import QMainWindow, QPlainTextEdit, QSpacerItem, QInputDialog, QListWidgetItem, QSizePolicy, QLabel, QGridLayout,  QFrame, QPushButton, QVBoxLayout, QWidget, QListWidget, QMenu, QApplication, QLineEdit, QScrollArea, QHBoxLayout, QSplitter, QComboBox, QSpinBox, QSlider, QRadioButton, QButtonGroup
 from PySide6.QtGui import QAction, QCursor, QFont
 from PySide6.QtCore import Qt, QSize, QPoint, Signal, QTimer
 
+from .confimation_window import ConfirmationWindow
+
 from ui.custom_widgets import CustomButton, CustomHeaderBar, ConsoleWidget, ToggleSwitch
 from ui.text_box_window import TextBoxWindow
 
-from utils.utils import check_for_new_players, clean_name, clear_layout, get_items_from_qlist, remove_item_from_qlist
+from utils.utils import clean_name, clear_layout, get_items_from_qlist, remove_item_from_qlist, calc_elo_change
 from utils.utils_classes import SessionBuilder
 
-from database.queries import get_all_players_name, get_player_id_from_name
+from DB.db import get_connection, list_active_players, get_pid_from_name, get_player, create_round, create_semester, create_session, list_all_players, add_player, record_match, delete_match, get_match_id
 
-from resources.colours import DARK, HEAD, PANEL_COL, LINE, TEXT, ACCENT
+from resources.colours import DARK, HEAD, PANEL_COL, LINE, TEXT, ACCENT, GREEN, RED
 from resources.stylesheets import _scrollbar_stylesheet, _settings_controls_stylesheet, _title_text_stylesheet
 
 class MainSessionWindow(QMainWindow):
@@ -47,25 +50,32 @@ class MainSessionWindow(QMainWindow):
         # top menu
         self.file_menu = self.menuBar().addMenu("File")
         
-        # actions 
-        """
-        self.setup_action = QAction("Setup Session")
-        self.setup_action.triggered.connect(self.on_setup)
-        self.file_menu.addAction(self.setup_action)
+        # create semester if it already dosent exist
+        date_time = datetime.datetime.now()
+        self.date = date_time.strftime("%d") + "." + date_time.strftime("%m") + "." + date_time.strftime("%Y") # 01.01.2000 first jan 2000
+        self.year = date_time.strftime("%Y")
+        self.month = int(date_time.strftime("%m"))
         
-        self.confirm_action = QAction("Confirm")
-        self.confirm_action.triggered.connect(self.on_confirm_setup)
-        self.file_menu.addAction(self.confirm_action)
+        conn = get_connection()
         
-        self.test_action = QAction("Test")
-        self.test_action.triggered.connect(self.on_test)
-        self.file_menu.addAction(self.test_action)
-        """
+        # automatically determine semester and year
+        if 9 <= self.month <= 12:
+            sem_name = f"{int(self.year) - 1}.{self.year}.1"
+            
+            self.semester_id = create_semester(conn, sem_name, self.date)
+
+        if 1 <= self.month <= 8:
+            sem_name = f"{int(self.year) - 1}.{self.year}.2"
+            
+            
+            self.semester_id = create_semester(conn, sem_name, self.date)
+
+        logger.info(f"Semester set to: {sem_name}")
         
         # Create header bar
         def console_panel() -> QWidget:
             self.console = ConsoleWidget()
-            self.console.setFont(self.default_font)
+            self.console.setFont(self.small_font)
             
             self.console.setMinimumWidth(int(100 * self.scale))
             
@@ -262,7 +272,7 @@ class MainSessionWindow(QMainWindow):
         
         def player_seed_panel() -> QWidget:
             self.players_list_seed = QListWidget()
-            self.players_list_seed.setFont(self.default_font)
+            self.players_list_seed.setFont(self.small_font)
             
             self.players_list_seed.setMinimumWidth(int(100 * self.scale))
             
@@ -350,13 +360,53 @@ class MainSessionWindow(QMainWindow):
                 self.selected_players_list.clear()
 
             def add():
+                
+                def add_after_check(yes_no):
+                    if yes_no:
+                        players = confim_wind.stored_players
+                        possible_selections = get_items_from_qlist(self.selection_list)
+                        
+                        conn = get_connection()
+                        
+                        for p in players:
+                            fn, ln = p.split(" ")
+                            
+                            add_player(conn, fn, ln)
+                            
+                            # update the selection list with these new players
+                            if p not in possible_selections:
+                                self.selection_list.addItem(p)
+                        
+                        add_players_to_seed(players)
+                    
+                def add_players_to_seed(players):
+                    for player in players:
+                        matches = self.players_list_seed.findItems(player, Qt.MatchFlag.MatchExactly)
+                        
+                        if not matches:
+                            self.players_list_seed.addItem(player)
+                
                 participants = get_items_from_qlist(self.selected_players_list)
                 
-                for player in participants:
-                    matches = self.players_list_seed.findItems(player, Qt.MatchFlag.MatchExactly)
+                conn = get_connection()
+                players = list_all_players(conn)
+                players_names = []
+                new_players = []
+                
+                for p in players:
+                    players_names.append(f"{p["first_name"]} {p["last_name"]}")
                     
-                    if not matches:
-                        self.players_list_seed.addItem(player)
+                if (set(participants) - set(players_names)):
+                    new_players = list(set(participants) - set(players_names))
+                
+                if new_players != []:
+                    confim_wind = ConfirmationWindow(self.scale, new_players)
+                    confim_wind.info(participants)
+                    confim_wind.signal_to_send.connect(add_after_check)
+                    confim_wind.show()
+                
+                else:
+                    add_players_to_seed(participants)
                     
             def remove():
                 participants = get_items_from_qlist(self.selected_players_list)
@@ -368,7 +418,7 @@ class MainSessionWindow(QMainWindow):
             player_manager_panel_widget = QWidget()
             player_manager_panel_widget.setLayout(self.player_manager_layout)
             
-            player_manager_panel_widget.setMinimumWidth(int(450 * self.scale))
+            player_manager_panel_widget.setMinimumWidth(int(420 * self.scale))
 
             label_text_box = QLabel("Enter Players:".upper())
             label_text_box.setFont(self.small_font)
@@ -405,8 +455,14 @@ class MainSessionWindow(QMainWindow):
             card_layout.addWidget(self.selection_list)
             self.player_manager_layout.addWidget(card, 3, 0)
 
-            for player in get_all_players_name(dest=self.dest):
-                self.selection_list.addItem(player)
+
+            conn = get_connection()
+            active_players = list_active_players(conn)
+            
+            for player in active_players:
+                
+                name = f"{player["first_name"]} {player["last_name"]}"
+                self.selection_list.addItem(name)
 
             label_text_box = QLabel("Players Selected:".upper())
             label_text_box.setFont(self.small_font)
@@ -456,11 +512,113 @@ class MainSessionWindow(QMainWindow):
         
         def game_manager_panel() -> QWidget:
             
-            self.main_game_manager_layout = QGridLayout()
-            game_manager_panel_widget = QWidget()
-            game_manager_panel_widget.setLayout(self.main_game_manager_layout)
+            # ---------------------------------------------------------------
+            # Helper Functions
+            # ---------------------------------------------------------------
             
-            game_manager_panel_widget.setMinimumWidth(int(100 * self.scale))
+            def _pad(pxl) -> str:
+                return f"padding: {pxl}px {pxl*2}px {pxl}px {pxl*2}px;"
+            
+            def _fetch_elo_label(pos: tuple) -> QLabel:
+                return self.session_items[pos[0]][pos[1]][f"p{pos[2] + 1}_elo_label"]
+            
+            def _calc_new_elo_for_labels(main: QLabel, other: QLabel) -> tuple[str, str]:
+                a = main.property("elo_change")
+                a_elo = a[0]["current_elo"]
+                
+                b = other.property("elo_change")
+                b_elo = b[0]["current_elo"]
+                
+                return (f"{a_elo:.0f} --> {a_elo + a[1]:.0f}", f"{b_elo:.0f} --> {b_elo - b[2]:.0f}")
+            
+            # ---------------------------------------------------------------
+            # Functions to control the buttons
+            # ---------------------------------------------------------------
+            
+            def on_normal_click(btns):
+                """Update button states to show the game has been resolved; also update the database"""
+                
+                main, other = btns
+                # check if the button has already been normal clicked and return if so
+                if main.clicked or other.clicked:
+                    print("already clicked")
+                    return
+                
+                main.setStyleSheet(f"border-radius: 3px; background-color: {GREEN}; {_pad(4)}")
+                other.setStyleSheet(f"border-radius: 3px; background-color: {RED}; {_pad(4)}")
+                
+                main_elo = _fetch_elo_label(main.position)
+                other_elo = _fetch_elo_label(other.position)
+                
+                main_elo.setStyleSheet(f"background:transparent; font-size:{14 * self.scale}px; color:{GREEN}")
+                other_elo.setStyleSheet(f"background:transparent; font-size:{14 * self.scale}px; color:{RED}")
+                
+                new_m, new_o = _calc_new_elo_for_labels(main_elo, other_elo)
+                
+                main_elo.setText(new_m)
+                other_elo.setText(new_o)
+                
+                round_id = main.round_id
+                
+                # find player ids
+                p1_id = main_elo.property("elo_change")[0]["player_id"]
+                p2_id = other_elo.property("elo_change")[0]["player_id"]
+                
+                # database updates
+                conn = get_connection()
+                record_match(conn, round_id, p1_id, p2_id, p1_id)
+                
+                refresh_session_items()
+                main.clicked = True
+                other.clicked = True
+                
+            def on_shift_click(btns):
+                """Revert button states to how they were before they were clicked; also revert match to unplayed in the database"""
+                
+                main, other = btns
+                # check if the button has already been shift clicked and return if so
+                if not main.clicked:
+                    print("already not clicked")
+                    return
+                
+                main.setStyleSheet(f"border-radius: 3px; background-color: {LINE}; {_pad(4)}")
+                other.setStyleSheet(f"border-radius: 3px; background-color: {LINE}; {_pad(4)}")
+                
+                main_elo = _fetch_elo_label(main.position)
+                other_elo = _fetch_elo_label(other.position)
+                
+                main_elo.setStyleSheet(f"background:transparent; font-size:{14 * self.scale}px; color:{TEXT}")
+                other_elo.setStyleSheet(f"background:transparent; font-size:{14 * self.scale}px; color:{TEXT}")
+                
+                p1_elo = main_elo.property("elo_change")
+                main_elo.setText(f"{p1_elo[0]["current_elo"]:.0f} + {p1_elo[1]:.0f}, - {p1_elo[2]:.0f}")
+                
+                p2_elo = other_elo.property("elo_change")
+                other_elo.setText(f"{p2_elo[0]["current_elo"]:.0f} + {p2_elo[1]:.0f}, - {p2_elo[2]:.0f}")
+                
+                round_id = main.round_id
+                
+                # find player ids
+                p1_id = main_elo.property("elo_change")[0]["player_id"]
+                p2_id = other_elo.property("elo_change")[0]["player_id"]
+                
+                # database updates
+                conn = get_connection()
+                match_id = get_match_id(conn, p1_id, p2_id, round_id)
+                if match_id == None:
+                    match_id = get_match_id(conn, p2_id, p1_id, round_id)
+                
+                print(p1_id, p2_id, round_id)
+                print(match_id)
+                delete_match(conn, match_id)
+                
+                main.clicked = False
+                other.clicked = False
+                refresh_session_items()
+            
+            # ---------------------------------------------------------------
+            # Functions to build the UI
+            # ---------------------------------------------------------------
             
             def _round_header(text: str) -> QLabel:
                 lbl = QLabel(text.upper())
@@ -468,7 +626,8 @@ class MainSessionWindow(QMainWindow):
                 lbl.setStyleSheet(_title_text_stylesheet())
                 return lbl
             
-            def _round_card(rows: list[QWidget]) -> QFrame:
+            def _round_card():
+                """Creates the container for round pairings, returns widget and layout"""
                 card = QFrame()
                 card.setStyleSheet(f"""
                     QFrame {{
@@ -476,46 +635,142 @@ class MainSessionWindow(QMainWindow):
                         border-radius: 5px;
                     }}
                 """)
-                card_layout = QVBoxLayout(card)
-                card_layout.setContentsMargins(4, 4, 4, 4)
-                card_layout.setSpacing(0)
+                card_layout = QGridLayout(card)
+                card_layout.setContentsMargins(8, 8, 8, 8)
+                card_layout.setSpacing(8)
                 
-                for i, row in enumerate(rows):
-                    card_layout.addWidget(row)
-                    if i < len(rows) - 1:
-                        divider = QFrame()
-                        divider.setFixedHeight(1)
-                        divider.setStyleSheet(f"background:{LINE}; border:none;")
-                        card_layout.addWidget(divider)
-                
-                return card
+                return card, card_layout
             
-            def _round_row(left: str, right: str) -> QWidget:
-                row = QWidget()
-                row.setStyleSheet("background: transparent;")
-                row_layout = QHBoxLayout(row)
-                row_layout.setContentsMargins(10, 10, 10, 10)
-                row_layout.setSpacing(12)
+            def _round_row(layout, vert_offset, left: str, right: str, p1_elo: str, p2_elo: str, round_id: int) -> QWidget:
 
-                left_btn = CustomButton(left)
-                left_btn.setStyleSheet(f"border-radius: 5px; border-color: {ACCENT}; background-color: {LINE};")
-                right_btn = CustomButton(right)
-                right_btn.setStyleSheet(f"border-radius: 5px; border-color: {ACCENT}; background-color: {LINE};")
-
-                row_layout.addWidget(left_btn)
-                row_layout.addWidget(QLabel("v"))
-                row_layout.addWidget(right_btn)
-
-                return row
-            
-            def add_new_round(layout: QGridLayout):
+                left_btn = CustomButton()
+                left_btn.setText(left)
+                left_btn.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+                left_btn.normalClick.connect(on_normal_click)
+                left_btn.shiftClick.connect(on_shift_click)
+                left_btn.setStyleSheet(f"border-radius: 3px; background-color: {LINE}; {_pad(4)}")
                 
-                layout.addWidget(_round_header(f"Round: {1}"), 0, 0)
-                layout.addWidget(_round_card([
-                    _round_row("Player1", "Player2"),
-                    _round_row("Player3", "Player4"),
-                    _round_row("Player5", "Player6"),
-                ]), 1, 0)
+                right_btn = CustomButton()
+                right_btn.setText(right)
+                right_btn.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+                right_btn.normalClick.connect(on_normal_click)
+                right_btn.shiftClick.connect(on_shift_click)
+                right_btn.setStyleSheet(f"border-radius: 3px; background-color: {LINE}; {_pad(4)}")
+
+                left_btn.info((left_btn, right_btn), (self.round_number, vert_offset // 3, 0), round_id)
+                right_btn.info((right_btn, left_btn), (self.round_number, vert_offset // 3, 1), round_id)
+
+                # Center the VS label
+                vs_lbl = QLabel("v")
+                vs_lbl.setStyleSheet("background: transparent;")
+                
+                layout.addWidget(left_btn, vert_offset, 0)
+                layout.addWidget(vs_lbl, vert_offset, 1, alignment=Qt.AlignCenter)
+                layout.addWidget(right_btn, vert_offset, 2)
+
+                # Rounded float formatting for ELO labels
+                p1_elo_lbl = QLabel(f"{p1_elo[0]["current_elo"]:.0f} + {p1_elo[1]:.0f}, - {p1_elo[2]:.0f}")
+                p1_elo_lbl.setProperty("elo_change", p1_elo)
+                p1_elo_lbl.setStyleSheet(f"background:transparent; font-size:{14 * self.scale}px; color:{TEXT}")
+                layout.addWidget(p1_elo_lbl, vert_offset + 1, 0, alignment=Qt.AlignLeft)
+                
+                p2_elo_lbl = QLabel(f"{p2_elo[0]["current_elo"]:.0f} + {p2_elo[1]:.0f}, - {p2_elo[2]:.0f}")
+                p2_elo_lbl.setProperty("elo_change", p2_elo)
+                p2_elo_lbl.setStyleSheet(f"background:transparent; font-size:{14 * self.scale}px; color:{TEXT}")
+                layout.addWidget(p2_elo_lbl, vert_offset + 1, 2, alignment=Qt.AlignLeft)
+                
+                self.session_items[self.round_number].append({"p1_button": left_btn, "p2_button": right_btn, "p1_elo_label": p1_elo_lbl, "p2_elo_label": p2_elo_lbl})
+                
+            def _round_spacer(layout, vert_offset):
+                """Adds a spacer to the round container"""
+                spacer = QFrame()
+                spacer.setFrameShape(QFrame.HLine)
+                spacer.setFrameShadow(QFrame.Sunken)
+                spacer.setStyleSheet("background-color: #333333; max-height: 3px; border: none;")
+                
+                layout.addWidget(spacer, vert_offset, 0, 1, 3)
+            
+            def round_bye_row(layout, vert_offset, bye: str) -> QWidget:
+                """Adds the last row to the round container for the bye"""
+                bye_lbl = QLabel(f"Bye: {bye}")
+                bye_lbl.setStyleSheet(f"color:{TEXT}; background:transparent; font-size:12px; font-weight:600;")
+                
+                layout.addWidget(bye_lbl, vert_offset, 0)
+            
+            # ---------------------------------------------------------------
+            # Functions
+            # ---------------------------------------------------------------
+            
+            def add_new_round(layout: QGridLayout, round_to_rebuild = None):
+                """
+                Adds a new round to the game manager panel\n
+                Accepts round_to_rebuild so that an exact copy of a previous round can be refreshed to update the UI
+                """
+                
+                if round_to_rebuild == None:
+                    # get players from seed and update the builder
+                    players_names = get_items_from_qlist(self.players_list_seed)
+                    self.builder.update_players(players_names)
+                    
+                    # start a new row for a new round
+                    self.session_items.append([])
+                    
+                    round_, bye = self.builder.create_round()
+                    
+                else:
+                    round_, bye = round_to_rebuild
+                
+                layout.addWidget(_round_header(f"Round: {self.round_number + 1}"), 0, self.round_number, alignment=Qt.AlignLeft)
+                card, card_layout = _round_card()
+                layout.addWidget(card, 1, self.round_number, alignment=Qt.AlignLeft)
+                
+                conn = get_connection()
+                
+                round_id = create_round(conn, self.session_id, self.round_number)
+                
+                for i, match in enumerate(round_):
+                    i = i*3
+                    
+                    fn1, ln1 = match[0].split(" ")
+                    p1 = get_player(conn, get_pid_from_name(conn, fn1.strip(), ln1.strip()))
+                    
+                    fn2, ln2 = match[1].split(" ")
+                    p2 = get_player(conn, get_pid_from_name(conn, fn2.strip(), ln2.strip()))
+                    
+                    p_change1, _ = calc_elo_change(p1["current_elo"], p2["current_elo"])
+                    p_change2, _ = calc_elo_change(p2["current_elo"], p1["current_elo"])
+
+                    p_change1 = abs(p_change1)
+                    p_change2 = abs(p_change2)
+                    
+                    _round_row(card_layout, i, match[0], match[1], (p1, p_change1, p_change2), (p2, p_change2, p_change1), round_id)
+                    
+                    _round_spacer(card_layout, i + 2)
+                
+                if bye == None:
+                    bye = "Na"
+                
+                round_bye_row(card_layout, i*3, bye)
+                
+                self.round_number += 1
+                
+                return card_layout
+                
+            self.main_game_manager_layout = QGridLayout()
+            game_manager_panel_widget = QWidget()
+            game_manager_panel_widget.setLayout(self.main_game_manager_layout)
+            
+            game_manager_panel_widget.setMinimumWidth(int(200 * self.scale))
+            
+            self.round_number = 0
+            
+            self.finished_games = [] # martix
+            self.session_items = [] # matrix
+                
+            self.builder = SessionBuilder()
+            
+            conn = get_connection()
+            self.session_id = create_session(conn, self.semester_id, self.date, [])
                 
             
             def players_confirmed(yesorno):
@@ -710,10 +965,11 @@ class MainSessionWindow(QMainWindow):
                     for round_ in self.finished_games:
                         for game in list(round_):
                             
-                            player1_id = get_player_id_from_name(game[0], dest=self.dest)
-                            player2_id = get_player_id_from_name(game[1], dest=self.dest)
+                            #player1_id = get_player_id_from_name(game[0], dest=self.dest)
+                            #player2_id = get_player_id_from_name(game[1], dest=self.dest)
                             
                             # add_game(self.session_id, player1_id, player2_id, winner_id=player1_id, dest=self.dest)
+                            pass
                         
                     logger.info("Saved Session")
                     
@@ -828,16 +1084,50 @@ class MainSessionWindow(QMainWindow):
                 self.players_list_seed.setContextMenuPolicy(Qt.CustomContextMenu)
                 self.players_list_seed.customContextMenuRequested.connect(show_context_menu)
 
+            def refresh_session_items():
+                """Updates the session elo labels with potentially new database updates"""
+                
+                conn = get_connection()
+                
+                for _round in self.session_items:
+                    for row in _round:
+                        # retrive old elo
+                        p1_old = row["p1_elo_label"].property("elo_change")[0]
+                        p2_old = row["p2_elo_label"].property("elo_change")[0]
+                        
+                        # find new elo and elo change
+                        p1_new = get_player(conn, p1_old["player_id"])
+                        p2_new = get_player(conn, p2_old["player_id"])
+                        
+                        p_change1, _ = calc_elo_change(p1_new["current_elo"], p2_new["current_elo"])
+                        p_change2, _ = calc_elo_change(p2_new["current_elo"], p1_new["current_elo"])
+                        p_change1 = abs(p_change1)
+                        p_change2 = abs(p_change2)
+                        
+                        # update stored info
+                        row["p1_elo_label"].setProperty("elo_change", (p1_new, p_change1, p_change2))
+                        row["p2_elo_label"].setProperty("elo_change", (p2_new, p_change2, p_change1))
+                        
+                        if not row["p1_button"].clicked or not row["p1_button"].clicked:
+                            
+                            # update display text
+                            row["p1_elo_label"].setText(f"{p1_new["current_elo"]:.0f} + {p_change1:.0f}, - {p_change2:.0f}")
+                            row["p2_elo_label"].setText(f"{p2_new["current_elo"]:.0f} + {p_change2:.0f}, - {p_change1:.0f}")
+
             # temporary logic for testing
-            self.file_menu.addAction(QAction("Confirm Players", self, triggered=lambda: players_confirmed(True)))
+            #self.file_menu.addAction(QAction("Confirm Players", self, triggered=lambda: players_confirmed(True)))
             self.file_menu.addAction(QAction("Add Round", self, triggered=lambda: add_new_round(self.main_game_manager_layout)))
+            
+            a = QAction("Refresh Rounds", self)
+            a.triggered.connect(refresh_session_items)
+            self.file_menu.addAction(a)
 
             return game_manager_panel_widget
         
         PANELS = [
-            ("console", "Console", True, console_panel),
+            ("console", "Console", False, console_panel),
             ("settings", "Settings", False, settings_panel),
-            ("players", "Player Seed", False, player_seed_panel),
+            ("players", "Player Seed", True, player_seed_panel),
             ("leaderboard", "Leaderboard", False, leaderboard_panel),
             ("player_manager", "Player Manager", True, player_manager_panel),
             ("game_manager", "Game Manager", True, game_manager_panel),

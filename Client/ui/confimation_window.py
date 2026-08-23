@@ -43,6 +43,9 @@ class ConfirmationWindow(QDialog):
         layout.addLayout(button_layout)
         self.setLayout(layout)
         
+    def info(self, stored_players):
+        self.stored_players = stored_players
+        
     def accept(self):
         self.signal_to_send.emit(True, self.new_players)
         super().accept()

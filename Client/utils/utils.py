@@ -28,6 +28,17 @@ def clean_name(name):
     
     return name
 
+def clean_first_last_name(name):
+    """ Make a input clean as required by the program """
+    
+    name = name.lower()
+    name = name.title()
+    name = name.strip()
+    
+    names = name.split(" ")
+    
+    return (names[0], names[1])
+
 def remove_menu(menu_bar, menu_to_remove):
 
     for action in menu_bar.actions():
@@ -68,7 +79,7 @@ def clear_layout(layout):
             if widget is not None:
                 widget.setParent(None)
                 
-def calc_elo_change(a, b, games_a, games_b) -> tuple[float, float]: # where A is the winner
+def calc_elo_change(a, b) -> tuple[float, float]: # where A is the winner
 
     s = Settings()
     config = s.load_settings()["elo_vars"]
@@ -76,24 +87,10 @@ def calc_elo_change(a, b, games_a, games_b) -> tuple[float, float]: # where A is
     # define the constants
     BASE = config["base"]
     SCALE_FACTOR = config["scale_factor"] # controls the trend value (thousends)
-    P_FACTOR = config["placement_factor"] # controls the strengh of placements
-    
-    def placement_factor(games):
-        # returns a factor when games = 0 of 2.71 (e)
-        # drops off slowly until at games = 10 the multiple is 1
-        
-        return 1 + (np.e - np.e ** (0.1 * games)) * P_FACTOR
     
     # controls how much a win or loss effects the elo change
     k_factor_a = 72
     k_factor_b = 72
-    
-    # check for placements
-    if games_a < 10:
-        k_factor_a = k_factor_a * placement_factor(games_a)
-
-    if games_b < 10:
-        k_factor_b = k_factor_b * placement_factor(games_b)
 
     # calc probablity for each player to win given the ratings
     Ea = 1 / (1 + (BASE ** ((b - a) / SCALE_FACTOR)))

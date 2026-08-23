@@ -11,7 +11,6 @@ logger = logging.getLogger(__name__)
 from PySide6.QtGui import QFont
 from PySide6.QtWidgets import QApplication
 from PySide6.QtCore import Qt
-from pathlib import Path
 
 from ui.main_window import MainWindow
 

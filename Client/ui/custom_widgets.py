@@ -5,18 +5,25 @@ from PySide6.QtGui import QAction, QPainter, QColor
 from resources.colours import HEAD, LINE, TEXT, ACCENT
 
 class CustomButton(QPushButton):
-    normalClick = Signal()
-    shiftClick = Signal()
+    normalClick = Signal(tuple)
+    shiftClick = Signal(tuple)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.clicked.connect(self._handle_click)
+        
+        self.clicked = False
+        
+    def info(self, buttons: tuple[QPushButton, QPushButton], position: tuple[int, int], round_id: int): # first one is the subject button
+        self.buttons = buttons
+        self.position = position
+        self.round_id = round_id
 
     def _handle_click(self):
         if QApplication.keyboardModifiers() & Qt.ShiftModifier:
-            self.shiftClick.emit()
+            self.shiftClick.emit(self.buttons)
         else:
-            self.normalClick.emit()
+            self.normalClick.emit(self.buttons)
 
 
 class ToggleSwitch(QCheckBox):
