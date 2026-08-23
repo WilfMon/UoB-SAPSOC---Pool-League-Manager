@@ -50,6 +50,8 @@ class MainSessionWindow(QMainWindow):
         # top menu
         self.file_menu = self.menuBar().addMenu("File")
         
+        self.file_menu.addAction(QAction("Exit", self, triggered=lambda: self.close()))
+        
         # create semester if it already dosent exist
         date_time = datetime.datetime.now()
         self.date = date_time.strftime("%d") + "." + date_time.strftime("%m") + "." + date_time.strftime("%Y") # 01.01.2000 first jan 2000
@@ -305,6 +307,14 @@ class MainSessionWindow(QMainWindow):
             self.leaderboard_list.setMinimumWidth(int(100 * self.scale))
 
             return self.leaderboard_list
+        
+        def statistics_panel() -> QWidget:
+            self.stats_panel_widget = QWidget()
+            self.stats_panel_widget.setFont(self.default_font)
+            
+            self.stats_panel_widget.setMinimumWidth(int(100 * self.scale))
+
+            return self.stats_panel_widget            
         
         def player_manager_panel() -> QWidget:
             
@@ -701,389 +711,71 @@ class MainSessionWindow(QMainWindow):
             # Functions
             # ---------------------------------------------------------------
             
-            def add_new_round(layout: QGridLayout, round_to_rebuild = None):
+            def add_new_round(layout: QGridLayout, round_to_rebuild=None):
                 """
-                Adds a new round to the game manager panel\n
-                Accepts round_to_rebuild so that an exact copy of a previous round can be refreshed to update the UI
+                Adds a new round to the game manager panel.
+                Accepts round_to_rebuild so that an exact copy of a previous round can be refreshed to update the UI.
                 """
                 
-                if round_to_rebuild == None:
-                    # get players from seed and update the builder
+                if round_to_rebuild is None:
+                    # Get players from seed and update the builder
                     players_names = get_items_from_qlist(self.players_list_seed)
                     self.builder.update_players(players_names)
                     
-                    # start a new row for a new round
+                    # Start a new row for a new round
                     self.session_items.append([])
-                    
                     round_, bye = self.builder.create_round()
-                    
                 else:
                     round_, bye = round_to_rebuild
-                
-                layout.addWidget(_round_header(f"Round: {self.round_number + 1}"), 0, self.round_number, alignment=Qt.AlignLeft)
+
+                col = self.round_number
+
+                header = _round_header(f"ROUND: {self.round_number + 1}")
+                layout.addWidget(header, 0, col, alignment=Qt.AlignTop | Qt.AlignLeft)
+
                 card, card_layout = _round_card()
-                layout.addWidget(card, 1, self.round_number, alignment=Qt.AlignLeft)
-                
+                layout.addWidget(card, 1, col, alignment=Qt.AlignTop | Qt.AlignLeft)
+
+                layout.setColumnStretch(col, 0)
+                layout.setColumnStretch(col + 1, 1)
+
                 conn = get_connection()
-                
                 round_id = create_round(conn, self.session_id, self.round_number)
-                
-                for i, match in enumerate(round_):
-                    i = i*3
-                    
+
+                vert_offset = 0
+                for idx, match in enumerate(round_):
+                    vert_offset = idx * 3
+
                     fn1, ln1 = match[0].split(" ")
                     p1 = get_player(conn, get_pid_from_name(conn, fn1.strip(), ln1.strip()))
-                    
+
                     fn2, ln2 = match[1].split(" ")
                     p2 = get_player(conn, get_pid_from_name(conn, fn2.strip(), ln2.strip()))
-                    
+
                     p_change1, _ = calc_elo_change(p1["current_elo"], p2["current_elo"])
                     p_change2, _ = calc_elo_change(p2["current_elo"], p1["current_elo"])
 
                     p_change1 = abs(p_change1)
                     p_change2 = abs(p_change2)
-                    
-                    _round_row(card_layout, i, match[0], match[1], (p1, p_change1, p_change2), (p2, p_change2, p_change1), round_id)
-                    
-                    _round_spacer(card_layout, i + 2)
-                
-                if bye == None:
+
+                    _round_row(card_layout, vert_offset, match[0], match[1], (p1, p_change1, p_change2), (p2, p_change2, p_change1), round_id)
+                    _round_spacer(card_layout, vert_offset + 2)
+
+                if bye is None:
                     bye = "Na"
-                
-                round_bye_row(card_layout, i*3, bye)
-                
+
+                # Fixed: Use vert_offset + 3 (next available row) instead of i * 3
+                round_bye_row(card_layout, vert_offset + 3, bye)
+
+                # 3. Standardize layout row height constraints
+                card_layout.setRowStretch(vert_offset + 4, 1)  # Pushes internal rows upward cleanly
+
                 self.round_number += 1
                 
+                edges, nodes = self.builder.estimate_rounds_left()
+                self.console.append(f"{edges}, {nodes}")
                 return card_layout
-                
-            self.main_game_manager_layout = QGridLayout()
-            game_manager_panel_widget = QWidget()
-            game_manager_panel_widget.setLayout(self.main_game_manager_layout)
             
-            game_manager_panel_widget.setMinimumWidth(int(200 * self.scale))
-            
-            self.round_number = 0
-            
-            self.finished_games = [] # martix
-            self.session_items = [] # matrix
-                
-            self.builder = SessionBuilder()
-            
-            conn = get_connection()
-            self.session_id = create_session(conn, self.semester_id, self.date, [])
-                
-            
-            def players_confirmed(yesorno):
-                if yesorno:
-                    logger.info("Players confirmed, proceeding to rounds")
-                    players = get_items_from_qlist(self.players_list_seed)
-                    
-                    # Ui stuff
-                    self.round_title = QLabel("Rounds:")
-                    self.main_game_manager_layout.addWidget(self.round_title, 0, 1, alignment=Qt.AlignLeft)
-                    
-                    self.round_area = QScrollArea()
-                    self.round_area.setWidgetResizable(True)
-                    self.round_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-                    self.round_area.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-                    self.round_area.setStyleSheet("background-color: #0b0b0b;")
-
-                    self.round_container = QWidget()
-                    self.round_container_layout = QHBoxLayout(self.round_container)
-                    self.round_container_layout.setAlignment(Qt.AlignTop | Qt.AlignLeft)
-
-                    self.round_area.setWidget(self.round_container)
-                    self.main_game_manager_layout.addWidget(self.round_area, 1, 1)
-                    
-                    # disable and enable menu options
-                    #self.confirm_players_action.setDisabled(True)
-                    #self.new_round_action.setDisabled(False)
-                    #self.remove_round_action.setDisabled(False)
-                    #self.save_session_action.setDisabled(False)
-                    
-                    # write to database players
-                    players_ = set(get_items_from_qlist(self.players_list_seed))
-                    for name in players_:
-                        #add_player(name, dest=self.dest)
-                        pass
-
-                    # logic for round pairings            
-                    self.round_number = 0
-                    
-                    self.finished_games = [] # martix
-                    
-                    self.session_items = [] # matrix
-                    
-                    self.last_round_players = set(players)
-                        
-                    self.builder = SessionBuilder(players)
-                    
-                    on_new_round() # creates first round
-
-                    # update tracker
-                    self.players_confimed = True
-                        
-                else:
-                    logger.info("Players not confirmed")            
-            
-            def on_new_round():
-                
-                def toggle_match_state(loc):
-                    
-                    round_num, index, side = loc
-                    
-                    left, right = self.session_items[round_num][index]
-                    
-                    if side == "left":
-                        pressed = left
-                        opp = right
-                        
-                    if side == "right":
-                        pressed = right
-                        opp = left
-                        
-                    pressed.setStyleSheet("background-color: green")
-                    opp.setStyleSheet("background-color: #5e0202")
-                    
-                    # adjustment therefore remove the previous game stored
-                    if (opp.text(), pressed.text()) in self.finished_games[round_num]:
-                        self.finished_games[round_num].remove((opp.text(), pressed.text()))
-                    
-                    self.finished_games[round_num].add((pressed.text(), opp.text()))
-                    
-                def remove_match_state(loc):
-                    round_num, index = loc
-                    
-                    left, right = self.session_items[round_num][index]
-                    
-                    left.setStyleSheet("background-color: #1f1f1f") # default colour
-                    right.setStyleSheet("background-color: #1f1f1f")
-                    
-                    self.finished_games[round_num].discard((left.text(), right.text()))
-                    self.finished_games[round_num].discard((right.text(), left.text()))
-                
-                # check for new players
-                players = set(get_items_from_qlist(self.players_list_seed))
-                difference_in_players = players ^ self.last_round_players
-                if difference_in_players != set(): # if there is a difference in players from last round
-                    
-                    more_players = players - self.last_round_players
-                    less_players = self.last_round_players - players
-                
-                    # update the LeagueRoundBuilder with this infomaion
-                    if more_players != set():
-                        self.builder.add_players(list(more_players))
-                        
-                    if less_players != set():
-                        self.builder.add_players(list(less_players))
-                    
-                # Create new round and the bye (None for no bye)
-                round_, bye = self.builder.create_round()
-                self.finished_games.append(set())
-                self.session_items.append([])
-                
-                self.last_round_players = players
-                            
-                # creating display of round pairings
-                round_container = QFrame()
-                round_container.setStyleSheet("background-color: #1f1f1f;")
-                round_container_layout = QGridLayout(round_container, alignment=Qt.AlignTop)
-                
-                round_container_layout.addWidget(QLabel(f"Round: {self.round_number + 1}"), 0, self.round_number)
-                
-                # shuffle order of round and games so display is random
-                rng = np.random.default_rng()
-            
-                round_ = [list(t) for t in list(round_)]
-                rng.shuffle(round_)
-                
-                for game in round_:
-                    rng.shuffle(game)
-                
-                # create buttons to display players and track wins
-                for n, pair in enumerate(round_):
-                    
-                    left = CustomButton(pair[0])
-                    right = CustomButton(pair[1])
-                    
-                    left.normalClick.connect(lambda loc=(self.round_number, n, "left"): toggle_match_state(loc))
-                    right.normalClick.connect(lambda loc=(self.round_number, n, "right"): toggle_match_state(loc))
-                    
-                    left.shiftClick.connect(lambda loc=(self.round_number, n): remove_match_state(loc))
-                    right.shiftClick.connect(lambda loc=(self.round_number, n): remove_match_state(loc))
-                    
-                    # adding buttons to the gui
-                    round_container_layout.addWidget(left, n + 1, self.round_number)
-                    round_container_layout.addWidget(QLabel("v"), n + 1, self.round_number + 1)
-                    round_container_layout.addWidget(right, n + 1, self.round_number + 2)
-                    
-                    # adding buttons to the tracker
-                    self.session_items[self.round_number].append((left, right))
-                    
-                if bye != None:
-                    bye_text = QLabel(f"Bye: {bye}")
-                else:
-                    bye_text = QLabel(f"Bye: None")
-                    
-                round_container_layout.addWidget(bye_text, n + 3, self.round_number)
-                
-                self.round_container_layout.addWidget(round_container)
-                
-                #self.remove_round_action.setDisabled(False)
-                if not self.builder.rounds_left: # no rounds left to play
-                    #self.new_round_action.setDisabled(True)
-                    pass
-
-                self.round_number += 1
-                    
-                """ Called when the remove round menu item is pressed """
-                def on_remove_round():
-                    self.builder.remove_round()
-                    self.finished_games.pop(-1)
-                    self.session_items.pop(-1)
-                    
-                    # delete display of last round
-                    item = self.round_container_layout.takeAt(self.round_number - 1)
-                    widget = item.widget()
-                    if widget:
-                        widget.setParent(None)
-                        widget.deleteLater()
-
-                    #self.new_round_action.setDisabled(False)
-                    
-                    self.round_number -= 1
-                    
-                    if self.round_number == 0: # no rounds displayed
-                        #self.remove_round_action.setDisabled(True)
-                        pass
-
-                """ Called when the save session menu item is pressed """
-                def on_save_session():
-
-                    # self.session_id = add_session(semester_id=self.semester_id, session_date=self.date, dest=self.dest)
-                    
-                    for round_ in self.finished_games:
-                        for game in list(round_):
-                            
-                            #player1_id = get_player_id_from_name(game[0], dest=self.dest)
-                            #player2_id = get_player_id_from_name(game[1], dest=self.dest)
-                            
-                            # add_game(self.session_id, player1_id, player2_id, winner_id=player1_id, dest=self.dest)
-                            pass
-                        
-                    logger.info("Saved Session")
-                    
-                    on_cancel_session()
-                    
-                """ Called when the cancel session menu item is pressed """
-                def on_cancel_session():
-                
-                    # enable new session creation again
-                    self.new_session_action.setDisabled(False)
-                    
-                    # clear the session layout
-                    clear_layout(self.main_game_manager_layout)
-                    
-                    # delete session menu bar
-                    # self.menu_bar = remove_menu(self.menu_bar, "Session")
-                        
-                    # clear finished games
-                    self.finished_games = []
-
-                """ Called when the listWidget is right clicked """
-                def show_context_menu(position: QPoint): # menu for adding and removing players from left list
-                    # Get the item under the cursor
-                    item = self.players_list_seed.itemAt(position)
-                    
-                    if item is None:
-                        menu = QMenu()
-                        new_action = menu.addAction("New")
-                        
-                        # Show menu and wait for user selection
-                        action = menu.exec(self.players_list_seed.mapToGlobal(position))
-                        
-                        if action == new_action:
-                            self.text_box = TextBoxWindow(scale=self.scale)
-                            self.text_box.open_at_cursor()
-                            
-                            #self.text_box.submitted_player.connect(player_recived)
-                            
-                            self.text_box.show()
-
-                    else:
-                        # Create context menu
-                        menu = QMenu()
-                        remove_action = menu.addAction("Remove")
-                        
-                        # Show menu and wait for user selection
-                        action = menu.exec(self.players_list_seed.mapToGlobal(position))
-                        
-                        if action == remove_action:
-                            i = self.players_list_seed.row(item)
-                            self.players_list_seed.takeItem(i)
-
-                """ Called when the view menu item is pressed """
-                def on_tab_in():            
-                    self.central.setCurrentWidget(game_manager_panel_widget)
-
-                # logic for new session window
-                #self.session_setup_window = SetupWindow(dest=self.dest, scale=self.scale)
-                #self.session_setup_window.submitted_players.connect(players_recived)
-
-                # create tracker that tracks when players have been confirmed
-                
-                self.players_confimed = False
-                
-                # Session menu
-                self.file_menu = self.menuBar().addMenu("Session")
-                
-                #self.new_session_action.setDisabled(True)
-                
-                self.tab_in_action = QAction("View", self)
-                self.tab_in_action.triggered.connect(on_tab_in)
-                self.file_menu.addAction(self.tab_in_action)
-                
-                self.file_menu.addSeparator()
-                
-                """
-                self.confirm_players_action = QAction("Confirm", self)
-                self.confirm_players_action.triggered.connect(on_confirm_players)
-                self.file_menu.addAction(self.confirm_players_action)
-                
-                self.new_round_action = QAction("New Round", self)
-                self.new_round_action.triggered.connect(on_new_round)
-                self.file_menu.addAction(self.new_round_action)
-                self.new_round_action.setDisabled(True)
-                """
-                
-                self.remove_round_action = QAction("Remove Last Round", self)
-                self.remove_round_action.triggered.connect(on_remove_round)
-                self.file_menu.addAction(self.remove_round_action)
-                self.remove_round_action.setDisabled(True)
-                
-                self.save_session_action = QAction("Save", self)
-                self.save_session_action.triggered.connect(on_save_session)
-                self.file_menu.addAction(self.save_session_action)
-                self.save_session_action.setDisabled(True)
-                
-                self.file_menu.addSeparator()
-                
-                self.cancel_action = QAction("Cancel", self)
-                self.cancel_action.triggered.connect(on_cancel_session)
-                self.file_menu.addAction(self.cancel_action)
-                
-                # logic for main window on new session
-                self.players_list_title = QLabel("List of Players:")
-                self.main_game_manager_layout.addWidget(self.players_list_title, 0, 0, alignment=Qt.AlignLeft)
-                
-                self.players_list_seed = QListWidget()
-                self.players_list_seed.setFixedWidth(250 * self.scale)
-                self.players_list_seed.setFont(self.default_font)
-                self.main_game_manager_layout.addWidget(self.players_list_seed, 1, 0, alignment=Qt.AlignLeft)
-                
-                self.players_list_seed.setContextMenuPolicy(Qt.CustomContextMenu)
-                self.players_list_seed.customContextMenuRequested.connect(show_context_menu)
-
             def refresh_session_items():
                 """Updates the session elo labels with potentially new database updates"""
                 
@@ -1113,22 +805,41 @@ class MainSessionWindow(QMainWindow):
                             # update display text
                             row["p1_elo_label"].setText(f"{p1_new["current_elo"]:.0f} + {p_change1:.0f}, - {p_change2:.0f}")
                             row["p2_elo_label"].setText(f"{p2_new["current_elo"]:.0f} + {p_change2:.0f}, - {p_change1:.0f}")
-
-            # temporary logic for testing
-            #self.file_menu.addAction(QAction("Confirm Players", self, triggered=lambda: players_confirmed(True)))
-            self.file_menu.addAction(QAction("Add Round", self, triggered=lambda: add_new_round(self.main_game_manager_layout)))
+                
             
-            a = QAction("Refresh Rounds", self)
-            a.triggered.connect(refresh_session_items)
-            self.file_menu.addAction(a)
+            self.action_menu = self.menuBar().addMenu("Action")
+            self.action_menu.addAction(QAction("Add Round", self, triggered=lambda: add_new_round(self.main_game_manager_layout)))
+                
+            self.main_game_manager_layout = QGridLayout()
+            self.main_game_manager_layout.setSpacing(12)  # Controls horizontal distance between round columns
+            self.main_game_manager_layout.setAlignment(Qt.AlignTop | Qt.AlignLeft)
+            
+            game_manager_panel_widget = QWidget()
+            game_manager_panel_widget.setLayout(self.main_game_manager_layout)
 
-            return game_manager_panel_widget
+            game_manager_panel_scoll_area = QScrollArea()
+            game_manager_panel_scoll_area.setWidget(game_manager_panel_widget)
+            game_manager_panel_scoll_area.setWidgetResizable(True)
+            game_manager_panel_scoll_area.setMinimumWidth(int(200 * self.scale))
+            
+            self.round_number = 0
+            
+            self.finished_games = [] # martix
+            self.session_items = [] # matrix
+                
+            self.builder = SessionBuilder()
+            
+            conn = get_connection()
+            self.session_id = create_session(conn, self.semester_id, self.date, [])
+
+            return game_manager_panel_scoll_area
         
         PANELS = [
             ("console", "Console", False, console_panel),
             ("settings", "Settings", False, settings_panel),
             ("players", "Player Seed", True, player_seed_panel),
             ("leaderboard", "Leaderboard", False, leaderboard_panel),
+            ("statistics", "Statistics", False, statistics_panel),
             ("player_manager", "Player Manager", True, player_manager_panel),
             ("game_manager", "Game Manager", True, game_manager_panel),
         ]
@@ -1255,6 +966,15 @@ class MainSessionWindow(QMainWindow):
         elif cmd == "echo":
             text = " ".join(parts[1:])
             self.console.append(text)
+
+        elif cmd == "show-elo":
+            text = " ".join(parts[1:])
+            
+            if text == "true":
+                print("true")
+                
+            if text == "false":
+                print("flase")
 
         else:
             self.console.append(f"Unknown command: {cmd}")

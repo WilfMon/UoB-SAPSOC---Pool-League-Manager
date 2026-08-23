@@ -10,7 +10,6 @@ from PySide6.QtCore import Qt, QPoint, QSize
 from PySide6.QtGui import QFont
 
 from utils.utils import clean_name
-from database.queries import get_members, make_member, remove_member, get_all_players_name, remove_player, add_player, get_player_id_from_name
 
 from .confimation_window import ConfirmationWindow
 

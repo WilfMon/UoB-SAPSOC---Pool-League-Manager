@@ -247,6 +247,12 @@ def create_round(conn, session_id, round_number):
             (session_id, round_number),
         )
         return cur.lastrowid
+    
+
+def delete_round(conn, round_id):
+    """Delete a round"""
+    with transaction(conn):
+        conn.execute("DELETE FROM rounds WHERE round_id = ?", (round_id,))
 
 
 # ---------------------------------------------------------------
@@ -272,9 +278,14 @@ def record_match(
         p1 = get_player(conn, player1_id)
         p1_elo = override_p1_elo if override_p1_elo is not None else p1["current_elo"]
         
+        # add both players to the semester
+        semester_id = get_semester_id_for_round(conn, round_id)
+        
+        add_player_to_semester(conn, semester_id, player1_id)
+        add_player_to_semester(conn, semester_id, player2_id)
+        
         # Update the semester standings with points first
         if winner_id is not None:
-            semester_id = get_semester_id_for_round(conn, round_id)
             if semester_id is not None:
                 _award_semester_point(conn, semester_id, winner_id)
                 

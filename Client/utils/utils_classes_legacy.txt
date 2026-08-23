@@ -1,0 +1,476 @@
+import string
+
+class TournamentBuilder():
+    def __init__(self, players, settings):
+
+        self.player_names = players
+        self.settings = settings
+        
+        self.random_amount = 2 # higher = more random
+        
+        self.rounds = []
+        self.groups = None
+        
+        self.player_labels = None
+        
+        letters = string.ascii_lowercase
+        self.possible_player_labels = [''.join(pair) for pair in itertools.product(letters, repeat=2)]
+
+        # create graph of players with no connections
+        self.G = nx.Graph()
+        self.G.add_nodes_from(self.player_names)
+
+        self.get_players_info(self.player_names)
+        
+        print(settings)
+        
+    def get_players_info(self, player_names):
+        """ From the list of player names, create a list of dicts of name and elo """
+        self.players = []
+
+        for player in player_names:
+            info = get_player(player)
+            
+            self.players.append({"name": player, "elo": info[0][6]})
+        
+    def define_weight(self):
+        # define weight function as elo based
+        if self.settings["seed"] == "Elo":
+            def weight(p1, p2):
+                diff = abs(p1["elo"] - p2["elo"])
+
+                rng = np.random.default_rng()
+                ran_factor = (rng.random() - 0.5) * (self.settings["ran"] * self.random_amount)
+
+                return 1 / (1 + (diff + ran_factor))
+            
+            # order a list of seed
+            self.seed_order = sorted(self.players, key=lambda x: x["elo"], reverse=True)
+
+        # define weight function as semester leaderboard based
+        if self.settings["seed"] == "Semester Leaderboard":
+            self.seed_order = []
+
+        # define weight function as random
+        if self.settings["seed"] == "Random":
+            def weight(p1, p2):
+                rng = np.random.default_rng()
+                return rng.random() * 100
+            
+            self.seed_order = self.players
+            random.shuffle(self.seed_order)
+
+        self.weight_func = weight
+
+    def start_tournament(self, player_names: list[str]) -> list[tuple[str, str]]:
+        """ Returns a set of the initial pairings of players """
+        
+        # calculate amount of rounds
+        for n in range(1, self.settings["num_players"] + 1):
+            if self.settings["num_players"] // (2 ** n) == 1:
+                break
+            
+        self.num_rounds = n
+        
+        # round calculation
+        self.get_players_info(player_names)
+
+        for a, b in itertools.combinations(self.players, 2): # add connections between players
+            
+            w = self.weight_func(a, b)
+            self.G.add_edge(a["name"], b["name"], weight=w)
+
+        round_ =  list(max_weight_matching(self.G, maxcardinality=True))
+
+        #round_ = {"aa": round_}
+
+        self.rounds = round_
+
+        return round_
+    
+    def start_groups(self):
+        
+        self.num_groups = self.settings["groups"]["num_groups"]
+        
+        # calc group sizes
+        base, remainder = divmod(self.settings["num_players"], self.num_groups)
+        group_sizes = [base + 1] * remainder + [base] * (self.num_groups - remainder)
+        group_sizes.sort(reverse=False) # smallest groups first for better layout
+        
+        possible_group_names = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]
+        groups: dict[str, list[str, int]] = {}
+        for i, size in enumerate(group_sizes):
+            groups[possible_group_names[i]] = []
+            
+            for k in range(size):
+                
+                k = k + sum(group_sizes[:i]) # offset k by the number of players in previous groups
+                groups[possible_group_names[i]].append([self.seed_order[k], 0]) # add player with 0 points to group
+                
+        self.groups = groups
+        
+        print(self.groups)
+        
+        names_by_group = {
+            group: [player[0]['name'] for player in players]
+            for group, players in self.groups.items()
+        }
+        
+        self.matches_by_group = {
+            group: list(itertools.combinations(names, 2))
+            for group, names in names_by_group.items()
+        }
+
+        print(self.matches_by_group)
+        
+        for sublist in self.matches_by_group.values():
+            self.rounds.extend(sublist)
+            
+        print(self.rounds)
+
+
+import matplotlib.pyplot as plt
+from matplotlib.figure import Figure
+
+class StatisticsBuilder():
+    def __init__(self, player_name):
+        # player object
+        player_info = get_player(player_name)
+        player_games = get_player_games(player_name)
+
+        # make an object that holds all the info on the player
+        print(player_info)
+        self.player = PlayerObj(player_info, player_games)
+
+    def get_graphs(self) -> tuple[Figure, Figure, Figure]:
+        
+        # cleanup figures
+        plt.close("all")
+
+        # visual data
+        points = [0]
+        wins = [0]
+        elo = [1000.0]
+        games_played = [0]
+        winrate = []
+        
+        for i, game in enumerate(self.player.games_played_info):
+            # update games played
+            games_played.append(games_played[i] + 1)
+            
+            # check if won
+            if game[4] == self.player.player_id:
+                wins.append(wins[i] + 1)
+                points.append(points[i] + game[5])
+                elo.append(elo[i] + game[6])
+            
+            # if not won
+            else:
+                wins.append(wins[i])
+                points.append(points[i])
+                elo.append(elo[i] + game[7])
+            
+            # track winrate
+            if games_played[i] == 0:
+                pass
+
+            else:
+                winrate.append(100 * (wins[i] / games_played[i]))
+
+            
+        fig1, ax1 = plt.subplots()
+        
+        ax1.plot(games_played, wins, label="Wins")
+
+        ax1.set_title("Wins Plot")
+        ax1.set_xlabel("Games Played")
+        ax1.set_ylabel("Wins")
+        
+        ax1.legend()
+        
+        fig2, ax2 = plt.subplots()
+        
+        copy = games_played.copy()
+        copy.pop(0)
+        copy.pop(0)
+        
+        ax2.plot(copy, winrate, label="Winrate")
+        
+        ax2.set_title("Winrate Plot")
+        ax2.set_xlabel("Games Played")
+        ax2.set_ylabel("Winrate")
+
+        ax2.set_ybound(0, 100)
+        
+        ax2.legend()
+        
+        fig3, ax3 = plt.subplots()
+        
+        ax3.plot(games_played, elo, label="Elo")
+        
+        ax3.set_title("Elo Plot")
+        ax3.set_xlabel("Games Played")
+        ax3.set_ylabel("Elo")
+        
+        ax3.legend()
+        
+        return (fig1, fig2, fig3)
+    
+
+class AdvancedStats():
+    def __init__(self):
+        self.p_data = get_all_players_info()
+        
+    def elo_dist(self, res=50) -> Figure:
+        
+        def floor_(x):
+            return np.floor(x / res) * res
+
+        elo_data = [t[-1] for t in self.p_data] # isolate elo data
+        elo_data_sorted = sorted(elo_data) # sort form lowest to highest
+        
+        low = floor_(elo_data_sorted[0])
+        high = floor_(elo_data_sorted[-1])
+        diff = high - low
+        
+        bins_y = np.zeros(int(diff // res + 1))
+        
+        for i, b in enumerate(bins_y):
+            for elo in elo_data_sorted:
+                if int(floor_(elo)) == int((i*res + low)):
+                    bins_y[i] += 1
+                    
+        x = np.arange(low, high + res, res)
+        
+        s = Settings()
+        config = s.load_settings()["elo_vars"]
+        
+        fig, ax = plt.subplots()
+        
+        ax.plot(x, bins_y)
+        
+        ax.set_title(f"""
+                        SETTINGS:
+                        defaut_elo = {config["default_elo"]}, base = {config["base"]}, 
+                        scale_factor = {config["scale_factor"]}, placement_factor = {config["placement_factor"]}
+                    """)
+        ax.set_xlabel("Elo Bin")
+        ax.set_ylabel("Frequency")
+        
+        data_to_write = {"x": list(x), "y": list(bins_y)}
+        
+        # create folder
+        info = f"{config["default_elo"]}-{config["base"]}-{config["scale_factor"]}-{config["placement_factor"]}"
+        info = info.replace(".", "_")
+        
+        folder = f"prev_data/plots/{info}"
+        
+        # write data
+        os.mkdir(folder)
+        
+        fig.savefig(
+        f"{folder}/{info}",
+        dpi=300,              # resolution (good for print)
+        bbox_inches="tight"  # trims extra whitespace
+        )
+        
+        with open(f"{folder}/data.json", "w") as f:
+            json.dump(data_to_write, f, indent=4)
+        
+        return fig
+            
+    
+class Leaderboard():
+    def __init__(self, dest="league.db"):
+        self.dest = dest
+
+        conn = get_connection(dest)
+        cursor = conn.cursor()
+        
+        cursor.execute("""
+            SELECT
+                s.semester_id,
+                g.session_id,
+                g.games_id,
+                sem.semester_name,
+                s.session_date,
+                p1.player_id AS player1_id,
+                p1.name AS player1_name,
+                p2.player_id AS player2_id,
+                p2.name AS player2_name,
+                w.player_id  AS winner_id,
+                w.name       AS winner_name,
+                g.points_to_winner
+            FROM games g
+            JOIN sessions s 
+                ON g.session_id = s.session_id
+            JOIN semester sem
+                ON s.semester_id = sem.semester_id
+            JOIN players p1
+                ON g.player1_id = p1.player_id
+            JOIN players p2
+                ON g.player2_id = p2.player_id
+            JOIN players w
+                ON g.winner_id = w.player_id
+            ORDER BY sem.semester_id, s.session_id, g.games_id;
+        """)
+        
+        self.games = cursor.fetchall()
+        conn.close()
+    
+    def semester(self):
+        conn = get_connection(self.dest)
+        cursor = conn.cursor()
+
+        # list of all semester ids
+        cursor.execute("""
+            SELECT semester_id FROM semester               
+        """)
+        
+        semester_id_list = cursor.fetchall()
+        
+        conn.close()
+        
+        games_per_semester = []
+        players_per_semester = []
+        
+        # sort games into semesters
+        for i in range(len(semester_id_list)): # loop though semesters
+            games_per_semester.append([])
+            for game in self.games: # loop though games and make lists of the same semester
+                if semester_id_list[i][0] == game[0]:
+                    games_per_semester[i].append(game)
+                
+        # sort players in each semester into a new list
+        for semester in games_per_semester:
+            names = set()
+            for game in semester:
+                
+                names.add((game[6], 0.0))  # name at index 6
+                names.add((game[8], 0.0))  # name at index 8
+            
+            names.add(((game[0], game[3]), -1)) # add data about semster to the set
+                    
+            players_per_semester.append(list(names))
+            
+        # add up points to each of the players from the list of all games this semester
+        for n, semester in enumerate(games_per_semester):
+            
+            for game in semester:
+                
+                for i, (name, score) in enumerate(players_per_semester[n]):
+                    if name == game[10]:
+                        players_per_semester[n][i] = (name, score + game[11])
+          
+        in_order = []
+                  
+        for player in players_per_semester:
+            in_order.append(sorted(player, key=lambda x: x[1], reverse=True))
+        
+        return in_order    
+
+    def session(self):
+        conn = get_connection(self.dest)
+        cursor = conn.cursor()
+
+        # list of all session ids
+        cursor.execute("""
+            SELECT session_id FROM sessions
+        """)
+        
+        session_id_list = cursor.fetchall()
+        
+        conn.close()
+        
+        games_per_session = []
+        players_per_session = []
+        
+        # sort games into sessions
+        for i in range(len(session_id_list)): # loop though sessions
+            games_per_session.append([])
+            for game in self.games: # loop though games and make lists of the same session
+                if session_id_list[i][0] == game[1]:
+                    games_per_session[i].append(game)
+                
+        # sort players in each session into a new list
+        for session in games_per_session:
+            names = set()
+            for game in session:
+                
+                names.add((game[6], 0.0))  # name at index 6
+                names.add((game[8], 0.0))  # name at index 8
+            
+            names.add(((game[0], game[1], game[4]), -1)) # add data about session to the set
+                    
+            players_per_session.append(list(names))
+            
+        # add up points to each of the players from the list of all games this session
+        for n, session in enumerate(games_per_session):
+            
+            for game in session:
+                
+                for i, (name, score) in enumerate(players_per_session[n]):
+                    if name == game[10]:
+                        players_per_session[n][i] = (name, score + game[11])
+          
+        in_order = []
+                  
+        for player in players_per_session:
+            in_order.append(sorted(player, key=lambda x: x[1], reverse=True))
+        
+        return in_order    
+    
+    def alltime_points(self):
+        
+        conn = get_connection(self.dest)
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            SELECT name, points, elo FROM players
+        """)
+    
+        players = cursor.fetchall()
+        players_copy = players.copy()
+        
+        # to remove players that havent played much from the alltime leaderboard
+        for player in players:
+            num_games = get_player_num_games_played(get_player_id_from_name(player[0], dest=self.dest), dest=self.dest)
+            
+            if num_games < 10:
+                players_copy.remove(player)
+        
+        # order the leaderboard
+        in_order = sorted(players_copy, key=lambda x: x[1], reverse=True)
+
+        return in_order
+    
+    def alltime_elo(self):
+        conn = get_connection(self.dest)
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            SELECT name, points, elo FROM players
+        """)
+    
+        players = cursor.fetchall()
+        
+        # to remove players that havent played much from the alltime leaderboard
+        for player in players:
+            num_games = get_player_num_games_played(get_player_id_from_name(player[0], dest=self.dest), dest=self.dest)
+            
+            if num_games < 10:
+                players.remove(player)
+
+        in_order = sorted(players, key=lambda x: x[2], reverse=True)
+
+        return in_order
+
+    def collect_leaderboards(self):
+        
+        sessions = self.session()
+        semesters = self.semester()
+        alltime_points = self.alltime_points()
+        alltime_elo = self.alltime_elo()
+        
+        return semesters, sessions, alltime_points, alltime_elo
+    

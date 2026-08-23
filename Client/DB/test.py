@@ -1,6 +1,7 @@
-from db import get_connection, delete_match, get_match_id
+from db import get_connection, delete_round
 
 
 conn = get_connection()
 
-print(get_match_id(conn, 4, 3, 2))
+for i in range(0, 100): 
+    delete_round(conn, i)
