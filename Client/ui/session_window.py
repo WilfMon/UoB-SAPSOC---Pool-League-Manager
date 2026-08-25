@@ -6,7 +6,6 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-import numpy as np
 import datetime
 
 from PySide6.QtWidgets import QMainWindow, QPlainTextEdit, QSpacerItem, QInputDialog, QListWidgetItem, QSizePolicy, QLabel, QGridLayout,  QFrame, QPushButton, QVBoxLayout, QWidget, QListWidget, QMenu, QApplication, QLineEdit, QScrollArea, QHBoxLayout, QSplitter, QComboBox, QSpinBox, QSlider, QRadioButton, QButtonGroup
@@ -21,7 +20,7 @@ from ui.text_box_window import TextBoxWindow
 from utils.utils import clean_name, clear_layout, get_items_from_qlist, remove_item_from_qlist, calc_elo_change
 from utils.utils_classes import SessionBuilder
 
-from DB.db import get_connection, list_active_players, get_pid_from_name, get_player, create_round, create_semester, create_session, list_all_players, add_player, record_match, delete_match, get_match_id
+from DB.db import get_connection, list_active_players, get_pid_from_name, get_player, create_round, create_semester, create_session, list_all_players, add_player, record_match, delete_match, get_match_id, listen
 
 from resources.colours import DARK, HEAD, PANEL_COL, LINE, TEXT, ACCENT, GREEN, RED
 from resources.stylesheets import _scrollbar_stylesheet, _settings_controls_stylesheet, _title_text_stylesheet
@@ -923,6 +922,9 @@ class MainSessionWindow(QMainWindow):
         )
         # Run once after the initial layout pass so real pixel widths exist.
         QTimer.singleShot(0, self._sync_tabs_to_panels)
+        
+        """ Tester Functions """
+        listen()
 
     def resizeEvent(self, event):
         super().resizeEvent(event)

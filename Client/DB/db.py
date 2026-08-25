@@ -49,6 +49,21 @@ def get_connection(db_path: Path = DB_PATH) -> sqlite3.Connection:
     return conn
 
 
+def listen():
+    
+    def on_table_change(action_code, db_name, table_name, rowid):
+        actions = {sqlite3.SQLITE_INSERT: "INSERT", sqlite3.SQLITE_UPDATE: "UPDATE", sqlite3.SQLITE_DELETE: "DELETE"}
+        action = actions.get(action_code, "UNKNOWN")
+        
+        # Custom Python logic runs automatically here
+        print(f"[Hook Fired] Action: {action} | DB: {db_name} | Table: {table_name} | Row ID: {rowid}")
+
+    conn = sqlite3.connect(":memory:")
+
+    # Register the Python function as the update hook
+    conn.set_update_hook(on_table_change)
+
+
 @contextmanager
 def transaction(conn: sqlite3.Connection):
     """Wrap a block of writes in a single commit/rollback so a match record + its two Elo history rows either all succeed or all fail."""
