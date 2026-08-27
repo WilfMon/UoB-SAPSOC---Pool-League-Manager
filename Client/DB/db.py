@@ -28,7 +28,6 @@ ACTIONS = {
         apsw.SQLITE_DELETE: "DELETE",
     }
 
-
 # ---------------------------------------------------------------
 # Database / connection
 # ---------------------------------------------------------------
@@ -288,6 +287,7 @@ def get_round_id(conn, session_id, round_number) -> int:
         ).fetchone()
         return row[0] if row else None
 
+
 def delete_round(conn, round_id):
     """Delete a round."""
     with transaction(conn):
@@ -296,6 +296,11 @@ def delete_round(conn, round_id):
         
         _recalculate_all_elo(conn)
 
+
+def get_rounds_in_session(conn, session_id):
+    """Get the IDs of the rounds in a session"""
+    rows = _rows_as_dicts(conn, "SELECT * FROM rounds WHERE session_id = ?", (session_id,))
+    return rows[0] if rows else None
 
 # ---------------------------------------------------------------
 # Matches

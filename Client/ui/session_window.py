@@ -8,8 +8,8 @@ logger = logging.getLogger(__name__)
 
 import datetime
 
-from PySide6.QtWidgets import QMainWindow, QPlainTextEdit, QSpacerItem, QInputDialog, QListWidgetItem, QSizePolicy, QLabel, QGridLayout,  QFrame, QPushButton, QVBoxLayout, QWidget, QListWidget, QMenu, QApplication, QLineEdit, QScrollArea, QHBoxLayout, QSplitter, QComboBox, QSpinBox, QSlider, QRadioButton, QButtonGroup
-from PySide6.QtGui import QAction, QCursor, QFont
+from PySide6.QtWidgets import QMainWindow, QPlainTextEdit, QSpacerItem, QInputDialog, QMessageBox, QListWidgetItem, QSizePolicy, QLabel, QGridLayout,  QFrame, QPushButton, QVBoxLayout, QWidget, QListWidget, QMenu, QApplication, QLineEdit, QScrollArea, QHBoxLayout, QSplitter, QComboBox, QSpinBox, QSlider, QRadioButton, QButtonGroup
+from PySide6.QtGui import QAction, QCursor, QFont, QCloseEvent
 from PySide6.QtCore import Qt, QSize, QPoint, Signal, QTimer
 
 from .confimation_window import ConfirmationWindow
@@ -21,7 +21,7 @@ from utils.utils_classes import SessionBuilder
 
 from DB.db import (
                     get_connection, list_active_players, get_pid_from_name, get_player, create_round, get_match, get_name_from_pid, delete_round, get_round_id,
-                   create_semester, create_session, list_all_players, add_player, record_match, delete_match, get_match_id, listen, 
+                   create_semester, create_session, list_all_players, add_player, record_match, delete_match, get_match_id, listen, get_rounds_in_session,
                    ACTIONS
                    )
 
@@ -60,6 +60,8 @@ class MainSessionWindow(QMainWindow):
         self.month = int(date_time.strftime("%m"))
         
         self.conn = get_connection()
+        
+        self.save = False
         
         # automatically determine semester and year
         if 9 <= self.month <= 12:
@@ -975,6 +977,7 @@ class MainSessionWindow(QMainWindow):
             
         listen(self.conn, on_database_change)
         
+        
     def update_leaderboard(self):
         players = list_active_players(self.conn)
         
@@ -986,8 +989,19 @@ class MainSessionWindow(QMainWindow):
             self.lb_elo_list.addItem(f"{pl["current_elo"]}")
             
             
+    def closeEvent(self, event: QCloseEvent):
+        """Runs on close of the window"""
+        if not self.save:
+            round_ids = get_rounds_in_session(self.conn, self.session_id)
+            
+            if round_ids:
+                for rid in round_ids:
+                    delete_round(self.conn, rid)
+                
+        event.accept()
         
-
+            
+            
     def resizeEvent(self, event):
         super().resizeEvent(event)
         # Window resizes reflow the splitter's proportional sizes without

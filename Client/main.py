@@ -32,6 +32,8 @@ def main():
 
     app = QApplication(sys.argv)
     
+    app.setStyle("Fusion")
+    
     app.setFont(QFont("Segoe UI", scale_factor * 18))
                 
     app.setStyleSheet(f"QMainWindow {{ background:{DARK}; }}")

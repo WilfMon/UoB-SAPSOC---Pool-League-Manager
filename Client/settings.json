@@ -1,5 +1,5 @@
 {
-    "scale": 1.0,
+    "scale": 0.75,
     "forget_factor": 10,
     "dest": "league.db",
     "elo_vars": {
