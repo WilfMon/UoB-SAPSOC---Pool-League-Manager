@@ -8,6 +8,8 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+import numpy as np
+
 from PySide6.QtGui import QFont
 from PySide6.QtWidgets import QApplication
 from PySide6.QtCore import Qt
@@ -30,7 +32,7 @@ def main():
 
     app = QApplication(sys.argv)
     
-    app.setFont(QFont("Segoe UI", round(scale_factor * 18)))
+    app.setFont(QFont("Segoe UI", scale_factor * 18))
                 
     app.setStyleSheet(f"QMainWindow {{ background:{DARK}; }}")
     

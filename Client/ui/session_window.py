@@ -15,27 +15,29 @@ from PySide6.QtCore import Qt, QSize, QPoint, Signal, QTimer
 from .confimation_window import ConfirmationWindow
 
 from ui.custom_widgets import CustomButton, CustomHeaderBar, ConsoleWidget, ToggleSwitch
-from ui.text_box_window import TextBoxWindow
 
 from utils.utils import clean_name, clear_layout, get_items_from_qlist, remove_item_from_qlist, calc_elo_change
 from utils.utils_classes import SessionBuilder
 
-from DB.db import get_connection, list_active_players, get_pid_from_name, get_player, create_round, create_semester, create_session, list_all_players, add_player, record_match, delete_match, get_match_id, listen
+from DB.db import (
+                    get_connection, list_active_players, get_pid_from_name, get_player, create_round, get_match, get_name_from_pid, delete_round, get_round_id,
+                   create_semester, create_session, list_all_players, add_player, record_match, delete_match, get_match_id, listen, 
+                   ACTIONS
+                   )
 
 from resources.colours import DARK, HEAD, PANEL_COL, LINE, TEXT, ACCENT, GREEN, RED
-from resources.stylesheets import _scrollbar_stylesheet, _settings_controls_stylesheet, _title_text_stylesheet
+from resources.stylesheets import _scrollbar_stylesheet, _settings_controls_stylesheet, _title_text_stylesheet, _normal_text_stylesheet
 
 class MainSessionWindow(QMainWindow):
     info = Signal(dict)
     
-    def __init__(self, dest, scale=1.0):
+    def __init__(self, scale=1.0):
         super().__init__()
         
         self.scale = scale
-        self.dest = dest
 
         self.setWindowTitle(f"Session")
-        self.setMinimumSize(int(1280 * self.scale), int(720 * self.scale))
+        self.setMinimumSize(int(1960 * self.scale), int(1080 * self.scale))
         self.default_font = QFont("Segoe UI", round(self.scale * 18))
         self.small_font = QFont("Segoe UI", round(self.scale * 12))
         
@@ -57,19 +59,19 @@ class MainSessionWindow(QMainWindow):
         self.year = date_time.strftime("%Y")
         self.month = int(date_time.strftime("%m"))
         
-        conn = get_connection()
+        self.conn = get_connection()
         
         # automatically determine semester and year
         if 9 <= self.month <= 12:
             sem_name = f"{int(self.year) - 1}.{self.year}.1"
             
-            self.semester_id = create_semester(conn, sem_name, self.date)
+            self.semester_id = create_semester(self.conn, sem_name, self.date)
 
         if 1 <= self.month <= 8:
             sem_name = f"{int(self.year) - 1}.{self.year}.2"
             
             
-            self.semester_id = create_semester(conn, sem_name, self.date)
+            self.semester_id = create_semester(self.conn, sem_name, self.date)
 
         logger.info(f"Semester set to: {sem_name}")
         
@@ -79,6 +81,7 @@ class MainSessionWindow(QMainWindow):
             self.console.setFont(self.small_font)
             
             self.console.setMinimumWidth(int(100 * self.scale))
+            self.console.setStyleSheet(_normal_text_stylesheet())
             
             self.console.commandEntered.connect(self.handle_command)
 
@@ -300,12 +303,23 @@ class MainSessionWindow(QMainWindow):
             return self.players_list_seed
         
         def leaderboard_panel() -> QWidget:
-            self.leaderboard_list = QWidget()
-            self.leaderboard_list.setFont(self.default_font)
+            self.leaderboard_widget = QWidget()
+            self.lb_wid_layout = QGridLayout()
+            self.leaderboard_widget.setLayout(self.lb_wid_layout)
             
-            self.leaderboard_list.setMinimumWidth(int(100 * self.scale))
+            self.leaderboard_widget.setMinimumWidth(int(100 * self.scale))
+            
+            self.lb_players_list = QListWidget()
+            self.lb_players_list.setFont(self.small_font)
+            self.lb_wid_layout.addWidget(self.lb_players_list, 0, 0)
+            
+            self.lb_elo_list = QListWidget()
+            self.lb_elo_list.setFont(self.small_font)
+            self.lb_wid_layout.addWidget(self.lb_elo_list, 0, 1)
+            
+            self.update_leaderboard()
 
-            return self.leaderboard_list
+            return self.leaderboard_widget
         
         def statistics_panel() -> QWidget:
             self.stats_panel_widget = QWidget()
@@ -375,12 +389,10 @@ class MainSessionWindow(QMainWindow):
                         players = confim_wind.stored_players
                         possible_selections = get_items_from_qlist(self.selection_list)
                         
-                        conn = get_connection()
-                        
                         for p in players:
                             fn, ln = p.split(" ")
                             
-                            add_player(conn, fn, ln)
+                            add_player(self.conn, fn, ln)
                             
                             # update the selection list with these new players
                             if p not in possible_selections:
@@ -397,8 +409,7 @@ class MainSessionWindow(QMainWindow):
                 
                 participants = get_items_from_qlist(self.selected_players_list)
                 
-                conn = get_connection()
-                players = list_all_players(conn)
+                players = list_all_players(self.conn)
                 players_names = []
                 new_players = []
                 
@@ -465,8 +476,7 @@ class MainSessionWindow(QMainWindow):
             self.player_manager_layout.addWidget(card, 3, 0)
 
 
-            conn = get_connection()
-            active_players = list_active_players(conn)
+            active_players = list_active_players(self.conn)
             
             for player in active_players:
                 
@@ -564,6 +574,8 @@ class MainSessionWindow(QMainWindow):
                 
                 new_m, new_o = _calc_new_elo_for_labels(main_elo, other_elo)
                 
+                refresh_session_items()
+                
                 main_elo.setText(new_m)
                 other_elo.setText(new_o)
                 
@@ -574,10 +586,8 @@ class MainSessionWindow(QMainWindow):
                 p2_id = other_elo.property("elo_change")[0]["player_id"]
                 
                 # database updates
-                conn = get_connection()
-                record_match(conn, round_id, p1_id, p2_id, p1_id)
+                record_match(self.conn, round_id, p1_id, p2_id, p1_id)
                 
-                refresh_session_items()
                 main.clicked = True
                 other.clicked = True
                 
@@ -612,18 +622,45 @@ class MainSessionWindow(QMainWindow):
                 p2_id = other_elo.property("elo_change")[0]["player_id"]
                 
                 # database updates
-                conn = get_connection()
-                match_id = get_match_id(conn, p1_id, p2_id, round_id)
+                match_id = get_match_id(self.conn, p1_id, p2_id, round_id)
                 if match_id == None:
-                    match_id = get_match_id(conn, p2_id, p1_id, round_id)
+                    match_id = get_match_id(self.conn, p2_id, p1_id, round_id)
                 
                 print(p1_id, p2_id, round_id)
                 print(match_id)
-                delete_match(conn, match_id)
+                delete_match(self.conn, match_id)
                 
                 main.clicked = False
                 other.clicked = False
                 refresh_session_items()
+            
+            def refresh_session_items():
+                """Updates the session elo labels with potentially new database updates"""
+                
+                for _round in self.session_items:
+                    for row in _round:
+                        # retrive old elo
+                        p1_old = row["p1_elo_label"].property("elo_change")[0]
+                        p2_old = row["p2_elo_label"].property("elo_change")[0]
+                        
+                        # find new elo and elo change
+                        p1_new = get_player(self.conn, p1_old["player_id"])
+                        p2_new = get_player(self.conn, p2_old["player_id"])
+                        
+                        p_change1, _ = calc_elo_change(p1_new["current_elo"], p2_new["current_elo"])
+                        p_change2, _ = calc_elo_change(p2_new["current_elo"], p1_new["current_elo"])
+                        p_change1 = abs(p_change1)
+                        p_change2 = abs(p_change2)
+                        
+                        # update stored info
+                        row["p1_elo_label"].setProperty("elo_change", (p1_new, p_change1, p_change2))
+                        row["p2_elo_label"].setProperty("elo_change", (p2_new, p_change2, p_change1))
+                        
+                        if not row["p1_button"].clicked or not row["p1_button"].clicked:
+                            
+                            # update display text
+                            row["p1_elo_label"].setText(f"{p1_new["current_elo"]:.0f} + {p_change1:.0f}, - {p_change2:.0f}")
+                            row["p2_elo_label"].setText(f"{p2_new["current_elo"]:.0f} + {p_change2:.0f}, - {p_change1:.0f}")
             
             # ---------------------------------------------------------------
             # Functions to build the UI
@@ -707,7 +744,7 @@ class MainSessionWindow(QMainWindow):
                 layout.addWidget(bye_lbl, vert_offset, 0)
             
             # ---------------------------------------------------------------
-            # Functions
+            # Functions to control rounds
             # ---------------------------------------------------------------
             
             def add_new_round(layout: QGridLayout, round_to_rebuild=None):
@@ -738,18 +775,17 @@ class MainSessionWindow(QMainWindow):
                 layout.setColumnStretch(col, 0)
                 layout.setColumnStretch(col + 1, 1)
 
-                conn = get_connection()
-                round_id = create_round(conn, self.session_id, self.round_number)
+                round_id = create_round(self.conn, self.session_id, self.round_number)
 
                 vert_offset = 0
                 for idx, match in enumerate(round_):
                     vert_offset = idx * 3
 
                     fn1, ln1 = match[0].split(" ")
-                    p1 = get_player(conn, get_pid_from_name(conn, fn1.strip(), ln1.strip()))
+                    p1 = get_player(self.conn, get_pid_from_name(self.conn, fn1.strip(), ln1.strip()))
 
                     fn2, ln2 = match[1].split(" ")
-                    p2 = get_player(conn, get_pid_from_name(conn, fn2.strip(), ln2.strip()))
+                    p2 = get_player(self.conn, get_pid_from_name(self.conn, fn2.strip(), ln2.strip()))
 
                     p_change1, _ = calc_elo_change(p1["current_elo"], p2["current_elo"])
                     p_change2, _ = calc_elo_change(p2["current_elo"], p1["current_elo"])
@@ -774,40 +810,32 @@ class MainSessionWindow(QMainWindow):
                 edges, nodes = self.builder.estimate_rounds_left()
                 self.console.append(f"{edges}, {nodes}")
                 return card_layout
-            
-            def refresh_session_items():
-                """Updates the session elo labels with potentially new database updates"""
                 
-                conn = get_connection()
+            def remove_last_round(layout: QGridLayout, col: int):
                 
-                for _round in self.session_items:
-                    for row in _round:
-                        # retrive old elo
-                        p1_old = row["p1_elo_label"].property("elo_change")[0]
-                        p2_old = row["p2_elo_label"].property("elo_change")[0]
-                        
-                        # find new elo and elo change
-                        p1_new = get_player(conn, p1_old["player_id"])
-                        p2_new = get_player(conn, p2_old["player_id"])
-                        
-                        p_change1, _ = calc_elo_change(p1_new["current_elo"], p2_new["current_elo"])
-                        p_change2, _ = calc_elo_change(p2_new["current_elo"], p1_new["current_elo"])
-                        p_change1 = abs(p_change1)
-                        p_change2 = abs(p_change2)
-                        
-                        # update stored info
-                        row["p1_elo_label"].setProperty("elo_change", (p1_new, p_change1, p_change2))
-                        row["p2_elo_label"].setProperty("elo_change", (p2_new, p_change2, p_change1))
-                        
-                        if not row["p1_button"].clicked or not row["p1_button"].clicked:
-                            
-                            # update display text
-                            row["p1_elo_label"].setText(f"{p1_new["current_elo"]:.0f} + {p_change1:.0f}, - {p_change2:.0f}")
-                            row["p2_elo_label"].setText(f"{p2_new["current_elo"]:.0f} + {p_change2:.0f}, - {p_change1:.0f}")
+                for row in range(layout.rowCount()):
+                    item = layout.itemAtPosition(row, col)
+                    
+                    if item is not None:
+                        widget = item.widget()
+                        if widget is not None:
+                            # Remove widget visually and queue it for deletion
+                            widget.setParent(None)
+                            widget.deleteLater()
+                        else:
+                            # If the item was a nested layout or spacer, remove it from layout
+                            layout.removeItem(item)
                 
-            
+                round_id = get_round_id(self.conn, self.session_id, col)
+                delete_round(self.conn, round_id)
+                
+                self.builder.remove_round()
+                
+                self.round_number -= 1
+                
             self.action_menu = self.menuBar().addMenu("Action")
             self.action_menu.addAction(QAction("Add Round", self, triggered=lambda: add_new_round(self.main_game_manager_layout)))
+            self.action_menu.addAction(QAction("Remove Round", self, triggered=lambda: remove_last_round(self.main_game_manager_layout, self.round_number - 1)))
                 
             self.main_game_manager_layout = QGridLayout()
             self.main_game_manager_layout.setSpacing(12)  # Controls horizontal distance between round columns
@@ -828,16 +856,15 @@ class MainSessionWindow(QMainWindow):
                 
             self.builder = SessionBuilder()
             
-            conn = get_connection()
-            self.session_id = create_session(conn, self.semester_id, self.date, [])
+            self.session_id = create_session(self.conn, self.semester_id, self.date, [])
 
             return game_manager_panel_scoll_area
         
         PANELS = [
-            ("console", "Console", False, console_panel),
+            ("console", "Console", True, console_panel),
             ("settings", "Settings", False, settings_panel),
             ("players", "Player Seed", True, player_seed_panel),
-            ("leaderboard", "Leaderboard", False, leaderboard_panel),
+            ("leaderboard", "Leaderboard", True, leaderboard_panel),
             ("statistics", "Statistics", False, statistics_panel),
             ("player_manager", "Player Manager", True, player_manager_panel),
             ("game_manager", "Game Manager", True, game_manager_panel),
@@ -923,8 +950,43 @@ class MainSessionWindow(QMainWindow):
         # Run once after the initial layout pass so real pixel widths exist.
         QTimer.singleShot(0, self._sync_tabs_to_panels)
         
-        """ Tester Functions """
-        listen()
+        
+        def on_database_change(action_code, db_name, table_name, rowid):
+            """ Logger Function for the console """
+            action = ACTIONS.get(action_code, "UNKNOWN")
+            
+            self.update_leaderboard()
+            
+            # Matches
+            if action == "INSERT" and table_name == "matches":
+                match_info = get_match(self.conn, rowid)
+                
+                fn, ln = get_name_from_pid(self.conn, match_info["player1_id"])
+                p1_name = f"{fn} {ln}"
+                fn, ln = get_name_from_pid(self.conn, match_info["player2_id"])
+                p2_name = f"{fn} {ln}"
+                fn, ln = get_name_from_pid(self.conn, match_info["winner_id"])
+                winner_name = f"{fn} {ln}"
+                
+                self.console.append(f"Match Added | {p1_name} v {p2_name} | {winner_name}")
+                
+            elif action != "UPDATE" and table_name != "elo_history":
+                self.console.append(f"{table_name} - {action}")
+            
+        listen(self.conn, on_database_change)
+        
+    def update_leaderboard(self):
+        players = list_active_players(self.conn)
+        
+        self.lb_players_list.clear()
+        self.lb_elo_list.clear()
+        
+        for pl in players:
+            self.lb_players_list.addItem(f"{pl["first_name"]} {pl["last_name"]}")
+            self.lb_elo_list.addItem(f"{pl["current_elo"]}")
+            
+            
+        
 
     def resizeEvent(self, event):
         super().resizeEvent(event)
@@ -980,8 +1042,3 @@ class MainSessionWindow(QMainWindow):
 
         else:
             self.console.append(f"Unknown command: {cmd}")
-            
- 
-    # -- scoped stylesheets --------------------------------------------------
-    # Set directly on a widget (not the QApplication), so these only cascade
-    # to that widget's own descendants and won't affect other panels.

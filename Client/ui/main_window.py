@@ -92,7 +92,7 @@ class MainWindow(QMainWindow):
 
     def on_new_session_test(self):
         
-        self.session_window = MainSessionWindow(dest=self.dest, scale=self.scale)
+        self.session_window = MainSessionWindow(scale=self.scale)
         
         self.session_window.show()
         

@@ -108,3 +108,13 @@ def _title_text_stylesheet() -> str:
             background: transparent;
             padding-left: 2px;
         """
+        
+def _normal_text_stylesheet() -> str:
+    return f"""
+            color: {ACCENT};
+            font-weight: 500;
+            letter-spacing: 1px;
+            background: transparent;
+            padding-left: 2px;
+        """
+        

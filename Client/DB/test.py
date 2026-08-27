@@ -1,4 +1,8 @@
-import sqlite3
-conn = sqlite3.connect(":memory:")
-for name in ("set_update_hook", "set_authorizer", "set_progress_handler", "set_trace_callback"):
-    print(name, hasattr(conn, name))
+from db import get_connection, delete_round
+
+
+conn = get_connection()
+
+for i in range(0, 100): 
+    delete_round(conn, i)
+    
