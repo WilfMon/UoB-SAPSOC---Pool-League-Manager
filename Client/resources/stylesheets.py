@@ -109,12 +109,12 @@ def _title_text_stylesheet() -> str:
             padding-left: 2px;
         """
         
-def _normal_text_stylesheet() -> str:
+def _normal_text_stylesheet(scale) -> str:
     return f"""
-            color: {ACCENT};
+            color: {TEXT};
             font-weight: 500;
+            font-size: {16 * scale}px;
             letter-spacing: 1px;
             background: transparent;
             padding-left: 2px;
         """
-        

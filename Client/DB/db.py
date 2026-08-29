@@ -84,7 +84,6 @@ def _rows_as_dicts(conn, sql, params=()):
     ]
 
 
-
 # ---------------------------------------------------------------
 # Players
 # ---------------------------------------------------------------
@@ -119,6 +118,27 @@ def list_all_players(conn):
     return _rows_as_dicts(conn, "SELECT * FROM players ORDER BY current_elo DESC")
 
 
+def list_active_players(conn):
+    """Return all active players sorted by current Elo descending."""
+    return _rows_as_dicts(
+        conn,
+        "SELECT * FROM players WHERE is_active = 1 ORDER BY current_elo DESC"
+    )
+
+
+def list_players_in_session(conn, session_id):
+    """Return all players in the session"""
+    rows = conn.execute(
+        "SELECT player_id FROM session_attendance WHERE session_id = ?", (session_id,)
+    ).fetchall()
+    
+    players = []
+    for pid in rows:
+        players.append(get_player(conn, pid[0]))
+        
+    return players
+    
+
 def get_pid_from_name(conn, first_name, last_name):
     """Return the player ID of the named player."""
     row = conn.execute(
@@ -137,14 +157,6 @@ def get_name_from_pid(conn, player_id):
     return row if row else None
 
 
-def list_active_players(conn):
-    """Return all active players sorted by current Elo descending."""
-    return _rows_as_dicts(
-        conn,
-        "SELECT * FROM players WHERE is_active = 1 ORDER BY current_elo DESC"
-    )
-
-
 def is_player_active(conn, player_id):
     """Return True if the player is active."""
     row = conn.execute(
@@ -154,13 +166,23 @@ def is_player_active(conn, player_id):
     return row[0] if row else None
 
 
-def update_player_active(conn, player_id, active=1):
-    """Update a player's active status."""
+def update_player_active(conn, active_sessions_count=10):
+    """Update all players' active status"""
     with transaction(conn):
-        conn.execute(
-            "UPDATE players SET is_active = ? WHERE player_id = ?",
-            (active, player_id)
-        )
+        conn.execute("""
+            UPDATE players
+            SET is_active = EXISTS (
+                SELECT 1
+                FROM session_attendance sa
+                WHERE sa.player_id = players.player_id
+                  AND sa.session_id IN (
+                      SELECT session_id
+                      FROM sessions
+                      ORDER BY session_id DESC
+                      LIMIT ?
+                  )
+            )
+        """, (active_sessions_count,))
 
 
 # ---------------------------------------------------------------
@@ -209,7 +231,7 @@ def add_player_to_semester(conn, semester_id, player_id):
         )
 
 
-def get_semester_id_for_round(conn, round_id):
+def get_semester_id_from_round(conn, round_id):
     """Look up which semester a round belongs to."""
     row = conn.execute(
         """SELECT s.semester_id
@@ -262,10 +284,43 @@ def create_session(conn, semester_id, session_date, attendee_ids):
 def add_session_attendance(conn, session_id, player_id):
     """Add a single player's attendance to an existing session."""
     with transaction(conn):
+        # check if player is aleady attending session
+        row = conn.execute(
+            "SELECT player_id FROM session_attendance WHERE session_id = ? AND player_id = ?",
+            (session_id, player_id)
+        ).fetchone()
+
+        if row:
+            return
+        
         conn.execute(
             "INSERT INTO session_attendance (session_id, player_id) VALUES (?, ?)",
             (session_id, player_id)
         )
+
+
+def get_session(conn, session_id):
+    """Get information about a session"""
+    row = _rows_as_dicts(conn, "SELECT * FROM sessions WHERE session_id = ?", (session_id,))
+    return row[0] if row else None
+
+
+def up_session_status(conn, session_id, status):
+    """Update a session status"""
+    with transaction(conn):
+        conn.execute("UPDATE sessions SET status = ? WHERE session_id = ?", (status, session_id))
+
+
+def delete_session(conn, session_id):
+    """Delete a session"""
+    with transaction(conn):
+        conn.execute("DELETE FROM sessions WHERE session_id = ?", (session_id,))
+
+
+def get_session_id_from_round(conn, round_id):
+    """Return the session_id of the round"""
+    row = conn.execute("SELECT session_id FROM rounds WHERE round_id = ?", (round_id,)).fetchone()
+    return row[0] if row else None
 
 
 def create_round(conn, session_id, round_number):
@@ -289,7 +344,7 @@ def get_round_id(conn, session_id, round_number) -> int:
 
 
 def delete_round(conn, round_id):
-    """Delete a round."""
+    """Delete a round and all the matches in the round"""
     with transaction(conn):
         conn.execute("DELETE FROM rounds WHERE round_id = ?", (round_id,))
         conn.execute("DELETE FROM matches WHERE round_id = ?", (round_id,))
@@ -297,10 +352,13 @@ def delete_round(conn, round_id):
         _recalculate_all_elo(conn)
 
 
-def get_rounds_in_session(conn, session_id):
+def get_rounds_in_session(conn, session_id) -> list[tuple]:
     """Get the IDs of the rounds in a session"""
-    rows = _rows_as_dicts(conn, "SELECT * FROM rounds WHERE session_id = ?", (session_id,))
-    return rows[0] if rows else None
+    rows = conn.execute(
+        "SELECT round_id FROM rounds WHERE session_id = ?",
+        (session_id,)
+    ).fetchall()
+    return rows if rows else None
 
 # ---------------------------------------------------------------
 # Matches
@@ -325,12 +383,15 @@ def record_match(
         p1 = get_player(conn, player1_id)
         p1_elo = override_p1_elo if override_p1_elo is not None else p1["current_elo"]
 
-        semester_id = get_semester_id_for_round(conn, round_id)
+        semester_id = get_semester_id_from_round(conn, round_id)
+        session_id = get_session_id_from_round(conn, round_id)
 
         add_player_to_semester(conn, semester_id, player1_id)
+        add_session_attendance(conn, session_id, player1_id)
 
         if player2_id is not None:
             add_player_to_semester(conn, semester_id, player2_id)
+            add_session_attendance(conn, session_id, player2_id)
 
         if winner_id is not None and semester_id is not None:
             _award_semester_point(conn, semester_id, winner_id)

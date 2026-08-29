@@ -20,8 +20,8 @@ from utils.utils import clean_name, clear_layout, get_items_from_qlist, remove_i
 from utils.utils_classes import SessionBuilder
 
 from DB.db import (
-                    get_connection, list_active_players, get_pid_from_name, get_player, create_round, get_match, get_name_from_pid, delete_round, get_round_id,
-                   create_semester, create_session, list_all_players, add_player, record_match, delete_match, get_match_id, listen, get_rounds_in_session,
+                    get_connection, list_active_players, get_pid_from_name, get_player, create_round, get_match, get_name_from_pid, delete_round, get_round_id, get_session,
+                   create_semester, create_session, list_all_players, add_player, record_match, delete_match, get_match_id, listen, get_rounds_in_session, delete_session, up_session_status, update_player_active,
                    ACTIONS
                    )
 
@@ -31,13 +31,18 @@ from resources.stylesheets import _scrollbar_stylesheet, _settings_controls_styl
 class MainSessionWindow(QMainWindow):
     info = Signal(dict)
     
-    def __init__(self, scale=1.0):
+    def __init__(self, config):
         super().__init__()
         
-        self.scale = scale
+        self.config = config
+        self.scale = config["scale"]
+
+        WIDTH = int(1960 * self.scale)
+        HEIGHT = int(1080 * self.scale)
+        INTERNAL_HEIGHT = HEIGHT - 68
 
         self.setWindowTitle(f"Session")
-        self.setMinimumSize(int(1960 * self.scale), int(1080 * self.scale))
+        self.setMinimumSize(WIDTH, HEIGHT)
         self.default_font = QFont("Segoe UI", round(self.scale * 18))
         self.small_font = QFont("Segoe UI", round(self.scale * 12))
         
@@ -72,7 +77,6 @@ class MainSessionWindow(QMainWindow):
         if 1 <= self.month <= 8:
             sem_name = f"{int(self.year) - 1}.{self.year}.2"
             
-            
             self.semester_id = create_semester(self.conn, sem_name, self.date)
 
         logger.info(f"Semester set to: {sem_name}")
@@ -83,7 +87,7 @@ class MainSessionWindow(QMainWindow):
             self.console.setFont(self.small_font)
             
             self.console.setMinimumWidth(int(100 * self.scale))
-            self.console.setStyleSheet(_normal_text_stylesheet())
+            self.console.setStyleSheet(_normal_text_stylesheet(self.scale))
             
             self.console.commandEntered.connect(self.handle_command)
 
@@ -309,15 +313,18 @@ class MainSessionWindow(QMainWindow):
             self.lb_wid_layout = QGridLayout()
             self.leaderboard_widget.setLayout(self.lb_wid_layout)
             
+            self.leaderboard_widget.setStyleSheet(f"""
+                    QFrame {{
+                        background: {HEAD};
+                        border-radius: 5px;
+                    }}
+                """)
+            
+            self.lb_wid_layout.setContentsMargins(8, 8, 8, 8)
+            self.lb_wid_layout.setSpacing(8)
+            
             self.leaderboard_widget.setMinimumWidth(int(100 * self.scale))
-            
-            self.lb_players_list = QListWidget()
-            self.lb_players_list.setFont(self.small_font)
-            self.lb_wid_layout.addWidget(self.lb_players_list, 0, 0)
-            
-            self.lb_elo_list = QListWidget()
-            self.lb_elo_list.setFont(self.small_font)
-            self.lb_wid_layout.addWidget(self.lb_elo_list, 0, 1)
+            self.leaderboard_widget.setMaximumHeight(INTERNAL_HEIGHT - 10)
             
             self.update_leaderboard()
 
@@ -441,6 +448,7 @@ class MainSessionWindow(QMainWindow):
             player_manager_panel_widget.setLayout(self.player_manager_layout)
             
             player_manager_panel_widget.setMinimumWidth(int(420 * self.scale))
+            player_manager_panel_widget.setMaximumHeight(INTERNAL_HEIGHT)
 
             label_text_box = QLabel("Enter Players:".upper())
             label_text_box.setFont(self.small_font)
@@ -576,11 +584,6 @@ class MainSessionWindow(QMainWindow):
                 
                 new_m, new_o = _calc_new_elo_for_labels(main_elo, other_elo)
                 
-                refresh_session_items()
-                
-                main_elo.setText(new_m)
-                other_elo.setText(new_o)
-                
                 round_id = main.round_id
                 
                 # find player ids
@@ -589,6 +592,11 @@ class MainSessionWindow(QMainWindow):
                 
                 # database updates
                 record_match(self.conn, round_id, p1_id, p2_id, p1_id)
+                
+                refresh_session_items()
+                
+                main_elo.setText(new_m)
+                other_elo.setText(new_o)
                 
                 main.clicked = True
                 other.clicked = True
@@ -957,6 +965,8 @@ class MainSessionWindow(QMainWindow):
             """ Logger Function for the console """
             action = ACTIONS.get(action_code, "UNKNOWN")
             
+            print(f"{action} # {table_name}")
+            
             self.update_leaderboard()
             
             # Matches
@@ -972,6 +982,9 @@ class MainSessionWindow(QMainWindow):
                 
                 self.console.append(f"Match Added | {p1_name} v {p2_name} | {winner_name}")
                 
+            if table_name == "matches":
+                update_player_active(self.conn, self.config["active_sessions_count"])
+                
             elif action != "UPDATE" and table_name != "elo_history":
                 self.console.append(f"{table_name} - {action}")
             
@@ -979,29 +992,75 @@ class MainSessionWindow(QMainWindow):
         
         
     def update_leaderboard(self):
+        
+        def _add_row(layout: QGridLayout, player: dict, row_num: int):
+            """Adds one row of the leaderboard directly into the shared grid layout"""
+
+            row_num += 1
+
+            rank = QLabel(f"{row_num}")
+            rank.setStyleSheet(_normal_text_stylesheet(self.scale))
+            layout.addWidget(rank, row_num, 0)
+
+            name = QLabel(f"{player['first_name']} {player['last_name']}")
+            name.setStyleSheet(_normal_text_stylesheet(self.scale))
+            layout.addWidget(name, row_num, 1)
+
+            elo = QLabel(f"{player['current_elo']:.0f}")
+            elo.setStyleSheet(_normal_text_stylesheet(self.scale))
+            layout.addWidget(elo, row_num, 2)
+
+        self.lb_wid_layout.setColumnStretch(0, 0)   # rank: fits content
+        self.lb_wid_layout.setColumnStretch(1, 1)   # name: takes extra space
+        self.lb_wid_layout.setColumnStretch(2, 0)   # elo: fits content
+        self.lb_wid_layout.setHorizontalSpacing(12)
+
         players = list_active_players(self.conn)
         
-        self.lb_players_list.clear()
-        self.lb_elo_list.clear()
-        
-        for pl in players:
-            self.lb_players_list.addItem(f"{pl["first_name"]} {pl["last_name"]}")
-            self.lb_elo_list.addItem(f"{pl["current_elo"]}")
+        for i, player in enumerate(players):
+            _add_row(self.lb_wid_layout, player, i)
             
             
     def closeEvent(self, event: QCloseEvent):
-        """Runs on close of the window"""
-        if not self.save:
+        """
+        Runs on close of the window\n
+        If no is selected when promted to save all matches, rounds and sessions that were created are deleted from the database
+        """
+        
+        reply = QMessageBox.question(
+            self, 
+            "Confrim Close", 
+            "Do you want to save the current session on close?",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No | QMessageBox.StandardButton.Cancel
+        )
+        
+        if reply == QMessageBox.StandardButton.Yes:
+            self.save = True
+        elif reply == QMessageBox.StandardButton.No:
+            self.save = False
+        elif reply == QMessageBox.StandardButton.Cancel:
+            event.ignore()
+            return
+        
+        session = get_session(self.conn, self.session_id)
+        
+        # if we are not saving the current session
+        if not self.save and session["status"] != "completed":
             round_ids = get_rounds_in_session(self.conn, self.session_id)
             
             if round_ids:
                 for rid in round_ids:
-                    delete_round(self.conn, rid)
+                    delete_round(self.conn, rid[0])
+                    
+            delete_session(self.conn, self.session_id)
+            
+        # if we are saving
+        else:
+            up_session_status(self.conn, self.session_id, "completed")
                 
         event.accept()
         
-            
-            
+
     def resizeEvent(self, event):
         super().resizeEvent(event)
         # Window resizes reflow the splitter's proportional sizes without

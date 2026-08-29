@@ -248,7 +248,7 @@ class ConsoleWidget(QWidget):
             return
 
         # echo command
-        self.append(f"> {text}")
+        self.append(f">> {text}")
 
         self.commandEntered.emit(text)
 

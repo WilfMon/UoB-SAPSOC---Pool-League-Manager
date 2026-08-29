@@ -19,8 +19,8 @@ CREATE TABLE players (
     last_name     TEXT NOT NULL,
     is_member     INTEGER NOT NULL DEFAULT 0 CHECK (is_member IN (0, 1)),
     joined_date   TEXT NOT NULL DEFAULT (date('now')),
-    base_elo      INTEGER NOT NULL DEFAULT 1000,     -- permanent starting point, set once
-    current_elo   INTEGER NOT NULL DEFAULT 1000,     -- live rating, derived/recalculable
+    base_elo      FLOAT NOT NULL DEFAULT 1000,     -- permanent starting point, set once
+    current_elo   FLOAT NOT NULL DEFAULT 1000,     -- live rating, derived/recalculable
     is_active     INTEGER NOT NULL DEFAULT 1 CHECK (is_active IN (0, 1)),
     notes         TEXT
 );
@@ -33,7 +33,7 @@ CREATE TABLE semesters (
     name              TEXT NOT NULL,                     -- e.g. "Autumn 2026"
     start_date        TEXT NOT NULL,
     end_date          TEXT,
-    status            TEXT NOT NULL DEFAULT 'upcoming'
+    status            TEXT NOT NULL DEFAULT 'active'
                           CHECK (status IN ('upcoming', 'active', 'completed')),
     winner_player_id  INTEGER REFERENCES players(player_id)
 );
@@ -59,7 +59,7 @@ CREATE TABLE sessions (
     session_id    INTEGER PRIMARY KEY AUTOINCREMENT,
     semester_id     INTEGER NOT NULL REFERENCES semesters(semester_id) ON DELETE CASCADE,
     session_date  TEXT NOT NULL,
-    status        TEXT NOT NULL DEFAULT 'scheduled'
+    status        TEXT NOT NULL DEFAULT 'in_progress'
                       CHECK (status IN ('scheduled', 'in_progress', 'completed', 'cancelled')),
     UNIQUE (semester_id, session_date)
 );

@@ -1,6 +1,6 @@
 import re
 
-from db import get_connection, add_player, create_semester, create_session, create_round, record_match, get_pid_from_name
+from db import get_connection, add_player, create_semester, create_session, create_round, record_match, get_pid_from_name, up_session_status
 
 def split_to_sessions(semester_data):
     result = []
@@ -180,7 +180,9 @@ for sem in final_parsed_data:
             elif re.match(ses_format, round_[0]):
                 #print(f"Session: {round_[0]}")
                 
-                ses_id = create_session(conn, sem_id, round_[0], [1])
+                ses_id = create_session(conn, sem_id, round_[0], [])
+                up_session_status(conn, ses_id, "completed")
+                
                 
                 round_count = 1
                 

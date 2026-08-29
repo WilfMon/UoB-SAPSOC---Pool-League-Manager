@@ -3,15 +3,6 @@ import networkx as nx
 import numpy as np
 
 
-class IdGen:
-    def __init__(self, start=0):
-        self._next_id = start
-
-    def generate(self):
-        id_ = self._next_id
-        self._next_id += 1
-        return id_
-
 class Settings():
     def __init__(self):
         self.DEFAULT_SETTINGS = {

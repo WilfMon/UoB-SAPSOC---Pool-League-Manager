@@ -14,46 +14,41 @@ from PySide6.QtWidgets import QMainWindow, QStackedWidget, QSpacerItem, QComboBo
 from PySide6.QtGui import QAction, QCursor, QFont
 from PySide6.QtCore import Qt, QSize, QPoint, Signal, QTimer
 
-
 from ui.text_box_window import TextBoxWindow
 from ui.session_window import MainSessionWindow
-#from ui.update_database_windows import DataWindow, MembershipWindow
+from ui.custom_widgets import ConsoleWidget
 
 from utils.utils import remove_menu, get_items_from_qlist, clear_layout
-from utils.utils_classes import Settings, SessionBuilder
+from utils.utils_classes import Settings
+
+from resources.stylesheets import _scrollbar_stylesheet, _settings_controls_stylesheet, _title_text_stylesheet, _normal_text_stylesheet
 
 class MainWindow(QMainWindow):
     def __init__(self, config):
         super().__init__()
         
         self.config = config
-        print(f"settings: {self.config}")
 
-        self.dest = self.config["dest"]
-        
         self.scale = config["scale"]
+
         self.default_font = QFont("Segoe UI", round(self.scale * 18))
+        self.small_font = QFont("Segoe UI", round(self.scale * 12))
 
         self.setWindowTitle("UoB SaPSoc Pool League Manager")
         self.setMinimumSize(int(1280 * self.scale), int(720 * self.scale))
         
-        self.central = QStackedWidget()
+        self.central = QWidget()
         self.setCentralWidget(self.central)
+        self.main_layout = QGridLayout(self.central)
         
-        self.main_wid = QWidget()
-        self.session_wid = QWidget()
-        self.tournament_wid = QWidget()
-        self.statistics_wid = QWidget()
+        self.console = ConsoleWidget()
+        self.console.setFont(self.small_font)
         
-        self.central.addWidget(self.main_wid)
-        self.central.addWidget(self.session_wid)
-        self.central.addWidget(self.tournament_wid)
-        self.central.addWidget(self.statistics_wid)
+        self.console.setMinimumWidth(int(100 * self.scale))
+        self.console.setStyleSheet(_normal_text_stylesheet(self.scale))
         
-        self.main_layout = QGridLayout(self.main_wid)
-        self.main_session_layout = QGridLayout(self.session_wid)
-        self.main_tournament_layout = QGridLayout(self.tournament_wid, alignment=Qt.AlignLeft)
-        self.main_statistics_layout = QGridLayout(self.statistics_wid)
+        self.console.commandEntered.connect(self.handle_command)
+        self.main_layout.addWidget(self.console, 0, 0)
 
         # Create the menu bar
         self.create_menu_bar()
@@ -65,23 +60,15 @@ class MainWindow(QMainWindow):
         self.file_menu = self.menu_bar.addMenu("File")
 
         # File menu actions
-        self.edit_memberships = QAction("Edit Members", self)
-        self.edit_memberships.triggered.connect(self.on_edit_memberships)
-        self.file_menu.addAction(self.edit_memberships)
-        
-        self.edit_data = QAction("Edit Data", self)
-        self.edit_data.triggered.connect(self.on_edit_data)
-        self.file_menu.addAction(self.edit_data)
+        test_action = QAction("New Session", self)
+        test_action.triggered.connect(self.on_new_session)
+        self.file_menu.addAction(test_action)
         
         self.file_menu.addSeparator()
 
         exit_action = QAction("Exit", self)
         exit_action.triggered.connect(self.close)  # Built-in close method
         self.file_menu.addAction(exit_action)
-        
-        test_action = QAction("Test", self)
-        test_action.triggered.connect(self.on_new_session_test)
-        self.file_menu.addAction(test_action)
 
         # View menu
         view_menu = self.menu_bar.addMenu("View")
@@ -90,9 +77,41 @@ class MainWindow(QMainWindow):
         self.change_scale.triggered.connect(self.on_change_scale)
         view_menu.addAction(self.change_scale)
 
-    def on_new_session_test(self):
+    def handle_command(self, command: str):
+        """ Handle commands entered in the console """
         
-        self.session_window = MainSessionWindow(scale=self.scale)
+        parts = command.split()
+
+        if not parts:
+            return
+
+        cmd = parts[0].lower()
+
+        if cmd == "help":
+            self.console.append("Available commands:")
+            self.console.append("  help - Show this help message")
+            self.console.append("  clear/cls - Clear the console")
+            self.console.append("  echo <text> - Echo the text back to the console")
+
+        elif cmd == "cls" or cmd == "clear":
+            self.console.clear()
+
+        elif cmd == "echo":
+            text = " ".join(parts[1:])
+            self.console.append(text)
+
+        elif cmd == "run":
+            text = " ".join(parts[1:])
+            
+            if text == "session":
+                self.on_new_session()
+
+        else:
+            self.console.append(f"Unknown command: {cmd}")
+
+    def on_new_session(self):
+        
+        self.session_window = MainSessionWindow(self.config)
         
         self.session_window.show()
         

@@ -7,7 +7,7 @@ Concept:
 Sessions:
 - have a "ghost round" that can be configured to automatically be confirmed depending on
   a configured number of tables
-- change layout to have current round on the left
+
 
 Tournament:
 - clean up config page its ugly and hard to understand (have groups part be greyed-out
