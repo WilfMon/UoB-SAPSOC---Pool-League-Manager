@@ -43,7 +43,7 @@ def get_items_from_qlist(q_list):
         item = q_list.item(i)
         players.append(item.text())
         
-    return players
+    return players if players != [] else None
 
 def remove_item_from_qlist(list_widget, text):
     matches = list_widget.findItems(text, Qt.MatchFlag.MatchExactly)
@@ -86,3 +86,27 @@ def calc_elo_change(a, b) -> tuple[float, float]: # where A is the winner
     Rb = k_factor_b * (0 - Eb) # b lost
 
     return (Ra, Rb)
+
+def clear_grid_after_row(layout, start_row: int):
+    """
+    Removes and deletes all widgets and items in layout at or after `start_row`.
+    """
+    # Iterate backwards to avoid index shifting issues
+    for i in reversed(range(layout.count())):
+        item = layout.itemAt(i)
+        if item is None:
+            continue
+
+        # Get the row position of the item
+        row, column, row_span, col_span = layout.getItemPosition(i)
+
+        # Check if the item starts at or after the target row
+        if row >= start_row:
+            # Remove item from layout
+            item_to_remove = layout.takeAt(i)
+
+            # Safely delete the widget if it exists
+            widget = item_to_remove.widget()
+            if widget is not None:
+                widget.setParent(None)
+                widget.deleteLater()

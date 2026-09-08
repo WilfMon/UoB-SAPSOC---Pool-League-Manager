@@ -1,5 +1,4 @@
-import numpy as np
-import datetime
+import re
 
 import logging
 logging.basicConfig(
@@ -18,10 +17,18 @@ from ui.text_box_window import TextBoxWindow
 from ui.session_window import MainSessionWindow
 from ui.custom_widgets import ConsoleWidget
 
-from utils.utils import remove_menu, get_items_from_qlist, clear_layout
+from utils.utils import clean_name
 from utils.utils_classes import Settings
 
-from resources.stylesheets import _scrollbar_stylesheet, _settings_controls_stylesheet, _title_text_stylesheet, _normal_text_stylesheet
+from DB.db import (
+                    get_connection, list_active_players, get_pid_from_name, get_player, create_round, get_match, get_name_from_pid, delete_round, get_round_id, get_session, list_all_semesters,
+                   create_semester, create_session, list_all_players, add_player, record_match, delete_match, get_match_id, listen, get_rounds_in_session, delete_session, up_session_status, update_player_active,
+                   get_semester_standings, get_alltime_standings, update_player_membership, list_all_matches, get_session_id_from_round, get_semester_id_from_round, list_all_sessions, complete_semester,
+                   ACTIONS
+                   )
+
+from resources.colours import DARK, HEAD, PANEL_COL, LINE, TEXT, ACCENT, GREEN, RED
+from resources.stylesheets import _scrollbar_stylesheet, _normal_text_stylesheet
 
 class MainWindow(QMainWindow):
     def __init__(self, config):
@@ -30,6 +37,8 @@ class MainWindow(QMainWindow):
         self.config = config
 
         self.scale = config["scale"]
+        
+        self.conn = get_connection()
 
         self.default_font = QFont("Segoe UI", round(self.scale * 18))
         self.small_font = QFont("Segoe UI", round(self.scale * 12))
@@ -45,13 +54,32 @@ class MainWindow(QMainWindow):
         self.console.setFont(self.small_font)
         
         self.console.setMinimumWidth(int(100 * self.scale))
-        self.console.setStyleSheet(_normal_text_stylesheet(self.scale))
-        
         self.console.commandEntered.connect(self.handle_command)
-        self.main_layout.addWidget(self.console, 0, 0)
+        
+        scroll = QScrollArea()
+        scroll.setWidget(self.console)
+        scroll.setWidgetResizable(True)
+        scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        scroll.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        scroll.setStyleSheet(_scrollbar_stylesheet(bg=PANEL_COL))
+        self.main_layout.addWidget(scroll, 0, 0)
 
         # Create the menu bar
         self.create_menu_bar()
+        
+        def on_database_change(action_code, db_name, table_name, rowid):
+            """ Logger Function for the console """
+            action = ACTIONS.get(action_code, "UNKNOWN")
+            
+            if table_name == "players" and action == "UPDATE":
+                player_info = get_player(self.conn, rowid)
+                
+                self.console.append(f"{player_info["first_name"]} {player_info["last_name"]} -- IS MEMBER: {player_info["is_member"]} -- IS ACTIVE {player_info["is_active"]}")
+            
+            else:
+                self.console.append(f"{table_name} # {action}")
+            
+        listen(self.conn, on_database_change)
 
     def create_menu_bar(self):
         self.menu_bar = self.menuBar()  # Built-in QMainWindow menu bar
@@ -80,6 +108,60 @@ class MainWindow(QMainWindow):
     def handle_command(self, command: str):
         """ Handle commands entered in the console """
         
+        def write_matches(path):
+            # wipe file
+            with open(path, "w") as file:
+                pass
+            
+            matches = list_all_matches(self.conn)
+            sessions = list_all_sessions(self.conn)
+            semesters, _ = list_all_semesters(self.conn)
+            
+            round_tracker = None
+            session_tracker = None
+            semester_tracker = None
+
+            for match in matches:
+                session_id = get_session_id_from_round(self.conn, match["round_id"])
+                semester_id = get_semester_id_from_round(self.conn, match["round_id"])
+                
+                if semester_id != semester_tracker:
+                    semester_tracker = semester_id
+                    
+                    for target_sem in semesters:
+                        if target_sem["semester_id"] == semester_id:
+                            break
+                    
+                    with open(path, "a") as file:
+                        file.write("######################################################################\n")
+                        file.write(f"{target_sem["name"]}\n")
+                                                
+                if session_id != session_tracker:
+                    session_tracker = session_id
+                    
+                    for target_session in sessions:
+                        if target_session["session_id"] == session_id:
+                            break
+                        
+                    with open(path, "a") as file:
+                        file.write(".\n")
+                        file.write(f"{target_session["session_date"]}\n")
+                
+                if match["round_id"] != round_tracker:
+                    round_tracker = match["round_id"]
+                    with open(path, "a") as file:
+                        file.write(" \n")
+                        
+                if match["player1_id"] == match["winner_id"]:
+                    winner = get_player(self.conn, match["player1_id"])
+                    loser = get_player(self.conn, match["player2_id"])
+                else:
+                    winner = get_player(self.conn, match["player2_id"])
+                    loser = get_player(self.conn, match["player1_id"])
+                
+                with open(path, "a") as file:
+                    file.write(f"{winner["first_name"]}, {winner["last_name"]}, {loser["first_name"]}, {loser["last_name"]}, 1, 0\n")
+        
         parts = command.split()
 
         if not parts:
@@ -92,6 +174,10 @@ class MainWindow(QMainWindow):
             self.console.append("  help - Show this help message")
             self.console.append("  clear/cls - Clear the console")
             self.console.append("  echo <text> - Echo the text back to the console")
+            self.console.append("  run <window> - run the window specified 'session'")
+            self.console.append("  save matches <path> - write all matches to a .txt file for safekeeping")
+            self.console.append("  members <action> <first_name last_name> ... - update the membership status of a player")
+            self.console.append("  semester end - completes the current semester")
 
         elif cmd == "cls" or cmd == "clear":
             self.console.clear()
@@ -105,27 +191,76 @@ class MainWindow(QMainWindow):
             
             if text == "session":
                 self.on_new_session()
-
+                
+        elif cmd == "save":
+            
+            if parts[1] == "matches" and parts[2]:
+                path = f"{parts[2]}.txt"
+                write_matches(path)
+                
+            else:
+                self.console.warn("Command not recognised - Expected format: save matches <path>")
+                
+        elif cmd == "members":
+            
+            # add members
+            if parts[1] == "add":
+                action = 1
+            if parts[1] == "remove":
+                action = 0
+            if parts[1] == "removeall":
+                for player in list_all_players(self.conn):
+                    update_player_membership(self.conn, player["player_id"], 0)
+                           
+                return
+            
+            else:
+                self.console.warn(f"Unknown Command: {parts[1]}")
+                
+            match = re.findall(r"<(.*?)>", command)
+            
+            if not match:
+                self.console.warn("No Name Provided - Expected format: member <action> <fist_name last_name> ...")
+                return
+            
+            for text in match:
+                fn, ln = text.split(" ")
+                fn = clean_name(fn)
+                ln = clean_name(ln)
+                
+                pid = get_pid_from_name(self.conn, fn, ln)
+                if pid:
+                    update_player_membership(self.conn, pid, action)
+                
+                else:
+                    self.console.warn("Player Doesn't exist")
+                    return
+                    
+        elif cmd == "semester":
+            
+            def format_date(date):
+                day, month, year = date.split(".")
+                
+                return f"{year}-{month}-{day} 00:00:00"
+            
+            if parts[1] == "end":
+                sems, _ = list_all_semesters(self.conn)
+                sessions = list_all_sessions(self.conn)
+                complete_semester(self.conn, sems[-1]["semester_id"], format_date(sessions[-1]["session_date"]))
+                    
+        elif cmd == "ping":
+            
+            if parts[1] == "active":
+                update_player_active(self.conn)
+        
         else:
-            self.console.append(f"Unknown command: {cmd}")
+            self.console.append(f"Unknown Command: {cmd}")
 
     def on_new_session(self):
         
         self.session_window = MainSessionWindow(self.config)
         
         self.session_window.show()
-        
-    def on_edit_memberships(self):
-        return
-        self.update_membership_window = MembershipWindow(scale=self.scale, dest=self.dest)
-        
-        self.update_membership_window.show()
-
-    def on_edit_data(self):
-        return
-        self.update_database_window = DataWindow(sest=self.dest, scale=self.scale)
-        
-        self.update_database_window.show()
 
     def on_change_scale(self):
 

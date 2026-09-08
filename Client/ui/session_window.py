@@ -14,14 +14,15 @@ from PySide6.QtCore import Qt, QSize, QPoint, Signal, QTimer
 
 from .confimation_window import ConfirmationWindow
 
-from ui.custom_widgets import CustomButton, CustomHeaderBar, ConsoleWidget, ToggleSwitch
+from ui.custom_widgets import CustomButton, CustomHeaderBar, ConsoleWidget
 
-from utils.utils import clean_name, clear_layout, get_items_from_qlist, remove_item_from_qlist, calc_elo_change
+from utils.utils import clean_name, clear_grid_after_row, get_items_from_qlist, remove_item_from_qlist, calc_elo_change
 from utils.utils_classes import SessionBuilder
 
 from DB.db import (
-                    get_connection, list_active_players, get_pid_from_name, get_player, create_round, get_match, get_name_from_pid, delete_round, get_round_id, get_session,
+                    get_connection, list_active_players, get_pid_from_name, get_player, create_round, get_match, get_name_from_pid, delete_round, get_round_id, get_session, list_all_semesters,
                    create_semester, create_session, list_all_players, add_player, record_match, delete_match, get_match_id, listen, get_rounds_in_session, delete_session, up_session_status, update_player_active,
+                   get_semester_standings, get_alltime_standings,
                    ACTIONS
                    )
 
@@ -34,12 +35,13 @@ class MainSessionWindow(QMainWindow):
     def __init__(self, config):
         super().__init__()
         
+        self.exit_code = None
+        
         self.config = config
         self.scale = config["scale"]
 
         WIDTH = int(1960 * self.scale)
         HEIGHT = int(1080 * self.scale)
-        INTERNAL_HEIGHT = HEIGHT - 68
 
         self.setWindowTitle(f"Session")
         self.setMinimumSize(WIDTH, HEIGHT)
@@ -93,194 +95,7 @@ class MainSessionWindow(QMainWindow):
 
             return self.console
         
-        def settings_panel() -> QWidget:
-            content = QWidget()
-            content.setStyleSheet(f"background:{PANEL_COL};")
-            
-            self.settings_panel_layout = QVBoxLayout(content)
-            self.settings_panel_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
-            self.settings_panel_layout.setContentsMargins(20, 20, 20, 20)
-            self.settings_panel_layout.setSpacing(16)
-            
-            def _settings_section_header(text: str) -> QLabel:
-                lbl = QLabel(text.upper())
-                lbl.setFont(self.small_font)
-                lbl.setStyleSheet(_title_text_stylesheet())
-                return lbl
-
-            def _settings_card(rows: list[QWidget]) -> QFrame:
-                card = QFrame()
-                card.setStyleSheet(f"""
-                    QFrame {{
-                        background: {HEAD};
-                        border-radius: 5px;
-                    }}
-                """)
-                card_layout = QVBoxLayout(card)
-                card_layout.setContentsMargins(16, 4, 16, 4)
-                card_layout.setSpacing(0)
-
-                for i, row in enumerate(rows):
-                    card_layout.addWidget(row)
-                    if i < len(rows) - 1:
-                        divider = QFrame()
-                        divider.setFixedHeight(1)
-                        divider.setStyleSheet(f"background:{LINE}; border:none;")
-                        card_layout.addWidget(divider)
-
-                return card
-
-            def _settings_row(label_text: str, control: QWidget, hint: str = None) -> QWidget:
-                row = QWidget()
-                row.setStyleSheet("background: transparent;")
-                row_layout = QHBoxLayout(row)
-                row_layout.setContentsMargins(0, 10, 0, 10)
-                row_layout.setSpacing(12)
-
-                text_col = QVBoxLayout()
-                text_col.setSpacing(2)
-
-                title = QLabel(label_text)
-                title.setFont(self.small_font)
-                title.setStyleSheet(f"color:{TEXT}; background:transparent;")
-                text_col.addWidget(title)
-
-                if hint:
-                    hint_lbl = QLabel(hint)
-                    hint_lbl.setStyleSheet("color:#888; background:transparent; font-size:11px;")
-                    text_col.addWidget(hint_lbl)
-
-                row_layout.addLayout(text_col)
-                row_layout.addStretch()
-                row_layout.addWidget(control, alignment=Qt.AlignVCenter)
-
-                return row
-            
-            def _make_toggle(checked: bool = False) -> ToggleSwitch:
-                toggle = ToggleSwitch()
-                toggle.setChecked(checked)
-                return toggle
-
-            def _make_combobox(items: list[str]) -> QComboBox:
-                box = QComboBox()
-                box.addItems(items)
-                box.setFont(self.small_font)
-                box.setStyleSheet(f"background:{DARK};")
-                return box
-
-            def _make_lineedit(value: str) -> QLineEdit:
-                edit = QLineEdit()
-                edit.setText(value)
-                edit.setFont(self.small_font)
-                edit.setFixedWidth(int(160 * self.scale))
-                return edit
-
-            def _make_spinbox(minimum: int, maximum: int, value: int) -> QSpinBox:
-                spin = QSpinBox()
-                spin.setRange(minimum, maximum)
-                spin.setValue(value)
-                spin.setFont(self.small_font)
-                return spin
-
-            def _make_slider(minimum: int, maximum: int, value: int, suffix: str = ""):
-                container = QWidget()
-                container.setStyleSheet("background: transparent;")
-                h = QHBoxLayout(container)
-                h.setContentsMargins(0, 0, 0, 0)
-                h.setSpacing(10)
-
-                slider = QSlider(Qt.Horizontal)
-                slider.setRange(minimum, maximum)
-                slider.setValue(value)
-                slider.setFixedWidth(int(140 * self.scale))
-
-                value_lbl = QLabel(f"{value}{suffix}")
-                value_lbl.setFont(self.small_font)
-                value_lbl.setStyleSheet(f"color:{TEXT}; background:transparent;")
-                value_lbl.setFixedWidth(int(40 * self.scale))
-                value_lbl.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
-
-                slider.valueChanged.connect(lambda v: value_lbl.setText(f"{v}{suffix}"))
-
-                h.addWidget(slider)
-                h.addWidget(value_lbl)
-
-                return container, slider
-
-            def _make_radio_group(options: list[str], checked_index: int = 0):
-                container = QWidget()
-                container.setStyleSheet("background: transparent;")
-                h = QHBoxLayout(container)
-                h.setContentsMargins(0, 0, 0, 0)
-                h.setSpacing(14)
-
-                group = QButtonGroup(container)
-                for i, option in enumerate(options):
-                    rb = QRadioButton(option)
-                    rb.setFont(self.small_font)
-                    if i == checked_index:
-                        rb.setChecked(True)
-                    group.addButton(rb, i)
-                    h.addWidget(rb)
-
-                return container, group
-            
-            def _populate_settings_panel(layout: QVBoxLayout):
-                """Fill the settings panel with example controls, grouped into cards."""
-        
-                layout.addWidget(_settings_section_header("General"))
-                layout.addWidget(_settings_card([
-                    _settings_row("Player Display Name", _make_lineedit("Player1")),
-                    _settings_row("Language", _make_combobox(
-                        ["English", "French", "German", "Spanish", "Japanese"])),
-                    _settings_row(
-                        "Sound Effects", _make_toggle(True),
-                        hint="Play audio cues during the session"),
-                    _settings_row(
-                        "Desktop Notifications", _make_toggle(False),
-                        hint="Notify me when it's my turn"),
-                ]))
-        
-                layout.addWidget(_settings_section_header("Gameplay"))
-                difficulty_row, self.difficulty_group = _make_radio_group(
-                    ["Easy", "Normal", "Hard"], checked_index=1)
-                turn_timer_row, self.turn_timer_slider = _make_slider(10, 120, 60, suffix="s")
-                layout.addWidget(_settings_card([
-                    _settings_row("Difficulty", difficulty_row),
-                    _settings_row("Max Players", _make_spinbox(2, 12, 6)),
-                    _settings_row("Turn Timer", turn_timer_row),
-                    _settings_row("Game Mode", _make_combobox(
-                        ["Classic", "Tournament", "Sandbox"])),
-                ]))
-        
-                layout.addWidget(_settings_section_header("Advanced"))
-                layout.addWidget(_settings_card([
-                    _settings_row("Auto-Save Session", _make_toggle(True)),
-                    _settings_row("Verbose Console Logging", _make_toggle(False)),
-                    _settings_row(
-                        "Network Port", _make_lineedit("7777"),
-                        hint="Requires a restart to take effect"),
-                ]))
-        
-                layout.addStretch()
- 
-            _populate_settings_panel(self.settings_panel_layout)
- 
-            settings_scroll = QScrollArea()
-            settings_scroll.setWidget(content)
-            settings_scroll.setWidgetResizable(True)
-            settings_scroll.setFrameShape(QFrame.NoFrame)
-            settings_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-            settings_scroll.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-            settings_scroll.setStyleSheet(
-                f"QScrollArea {{ border:none; background:{PANEL_COL}; }}"
-                + _settings_controls_stylesheet()
-                + _scrollbar_stylesheet(PANEL_COL)
-            )
- 
-            return settings_scroll
-        
-        def player_seed_panel() -> QWidget:
+        def players_panel() -> QWidget:
             self.players_list_seed = QListWidget()
             self.players_list_seed.setFont(self.small_font)
             
@@ -308,27 +123,56 @@ class MainSessionWindow(QMainWindow):
 
             return self.players_list_seed
         
-        def leaderboard_panel() -> QWidget:
+        def leaderboard_panel() -> QScrollArea:
             self.leaderboard_widget = QWidget()
             self.lb_wid_layout = QGridLayout()
             self.leaderboard_widget.setLayout(self.lb_wid_layout)
             
             self.leaderboard_widget.setStyleSheet(f"""
-                    QFrame {{
-                        background: {HEAD};
-                        border-radius: 5px;
-                    }}
-                """)
+                QFrame {{
+                    background: {HEAD};
+                    border-radius: 5px;
+                }}
+            """)
             
             self.lb_wid_layout.setContentsMargins(8, 8, 8, 8)
             self.lb_wid_layout.setSpacing(8)
             
-            self.leaderboard_widget.setMinimumWidth(int(100 * self.scale))
-            self.leaderboard_widget.setMaximumHeight(INTERNAL_HEIGHT - 10)
+            scroll_area = QScrollArea()
+            scroll_area.setWidget(self.leaderboard_widget)
+            scroll_area.setWidgetResizable(True)  # Allows the inner widget to resize smoothly
             
+            scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+            scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+            
+            scroll_area.setMinimumWidth(int(420 * self.scale))
+            
+            # combobox setup
+            label = QLabel("Leaderboard".upper())
+            label.setFont(self.small_font)
+            label.setStyleSheet(_title_text_stylesheet())
+            self.lb_wid_layout.addWidget(label, 0, 0, 1, 2)
+            
+            self.lb_box = QComboBox()
+            
+            self.lb_box.currentIndexChanged.connect(self.update_leaderboard)
+            
+            self.lb_box.addItem("Active", (get_alltime_standings, (self.conn, True)))
+            self.lb_box.addItem("Alltime", (get_alltime_standings, (self.conn, False)))
+            
+            semesters, sem_ids = list_all_semesters(self.conn)
+            for _id in sem_ids:
+                for sem in semesters:
+                    if sem["semester_id"] == _id:
+                        break
+                
+                self.lb_box.addItem(f"{sem["name"]}", (get_semester_standings, (self.conn, _id)))
+                
+            self.lb_wid_layout.addWidget(self.lb_box, 0, 2, 1, 2)
+
             self.update_leaderboard()
 
-            return self.leaderboard_widget
+            return scroll_area
         
         def statistics_panel() -> QWidget:
             self.stats_panel_widget = QWidget()
@@ -448,7 +292,6 @@ class MainSessionWindow(QMainWindow):
             player_manager_panel_widget.setLayout(self.player_manager_layout)
             
             player_manager_panel_widget.setMinimumWidth(int(420 * self.scale))
-            player_manager_panel_widget.setMaximumHeight(INTERNAL_HEIGHT)
 
             label_text_box = QLabel("Enter Players:".upper())
             label_text_box.setFont(self.small_font)
@@ -594,6 +437,7 @@ class MainSessionWindow(QMainWindow):
                 record_match(self.conn, round_id, p1_id, p2_id, p1_id)
                 
                 refresh_session_items()
+                self.update_leaderboard()
                 
                 main_elo.setText(new_m)
                 other_elo.setText(new_o)
@@ -636,13 +480,12 @@ class MainSessionWindow(QMainWindow):
                 if match_id == None:
                     match_id = get_match_id(self.conn, p2_id, p1_id, round_id)
                 
-                print(p1_id, p2_id, round_id)
-                print(match_id)
                 delete_match(self.conn, match_id)
                 
                 main.clicked = False
                 other.clicked = False
                 refresh_session_items()
+                self.update_leaderboard()
             
             def refresh_session_items():
                 """Updates the session elo labels with potentially new database updates"""
@@ -844,8 +687,10 @@ class MainSessionWindow(QMainWindow):
                 self.round_number -= 1
                 
             self.action_menu = self.menuBar().addMenu("Action")
-            self.action_menu.addAction(QAction("Add Round", self, triggered=lambda: add_new_round(self.main_game_manager_layout)))
-            self.action_menu.addAction(QAction("Remove Round", self, triggered=lambda: remove_last_round(self.main_game_manager_layout, self.round_number - 1)))
+            self.add_round_action = QAction("Add Round", self, triggered=lambda: add_new_round(self.main_game_manager_layout))
+            self.remove_round_action = QAction("Remove Round", self, triggered=lambda: remove_last_round(self.main_game_manager_layout, self.round_number - 1))
+            self.action_menu.addAction(self.add_round_action)
+            self.action_menu.addAction(self.remove_round_action)
                 
             self.main_game_manager_layout = QGridLayout()
             self.main_game_manager_layout.setSpacing(12)  # Controls horizontal distance between round columns
@@ -872,8 +717,7 @@ class MainSessionWindow(QMainWindow):
         
         PANELS = [
             ("console", "Console", True, console_panel),
-            ("settings", "Settings", False, settings_panel),
-            ("players", "Player Seed", True, player_seed_panel),
+            ("players", "Players in Session", True, players_panel),
             ("leaderboard", "Leaderboard", True, leaderboard_panel),
             ("statistics", "Statistics", False, statistics_panel),
             ("player_manager", "Player Manager", True, player_manager_panel),
@@ -960,14 +804,11 @@ class MainSessionWindow(QMainWindow):
         # Run once after the initial layout pass so real pixel widths exist.
         QTimer.singleShot(0, self._sync_tabs_to_panels)
         
-        
         def on_database_change(action_code, db_name, table_name, rowid):
             """ Logger Function for the console """
             action = ACTIONS.get(action_code, "UNKNOWN")
             
-            print(f"{action} # {table_name}")
-            
-            self.update_leaderboard()
+            #print(f"{action} # {table_name}")
             
             # Matches
             if action == "INSERT" and table_name == "matches":
@@ -982,11 +823,15 @@ class MainSessionWindow(QMainWindow):
                 
                 self.console.append(f"Match Added | {p1_name} v {p2_name} | {winner_name}")
                 
-            if table_name == "matches":
+                update_player_active(self.conn, self.config["active_sessions_count"])
+                
+            if action == "DELETE" and table_name == "matches":
+                self.console.append(f"==== MATCH DELETED ====")
+                
                 update_player_active(self.conn, self.config["active_sessions_count"])
                 
             elif action != "UPDATE" and table_name != "elo_history":
-                self.console.append(f"{table_name} - {action}")
+                self.console.append(f"{table_name} # {action}")
             
         listen(self.conn, on_database_change)
         
@@ -996,29 +841,38 @@ class MainSessionWindow(QMainWindow):
         def _add_row(layout: QGridLayout, player: dict, row_num: int):
             """Adds one row of the leaderboard directly into the shared grid layout"""
 
-            row_num += 1
-
             rank = QLabel(f"{row_num}")
             rank.setStyleSheet(_normal_text_stylesheet(self.scale))
             layout.addWidget(rank, row_num, 0)
 
-            name = QLabel(f"{player['first_name']} {player['last_name']}")
+            name = QLabel(player["player_name"])
             name.setStyleSheet(_normal_text_stylesheet(self.scale))
             layout.addWidget(name, row_num, 1)
+            
+            _points = QLabel(f"{player['points']:.0f}")
+            _points.setStyleSheet(_normal_text_stylesheet(self.scale))
+            layout.addWidget(_points, row_num, 2)
 
             elo = QLabel(f"{player['current_elo']:.0f}")
             elo.setStyleSheet(_normal_text_stylesheet(self.scale))
-            layout.addWidget(elo, row_num, 2)
+            layout.addWidget(elo, row_num, 3)
+            
+            row_num += 1
+
+        clear_grid_after_row(self.lb_wid_layout, 1)
 
         self.lb_wid_layout.setColumnStretch(0, 0)   # rank: fits content
         self.lb_wid_layout.setColumnStretch(1, 1)   # name: takes extra space
         self.lb_wid_layout.setColumnStretch(2, 0)   # elo: fits content
         self.lb_wid_layout.setHorizontalSpacing(12)
 
-        players = list_active_players(self.conn)
+        func, args = self.lb_box.currentData()
+        conn, index = args
         
+        players = func(conn, index)
+            
         for i, player in enumerate(players):
-            _add_row(self.lb_wid_layout, player, i)
+            _add_row(self.lb_wid_layout, player, i + 1)
             
             
     def closeEvent(self, event: QCloseEvent):
@@ -1027,31 +881,30 @@ class MainSessionWindow(QMainWindow):
         If no is selected when promted to save all matches, rounds and sessions that were created are deleted from the database
         """
         
-        reply = QMessageBox.question(
-            self, 
-            "Confrim Close", 
-            "Do you want to save the current session on close?",
-            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No | QMessageBox.StandardButton.Cancel
-        )
-        
-        if reply == QMessageBox.StandardButton.Yes:
-            self.save = True
-        elif reply == QMessageBox.StandardButton.No:
-            self.save = False
-        elif reply == QMessageBox.StandardButton.Cancel:
-            event.ignore()
-            return
+        if self.exit_code == None:
+            reply = QMessageBox.question(
+                self, 
+                "Confrim Close", 
+                "Do you want to save the current session on close?",
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No | QMessageBox.StandardButton.Cancel
+            )
+            
+            if reply == QMessageBox.StandardButton.Yes:
+                self.save = True
+            elif reply == QMessageBox.StandardButton.No:
+                self.save = False
+            elif reply == QMessageBox.StandardButton.Cancel:
+                event.ignore()
+                return
+            
+        else:
+            print(f"Closed with code: {self.exit_code}")
+            self.save = self.exit_code
         
         session = get_session(self.conn, self.session_id)
         
         # if we are not saving the current session
         if not self.save and session["status"] != "completed":
-            round_ids = get_rounds_in_session(self.conn, self.session_id)
-            
-            if round_ids:
-                for rid in round_ids:
-                    delete_round(self.conn, rid[0])
-                    
             delete_session(self.conn, self.session_id)
             
         # if we are saving
@@ -1067,10 +920,12 @@ class MainSessionWindow(QMainWindow):
         # emitting splitterMoved, so resync after the resize is applied.
         QTimer.singleShot(0, self._sync_tabs_to_panels)
 
+
     def _sync_tabs_to_panels(self, *args):
         sizes = self.panels_splitter.sizes()
         if sizes:
             self.header.tabs_splitter.setSizes(sizes)
+
 
     def _sync_panels_to_tabs(self, sizes):
         if sizes:
@@ -1080,6 +935,7 @@ class MainSessionWindow(QMainWindow):
             # and reflect that onto the tab splitter, rather than trusting
             # the originally-requested sizes.
             self.header.tabs_splitter.setSizes(self.panels_splitter.sizes())
+
 
     def handle_command(self, command: str):
         """ Handle commands entered in the console """
@@ -1096,6 +952,9 @@ class MainSessionWindow(QMainWindow):
             self.console.append("  help - Show this help message")
             self.console.append("  clear - Clear the console")
             self.console.append("  echo <text> - Echo the text back to the console")
+            self.console.append("  nround - creates a new round")
+            self.console.append("  dround - deletes the last round")
+            self.console.append("  close <action> - closes the window and either 'save' or 'discard' session")
 
         elif cmd == "cls" or cmd == "clear":
             self.console.clear()
@@ -1103,15 +962,32 @@ class MainSessionWindow(QMainWindow):
         elif cmd == "echo":
             text = " ".join(parts[1:])
             self.console.append(text)
-
-        elif cmd == "show-elo":
+                
+        elif cmd == "nround":
+            if get_items_from_qlist(self.players_list_seed) == None:
+                self.console.warn("No players selected")
+            else:
+                self.add_round_action.trigger()
+            
+        elif cmd == "dround":
+            if self.round_number == 0:
+                self.console.warn("No rounds to delete")
+            else:
+                self.remove_round_action.trigger()
+            
+        elif cmd == "close":
             text = " ".join(parts[1:])
             
-            if text == "true":
-                print("true")
+            if text == "save":
+                self.exit_code = 1
+                self.close()
                 
-            if text == "false":
-                print("flase")
+            if text == "discard":
+                self.exit_code = 0
+                self.close()
+                
+            else:
+                self.console.warn(f"Decorator not recognised: {text}")
 
         else:
-            self.console.append(f"Unknown command: {cmd}")
+            self.console.inform(f"Unknown command: {cmd}")

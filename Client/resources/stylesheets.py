@@ -1,5 +1,6 @@
 from resources.colours import DARK, TEXT, LINE, ACCENT
 
+
 def _settings_controls_stylesheet() -> str:
     return f"""
         QComboBox {{

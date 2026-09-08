@@ -26,62 +26,6 @@ class CustomButton(QPushButton):
             self.normalClick.emit(self.buttons)
 
 
-class ToggleSwitch(QCheckBox):
-    """A modern pill-shaped toggle switch, styled like an iOS switch.
-
-    Behaves like a QCheckBox (isChecked/setChecked/toggled/stateChanged all
-    work normally) but paints itself instead of using the platform's default
-    checkbox indicator.
-    """
-
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.setCursor(Qt.PointingHandCursor)
-        self.setFixedSize(42, 24)
-        self.setStyleSheet("background: transparent;")
-
-        self._circle_pos = 3.0
-        self._anim = QPropertyAnimation(self, b"circle_pos", self)
-        self._anim.setDuration(160)
-        self._anim.setEasingCurve(QEasingCurve.InOutCubic)
-
-        self.stateChanged.connect(self._animate_to_state)
-
-    def _animate_to_state(self, state):
-        end = self.width() - self.height() + 3 if state else 3.0
-        self._anim.stop()
-        self._anim.setStartValue(self._circle_pos)
-        self._anim.setEndValue(float(end))
-        self._anim.start()
-
-    def _get_circle_pos(self):
-        return self._circle_pos
-
-    def _set_circle_pos(self, pos):
-        self._circle_pos = pos
-        self.update()
-
-    circle_pos = Property(float, _get_circle_pos, _set_circle_pos)
-
-    def hitButton(self, pos: QPoint) -> bool:
-        return self.contentsRect().contains(pos)
-
-    def paintEvent(self, event):
-        painter = QPainter(self)
-        painter.setRenderHint(QPainter.Antialiasing)
-        painter.setPen(Qt.NoPen)
-
-        rect = self.rect()
-        radius = rect.height() / 2
-
-        track_color = QColor(ACCENT) if self.isChecked() else QColor(LINE)
-        painter.setBrush(track_color)
-        painter.drawRoundedRect(rect, radius, radius)
-
-        knob_diameter = rect.height() - 6
-        painter.setBrush(QColor("#ffffff"))
-        painter.drawEllipse(int(self._circle_pos), 3, knob_diameter, knob_diameter)
-        
 class CustomHeaderBar(QWidget):
     panelVisibilityChanged = Signal()
     tabsResized = Signal(list)  # emitted with new sizes when the user drags a tab handle
@@ -208,6 +152,9 @@ class ConsoleWidget(QWidget):
 
     def __init__(self, parent=None):
         super().__init__(parent)
+        
+        self.setAttribute(Qt.WA_StyledBackground, True)
+        self.setAutoFillBackground(True)
 
         self.output = QPlainTextEdit()
         self.output.setReadOnly(True)
@@ -257,6 +204,12 @@ class ConsoleWidget(QWidget):
     def append(self, text: str):
         """Append text to console output."""
         self.output.appendPlainText(text)
+
+    def warn(self, text: str):
+        self.output.appendPlainText(f"WARN | {text}")
+        
+    def inform(self, text: str):
+        self.output.appendPlainText(f"INFO | {text}")
 
     def clear(self):
         self.output.clear()

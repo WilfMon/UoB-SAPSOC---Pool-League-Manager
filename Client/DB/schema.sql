@@ -30,7 +30,8 @@ CREATE TABLE players (
 -- ---------------------------------------------------------
 CREATE TABLE semesters (
     semester_id         INTEGER PRIMARY KEY AUTOINCREMENT,
-    name              TEXT NOT NULL,                     -- e.g. "Autumn 2026"
+    name              TEXT NOT NULL,
+    display_name      TEXT NOT NULL,
     start_date        TEXT NOT NULL,
     end_date          TEXT,
     status            TEXT NOT NULL DEFAULT 'active'
@@ -48,6 +49,7 @@ CREATE TABLE semesters_players (
     semester_id     INTEGER NOT NULL REFERENCES semesters(semester_id) ON DELETE CASCADE,
     player_id     INTEGER NOT NULL REFERENCES players(player_id) ON DELETE CASCADE,
     starting_elo  INTEGER NOT NULL,
+    ending_elo    INTEGER,
     points        INTEGER NOT NULL DEFAULT 0,
     PRIMARY KEY (semester_id, player_id)
 );
@@ -96,7 +98,7 @@ CREATE TABLE matches (
     player2_elo_before   INTEGER,
     player1_elo_after    INTEGER,
     player2_elo_after    INTEGER,
-    played_at            TEXT DEFAULT (datetime('now')),
+    played_at            TEXT,
     CHECK (player2_id IS NULL OR player1_id != player2_id),
     CHECK (winner_id IS NULL OR winner_id IN (player1_id, player2_id))
 );
@@ -111,7 +113,7 @@ CREATE TABLE elo_history (
     elo_before      INTEGER NOT NULL,
     elo_after       INTEGER NOT NULL,
     elo_change      INTEGER NOT NULL,
-    recorded_at     TEXT DEFAULT (datetime('now'))
+    recorded_at     TEXT
 );
 
 -- ---------------------------------------------------------
@@ -139,6 +141,56 @@ BEGIN
 END;
 
 -- ---------------------------------------------------------
+-- VIEW: all-time standings across every semester.
+-- starting_elo = base_elo (their original starting point),
+-- points = sum of every semester's points, wins/losses/byes/
+-- matches_played computed across ALL matches ever played.
+-- ---------------------------------------------------------
+CREATE VIEW v_alltime_standings AS
+SELECT
+    p.player_id,
+    p.first_name || ' ' || p.last_name AS player_name,
+    p.base_elo    AS starting_elo,
+    p.current_elo AS current_elo,
+    COALESCE(pts.total_points, 0)      AS points,
+    COALESCE(stats.wins, 0)            AS wins,
+    COALESCE(stats.losses, 0)          AS losses,
+    COALESCE(stats.byes, 0)            AS byes,
+    COALESCE(stats.matches_played, 0)  AS matches_played
+FROM players p
+LEFT JOIN (
+    SELECT player_id, SUM(points) AS total_points
+    FROM semesters_players
+    GROUP BY player_id
+) pts ON pts.player_id = p.player_id
+LEFT JOIN (
+    SELECT
+        pid,
+        COUNT(CASE WHEN winner_id = pid THEN 1 END) AS wins,
+        COUNT(CASE WHEN winner_id IS NOT NULL AND winner_id != pid THEN 1 END) AS losses,
+        COUNT(CASE WHEN player2_id IS NULL THEN 1 END) AS byes,
+        COUNT(CASE WHEN player2_id IS NOT NULL THEN 1 END) AS matches_played
+    FROM (
+        SELECT player1_id AS pid, winner_id, player2_id FROM matches
+        UNION ALL
+        SELECT player2_id AS pid, winner_id, player1_id AS player2_id
+        FROM matches WHERE player2_id IS NOT NULL
+    )
+    GROUP BY pid
+) stats ON stats.pid = p.player_id;
+
+-- ---------------------------------------------------------
+-- VIEW: same as v_alltime_standings, restricted to currently
+-- active players. Kept as a thin filter on the view above so
+-- there's a single source of truth for the aggregation logic.
+-- ---------------------------------------------------------
+CREATE VIEW v_alltime_standings_active AS
+SELECT v.*
+FROM v_alltime_standings v
+JOIN players p ON p.player_id = v.player_id
+WHERE p.is_active = 1;
+
+-- ---------------------------------------------------------
 -- VIEW: live semester standings, computed on the fly so it can
 -- never drift out of sync with the underlying match data.
 -- points comes straight from semesters_players, since that's the
@@ -150,6 +202,7 @@ SELECT
     sp.player_id,
     p.first_name || ' ' || p.last_name AS player_name,
     sp.starting_elo,
+    sp.ending_elo,
     p.current_elo AS current_elo,
     sp.points AS points,
     COUNT(CASE WHEN m.winner_id = sp.player_id THEN 1 END) AS wins,

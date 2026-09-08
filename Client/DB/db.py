@@ -8,6 +8,8 @@ writing raw SQL scattered through the GUI code.
 import apsw
 import apsw.ext
 
+from datetime import datetime
+
 from contextlib import contextmanager
 from pathlib import Path
 from collections.abc import Callable
@@ -83,12 +85,11 @@ def _rows_as_dicts(conn, sql, params=()):
         for row in conn.execute(sql, params)
     ]
 
-
 # ---------------------------------------------------------------
 # Players
 # ---------------------------------------------------------------
 
-def add_player(conn, first_name, last_name, is_member=0, starting_elo=1000):
+def add_player(conn, first_name, last_name, is_member=0, joined_date=None, starting_elo=1000):
     """Add a new player to the database and return their player_id."""
     with transaction(conn):
         row = conn.execute(
@@ -100,9 +101,9 @@ def add_player(conn, first_name, last_name, is_member=0, starting_elo=1000):
             return row[0]
 
         conn.execute(
-            """INSERT INTO players (first_name, last_name, is_member, base_elo, current_elo)
-               VALUES (?, ?, ?, ?, ?)""",
-            (first_name, last_name, is_member, starting_elo, starting_elo),
+            """INSERT INTO players (first_name, last_name, is_member, joined_date, base_elo, current_elo)
+               VALUES (?, ?, ?, ?, ?, ?)""",
+            (first_name, last_name, is_member, joined_date, starting_elo, starting_elo),
         )
         return conn.last_insert_rowid()
 
@@ -157,6 +158,20 @@ def get_name_from_pid(conn, player_id):
     return row if row else None
 
 
+def is_player_member(conn, player_id):
+    """Return True if the player is a member."""
+    row = conn.execute(
+        "SELECT is_member FROM players WHERE player_id = ?",
+        (player_id,)
+    ).fetchone()
+    return row[0] if row else None
+
+
+def update_player_membership(conn, player_id, member):
+    """Make a player member or not member"""
+    conn.execute("UPDATE players SET is_member = ? WHERE player_id = ?", (member, player_id))
+
+
 def is_player_active(conn, player_id):
     """Return True if the player is active."""
     row = conn.execute(
@@ -184,13 +199,19 @@ def update_player_active(conn, active_sessions_count=10):
             )
         """, (active_sessions_count,))
 
-
 # ---------------------------------------------------------------
 # Semesters
 # ---------------------------------------------------------------
 
 def create_semester(conn, name, start_date, player_ids=None):
     """Create a semester and optionally seed its players."""
+    start_year, end_year, term = name.split(".")
+    
+    if term == "1":
+        display_name = f"Autumn {start_year}"
+    if term == "2":
+        display_name = f"Spring {end_year}"
+    
     with transaction(conn):
         row = conn.execute(
             "SELECT semester_id FROM semesters WHERE name = ?",
@@ -201,8 +222,8 @@ def create_semester(conn, name, start_date, player_ids=None):
             return row[0]
 
         conn.execute(
-            "INSERT INTO semesters (name, start_date) VALUES (?, ?)",
-            (name, start_date)
+            "INSERT INTO semesters (name, display_name, start_date) VALUES (?, ?, ?)",
+            (name, display_name, start_date)
         )
         semester_id = conn.last_insert_rowid()
 
@@ -219,6 +240,12 @@ def create_semester(conn, name, start_date, player_ids=None):
         return semester_id
 
 
+def get_semester(conn, semester_id):
+    """Return the semester row as a dict"""
+    rows = _rows_as_dicts(conn, "SELECT * FROM semesters WHERE semester_id = ?", (semester_id,))
+    return rows[0] if rows else None
+
+
 def add_player_to_semester(conn, semester_id, player_id):
     """Add a player to a semester if they aren't already in it."""
     with transaction(conn):
@@ -229,6 +256,35 @@ def add_player_to_semester(conn, semester_id, player_id):
                VALUES (?, ?, ?, 0)""",
             (semester_id, player_id, player["current_elo"])
         )
+
+
+def update_semester_status(conn, semester_id, status):
+    with transaction(conn):
+        conn.execute("UPDATE semesters SET status = ? WHERE semester_id = ?", (status, semester_id))
+        
+        
+def update_semester_display_name(conn, semester_id, name):
+    with transaction(conn):
+        conn.execute("UPDATE semesters SET display_name = ? WHERE semester_id = ?", (name, semester_id))
+        
+
+def complete_semester(conn, semester_id, end_date=None):
+    update_semester_status(conn, semester_id, "completed")
+    
+    with transaction(conn):
+        if not end_date:
+            end_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            
+        conn.execute("UPDATE semesters SET end_date = ? WHERE semester_id = ?", (end_date, semester_id))
+        
+        players = get_semester_standings(conn, semester_id)
+        conn.execute("UPDATE semesters SET winner_player_id = ? WHERE semester_id = ?", (players[0]["player_id"], semester_id))
+        
+        player_ids = conn.execute("SELECT player_id FROM semesters_players WHERE semester_id = ?", (semester_id,)).fetchall()
+        players = [get_player(conn, _id[0]) for _id in player_ids]
+        
+        for player in players:
+            conn.execute("UPDATE semesters_players SET ending_elo = ? WHERE player_id = ?", (player["current_elo"], player["player_id"]))
 
 
 def get_semester_id_from_round(conn, round_id):
@@ -243,6 +299,18 @@ def get_semester_id_from_round(conn, round_id):
     return row[0] if row else None
 
 
+def list_semester_players(conn):
+    """Return all the semesters and the players in them, along with the points for each players"""
+    return _rows_as_dicts(conn, "SELECT * FROM semesters_players ORDER BY semester_id DESC")
+
+
+def list_all_semesters(conn) -> tuple[dict, list]:
+    """List all semesters"""
+    row = [row[0] for row in conn.execute("SELECT semester_id FROM semesters").fetchall()]
+    
+    return (_rows_as_dicts(conn, "SELECT * FROM semesters ORDER BY semester_id ASC"), row) if row else None
+
+
 def _award_semester_point(conn, semester_id, player_id, points=POINTS_PER_WIN):
     """Add points to a player's semester total."""
     add_player_to_semester(conn, semester_id, player_id)
@@ -251,9 +319,8 @@ def _award_semester_point(conn, semester_id, player_id, points=POINTS_PER_WIN):
         (points, semester_id, player_id)
     )
 
-
 # ---------------------------------------------------------------
-# Sessions / attendance / rounds
+# Sessions / attendance
 # ---------------------------------------------------------------
 
 def create_session(conn, semester_id, session_date, attendee_ids):
@@ -279,6 +346,11 @@ def create_session(conn, semester_id, session_date, attendee_ids):
         )
 
         return session_id
+
+
+def list_all_sessions(conn):
+    """List all sessions"""
+    return _rows_as_dicts(conn, "SELECT * FROM sessions ORDER BY session_id ASC")
 
 
 def add_session_attendance(conn, session_id, player_id):
@@ -315,11 +387,24 @@ def delete_session(conn, session_id):
     """Delete a session"""
     with transaction(conn):
         conn.execute("DELETE FROM sessions WHERE session_id = ?", (session_id,))
+        
+        _recalculate_all_elo(conn)
 
+# ---------------------------------------------------------------
+# Rounds
+# ---------------------------------------------------------------
 
 def get_session_id_from_round(conn, round_id):
     """Return the session_id of the round"""
     row = conn.execute("SELECT session_id FROM rounds WHERE round_id = ?", (round_id,)).fetchone()
+    return row[0] if row else None
+
+
+def get_semester_id_from_round(conn, round_id):
+    """Return the semester_id of the round"""
+    ses_id = get_session_id_from_round(conn, round_id)
+    
+    row = conn.execute("SELECT semester_id FROM sessions WHERE session_id = ?", (ses_id,)).fetchone()
     return row[0] if row else None
 
 
@@ -372,12 +457,16 @@ def record_match(
     winner_id=None,
     override_p1_elo=None,
     override_p2_elo=None,
+    played_at=None,
 ):
     """
     Record a match result and update both players' Elo.
 
     Also credits the winner with POINTS_PER_WIN semester points.
     """
+    
+    if not played_at:
+        played_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     with transaction(conn):
         p1 = get_player(conn, player1_id)
@@ -401,9 +490,9 @@ def record_match(
             conn.execute(
                 """INSERT INTO matches
                    (round_id, player1_id, player2_id, winner_id,
-                    player1_elo_before, player1_elo_after)
-                   VALUES (?, ?, NULL, NULL, ?, ?)""",
-                (round_id, player1_id, p1_elo, p1_elo)
+                    player1_elo_before, player1_elo_after, played_at)
+                   VALUES (?, ?, NULL, NULL, ?, ?, ?)""",
+                (round_id, player1_id, p1_elo, p1_elo, played_at)
             )
             return conn.last_insert_rowid()
 
@@ -424,26 +513,26 @@ def record_match(
             """INSERT INTO matches
                (round_id, player1_id, player2_id, winner_id,
                 player1_elo_before, player2_elo_before,
-                player1_elo_after, player2_elo_after)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+                player1_elo_after, player2_elo_after, played_at)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
             (round_id, player1_id, player2_id, winner_id,
-             p1_elo, p2_elo, new1, new2)
+             p1_elo, p2_elo, new1, new2, played_at)
         )
 
         match_id = conn.last_insert_rowid()
 
         conn.execute(
             """INSERT INTO elo_history
-               (player_id, match_id, elo_before, elo_after, elo_change)
-               VALUES (?, ?, ?, ?, ?)""",
-            (player1_id, match_id, p1_elo, new1, new1 - p1_elo)
+               (player_id, match_id, elo_before, elo_after, elo_change, recorded_at)
+               VALUES (?, ?, ?, ?, ?, ?)""",
+            (player1_id, match_id, p1_elo, new1, new1 - p1_elo, played_at)
         )
 
         conn.execute(
             """INSERT INTO elo_history
-               (player_id, match_id, elo_before, elo_after, elo_change)
-               VALUES (?, ?, ?, ?, ?)""",
-            (player2_id, match_id, p2_elo, new2, new2 - p2_elo)
+               (player_id, match_id, elo_before, elo_after, elo_change, recorded_at)
+               VALUES (?, ?, ?, ?, ?, ?)""",
+            (player2_id, match_id, p2_elo, new2, new2 - p2_elo, played_at)
         )
 
         return match_id
@@ -454,6 +543,11 @@ def get_match(conn, match_id):
     return _rows_as_dicts(conn, "SELECT * FROM matches WHERE match_id = ?", (match_id,))[0]
 
 
+def list_all_matches(conn):
+    """Returns a list of all the matches as dicts"""
+    return _rows_as_dicts(conn, "SELECT * FROM matches ORDER BY match_id ASC")
+
+
 def _recalculate_all_elo(conn):
     """Internal recalculation. Assumes a transaction is already active."""
 
@@ -462,8 +556,8 @@ def _recalculate_all_elo(conn):
     conn.execute("UPDATE semesters_players SET points = 0")
 
     matches = conn.execute(
-        """SELECT m.match_id, m.round_id, m.player1_id, m.player2_id,
-                  m.winner_id, s.semester_id
+        """SELECT m.match_id, m.player1_id, m.player2_id,
+                  m.winner_id, m.played_at, s.semester_id
            FROM matches m
            JOIN rounds r ON m.round_id = r.round_id
            JOIN sessions s ON r.session_id = s.session_id
@@ -476,7 +570,7 @@ def _recalculate_all_elo(conn):
 
     elo_map = {player_id: elo for player_id, elo in players}
 
-    for match_id, round_id, p1_id, p2_id, winner_id, semester_id in matches:
+    for match_id, p1_id, p2_id, winner_id, played_at, semester_id in matches:
         p1_before = elo_map[p1_id]
 
         if p2_id is None:
@@ -508,16 +602,16 @@ def _recalculate_all_elo(conn):
 
         conn.execute(
             """INSERT INTO elo_history
-               (player_id, match_id, elo_before, elo_after, elo_change)
-               VALUES (?, ?, ?, ?, ?)""",
-            (p1_id, match_id, p1_before, new1, new1 - p1_before)
+               (player_id, match_id, elo_before, elo_after, elo_change, recorded_at)
+               VALUES (?, ?, ?, ?, ?, ?)""",
+            (p1_id, match_id, p1_before, new1, new1 - p1_before, played_at)
         )
 
         conn.execute(
             """INSERT INTO elo_history
-               (player_id, match_id, elo_before, elo_after, elo_change)
-               VALUES (?, ?, ?, ?, ?)""",
-            (p2_id, match_id, p2_before, new2, new2 - p2_before)
+               (player_id, match_id, elo_before, elo_after, elo_change, recorded_at)
+               VALUES (?, ?, ?, ?, ?, ?)""",
+            (p2_id, match_id, p2_before, new2, new2 - p2_before, played_at)
         )
 
         if winner_id is not None and semester_id is not None:
@@ -561,10 +655,18 @@ def get_match_id(conn, p1_id, p2_id, round_id):
     ).fetchone()
     return row[0] if row else None
 
-
 # ---------------------------------------------------------------
 # Standings / reporting
 # ---------------------------------------------------------------
+
+def get_alltime_standings(conn, active_only: bool = False):
+    """Return all-time standings as a list of dicts, ordered by current_elo desc."""
+    
+    view = "v_alltime_standings_active" if active_only else "v_alltime_standings"
+    query = f"SELECT * FROM {view} ORDER BY current_elo DESC"
+
+    return _rows_as_dicts(conn, query)
+    
 
 def get_semester_standings(conn, semester_id):
     """Return semester standings ordered by points, wins and Elo."""

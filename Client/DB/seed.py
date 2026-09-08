@@ -1,6 +1,6 @@
 import re
 
-from db import get_connection, add_player, create_semester, create_session, create_round, record_match, get_pid_from_name, up_session_status
+from db import get_connection, add_player, create_semester, create_session, create_round, record_match, get_pid_from_name, up_session_status, list_all_semesters, complete_semester
 
 def split_to_sessions(semester_data):
     result = []
@@ -48,6 +48,11 @@ def clean_to_sessions(sessions_data):
     sessions.append(sessions_data[0])
     return sessions
 
+
+def format_date(date):
+    day, month, year = date.split(".")
+    
+    return f"{year}-{month}-{day} 00:00:00"
 
 
 with open("DB/raw_data.txt", "r") as file:
@@ -162,9 +167,8 @@ for sem in final_parsed_data:
                         matches_list.append((p_name1, p_name2, 0))
                                 
 conn = get_connection()
-                             
-for player in list(players_set):
-    add_player(conn, player[0], player[1])
+ses_date = None
+                            
     
 for sem in final_parsed_data:
     for session in sem:
@@ -174,13 +178,26 @@ for sem in final_parsed_data:
             if re.match(sem_format, round_[0]):
                 #print(f"Semester: {round_[0]}")
                 
-                sem_id = create_semester(conn, round_[0], "2024")
+                sem_id = create_semester(conn, round_[0], "placeholder")
+                
+                sems, _ = list_all_semesters(conn)
+                #print(sems)
+                #print(sem_id)
+                
+                for sem in sems:
+                    
+                    #print(sem["semester_id"])
+                    
+                    if f"{sem["semester_id"]}" == f"{sem_id - 1}":
+                        #print("yes sem_id = prev")
+                        complete_semester(conn, sem_id - 1, end_date=ses_date)
+                    
                 
             #Per Session Logic
             elif re.match(ses_format, round_[0]):
-                #print(f"Session: {round_[0]}")
                 
                 ses_id = create_session(conn, sem_id, round_[0], [])
+                ses_date = format_date(round_[0])
                 up_session_status(conn, ses_id, "completed")
                 
                 
@@ -188,7 +205,6 @@ for sem in final_parsed_data:
                 
             #Per Round Logic
             else:
-                #print(f"Round: {round_}")
                 
                 round_id = create_round(conn, ses_id, round_count)
                 
@@ -205,10 +221,14 @@ for sem in final_parsed_data:
                     first_name1 = format_name(ls[0])                                              
                     last_name1 = format_name(ls[1])
                     p1id = get_pid_from_name(conn, first_name1, last_name1)
+                    if not p1id:
+                        p1id = add_player(conn, first_name1, last_name1, joined_date=ses_date)
                     
                     first_name2 = format_name(ls[2])
                     last_name2 = format_name(ls[3])
                     p2id = get_pid_from_name(conn, first_name2, last_name2)
+                    if not p2id:
+                        p2id = add_player(conn, first_name2, last_name2, joined_date=ses_date)
                     
                     if ls[4].strip() == "1":
                         #player 1 won 
@@ -218,6 +238,7 @@ for sem in final_parsed_data:
                             p1id,
                             p2id,
                             p1id,
+                            played_at = ses_date,
                         )
                     elif ls[5].strip() == "1":
                         #player 2 won
@@ -227,4 +248,5 @@ for sem in final_parsed_data:
                             p1id,
                             p2id,
                             p2id,
+                            played_at = ses_date,
                         )
