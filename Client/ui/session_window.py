@@ -36,6 +36,7 @@ class MainSessionWindow(QMainWindow):
         super().__init__()
         
         self.exit_code = None
+        logger.info(f"Session Window Running...")
         
         self.config = config
         self.scale = config["scale"]
@@ -898,7 +899,7 @@ class MainSessionWindow(QMainWindow):
                 return
             
         else:
-            print(f"Closed with code: {self.exit_code}")
+            logger.info(f"Closed with code: {self.exit_code}")
             self.save = self.exit_code
         
         session = get_session(self.conn, self.session_id)

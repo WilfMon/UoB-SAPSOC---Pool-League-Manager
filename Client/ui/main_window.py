@@ -54,6 +54,7 @@ class MainWindow(QMainWindow):
         self.console.setFont(self.small_font)
         
         self.console.setMinimumWidth(int(100 * self.scale))
+        self.console.setStyleSheet(_normal_text_stylesheet(self.scale))
         self.console.commandEntered.connect(self.handle_command)
         
         scroll = QScrollArea()
