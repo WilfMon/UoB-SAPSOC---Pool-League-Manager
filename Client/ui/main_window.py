@@ -206,9 +206,9 @@ class MainWindow(QMainWindow):
             # add members
             if parts[1] == "add":
                 action = 1
-            if parts[1] == "remove":
+            elif parts[1] == "remove":
                 action = 0
-            if parts[1] == "removeall":
+            elif parts[1] == "removeall":
                 for player in list_all_players(self.conn):
                     update_player_membership(self.conn, player["player_id"], 0)
                            
