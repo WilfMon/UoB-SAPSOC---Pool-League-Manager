@@ -2,7 +2,7 @@ from PySide6.QtCore import QPoint, Qt, Signal, QPropertyAnimation, QEasingCurve,
 from PySide6.QtWidgets import QWidget, QHBoxLayout, QLabel, QMenu, QPushButton, QSizePolicy, QApplication, QPlainTextEdit, QLineEdit, QVBoxLayout, QSplitter, QCheckBox
 from PySide6.QtGui import QAction, QPainter, QColor
 
-from resources.colours import HEAD, LINE, TEXT, ACCENT
+from resources.colours import HEAD, LINE, TEXT, MUTED, ACCENT, BRASS_LIGHT, FELT_LIGHT
 
 class CustomButton(QPushButton):
     normalClick = Signal(tuple)
@@ -61,7 +61,7 @@ class CustomHeaderBar(QWidget):
         self.tabs_splitter.setStyleSheet(f"""
             QSplitter {{ background: transparent; border: none; }}
             QSplitter::handle {{ background:{LINE}; }}
-            QSplitter::handle:hover {{ background:#777; }}
+            QSplitter::handle:hover {{ background:{MUTED}; }}
         """)
         outer_layout.addWidget(self.tabs_splitter)
 
@@ -72,11 +72,11 @@ class CustomHeaderBar(QWidget):
             lbl.setFixedHeight(32)
             lbl.setStyleSheet(f"""
                 QLabel {{
-                    color: #c8c8c8; font-size: 12px; font-weight: 600;
+                    color: {MUTED}; font-size: 12px; font-weight: 600;
                     padding-left: 10px;
                     background: transparent;
                 }}
-                QLabel:hover {{ background: #353535; }}
+                QLabel:hover {{ color: {ACCENT}; background: {FELT_LIGHT}; }}
             """)
             # Match the panel's minimum width so both splitters share the
             # same constraints. Without this, dragging a tab narrower than
@@ -101,16 +101,16 @@ class CustomHeaderBar(QWidget):
         menu.setStyleSheet(f"""
             QMenu {{
                 background:{HEAD}; color:{TEXT};
-                border:1px solid #444; padding:4px 0;
+                border:1px solid {LINE}; padding:4px 0;
             }}
             QMenu::item {{ padding:5px 28px 5px 28px; font-size:13px; }}
-            QMenu::item:selected {{ background:#3c3f41; }}
+            QMenu::item:selected {{ background:{FELT_LIGHT}; }}
             QMenu::indicator {{ width:14px; height:14px; left:6px; }}
             QMenu::indicator:checked {{
-                background:{ACCENT}; border:1px solid #6ab0ff; border-radius:2px;
+                background:{ACCENT}; border:1px solid {BRASS_LIGHT}; border-radius:2px;
             }}
             QMenu::indicator:unchecked {{
-                background:transparent; border:1px solid #666; border-radius:2px;
+                background:transparent; border:1px solid {MUTED}; border-radius:2px;
             }}
         """)
 

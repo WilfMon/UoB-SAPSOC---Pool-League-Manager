@@ -26,8 +26,8 @@ from DB.db import (
                    ACTIONS
                    )
 
-from resources.colours import DARK, HEAD, PANEL_COL, LINE, TEXT, ACCENT, GREEN, RED
-from resources.stylesheets import _scrollbar_stylesheet, _settings_controls_stylesheet, _title_text_stylesheet, _normal_text_stylesheet
+from resources.colours import DARK, HEAD, PANEL_COL, LINE, TEXT, ACCENT, GREEN, RED, CUE_WHITE
+from resources.stylesheets import _scrollbar_stylesheet, _title_text_stylesheet, _normal_text_stylesheet
 
 class MainSessionWindow(QMainWindow):
     info = Signal(dict)
@@ -73,7 +73,7 @@ class MainSessionWindow(QMainWindow):
         
         # automatically determine semester and year
         if 9 <= self.month <= 12:
-            sem_name = f"{int(self.year) - 1}.{self.year}.1"
+            sem_name = f"{int(self.year)}.{int(self.year) + 1}.1"
             
             self.semester_id = create_semester(self.conn, sem_name, self.date)
 
@@ -89,7 +89,7 @@ class MainSessionWindow(QMainWindow):
             self.console = ConsoleWidget()
             self.console.setFont(self.small_font)
             
-            self.console.setMinimumWidth(int(100 * self.scale))
+            self.console.setMinimumWidth(int(200 * self.scale))
             self.console.setStyleSheet(_normal_text_stylesheet(self.scale))
             
             self.console.commandEntered.connect(self.handle_command)
@@ -99,8 +99,9 @@ class MainSessionWindow(QMainWindow):
         def players_panel() -> QWidget:
             self.players_list_seed = QListWidget()
             self.players_list_seed.setFont(self.small_font)
+            self.players_list_seed.setStyleSheet(f"color: {TEXT};")
             
-            self.players_list_seed.setMinimumWidth(int(100 * self.scale))
+            self.players_list_seed.setMinimumWidth(int(180 * self.scale))
             
             def refresh_players_list():
                 
@@ -131,7 +132,7 @@ class MainSessionWindow(QMainWindow):
             
             self.leaderboard_widget.setStyleSheet(f"""
                 QFrame {{
-                    background: {HEAD};
+                    background: {PANEL_COL};
                     border-radius: 5px;
                 }}
             """)
@@ -142,11 +143,12 @@ class MainSessionWindow(QMainWindow):
             scroll_area = QScrollArea()
             scroll_area.setWidget(self.leaderboard_widget)
             scroll_area.setWidgetResizable(True)  # Allows the inner widget to resize smoothly
+            scroll_area.viewport().setStyleSheet("background: transparent;")
             
             scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
             scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
             
-            scroll_area.setMinimumWidth(int(420 * self.scale))
+            scroll_area.setMinimumWidth(int(450 * self.scale))
             
             # combobox setup
             label = QLabel("Leaderboard".upper())
@@ -155,6 +157,13 @@ class MainSessionWindow(QMainWindow):
             self.lb_wid_layout.addWidget(label, 0, 0, 1, 2)
             
             self.lb_box = QComboBox()
+            self.lb_box.setFont(self.small_font)
+            self.lb_box.setStyleSheet("""
+                                color: {TEXT};
+                                font-weight: 500;
+                                letter-spacing: 1px;
+                                padding-left: 2px;
+                            """)
             
             self.lb_box.currentIndexChanged.connect(self.update_leaderboard)
             
@@ -167,21 +176,13 @@ class MainSessionWindow(QMainWindow):
                     if sem["semester_id"] == _id:
                         break
                 
-                self.lb_box.addItem(f"{sem["name"]}", (get_semester_standings, (self.conn, _id)))
+                self.lb_box.addItem(f"- {sem["display_name"]}", (get_semester_standings, (self.conn, _id)))
                 
             self.lb_wid_layout.addWidget(self.lb_box, 0, 2, 1, 2)
 
             self.update_leaderboard()
 
-            return scroll_area
-        
-        def statistics_panel() -> QWidget:
-            self.stats_panel_widget = QWidget()
-            self.stats_panel_widget.setFont(self.default_font)
-            
-            self.stats_panel_widget.setMinimumWidth(int(100 * self.scale))
-
-            return self.stats_panel_widget            
+            return scroll_area          
         
         def player_manager_panel() -> QWidget:
             
@@ -455,8 +456,8 @@ class MainSessionWindow(QMainWindow):
                     print("already not clicked")
                     return
                 
-                main.setStyleSheet(f"border-radius: 3px; background-color: {LINE}; {_pad(4)}")
-                other.setStyleSheet(f"border-radius: 3px; background-color: {LINE}; {_pad(4)}")
+                main.setStyleSheet(f"border-radius: 3px; background-color: {CUE_WHITE}; {_pad(4)}")
+                other.setStyleSheet(f"border-radius: 3px; background-color: {CUE_WHITE}; {_pad(4)}")
                 
                 main_elo = _fetch_elo_label(main.position)
                 other_elo = _fetch_elo_label(other.position)
@@ -531,7 +532,7 @@ class MainSessionWindow(QMainWindow):
                 card = QFrame()
                 card.setStyleSheet(f"""
                     QFrame {{
-                        background: {HEAD};
+                        background: {PANEL_COL};
                         border-radius: 5px;
                     }}
                 """)
@@ -548,14 +549,14 @@ class MainSessionWindow(QMainWindow):
                 left_btn.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
                 left_btn.normalClick.connect(on_normal_click)
                 left_btn.shiftClick.connect(on_shift_click)
-                left_btn.setStyleSheet(f"border-radius: 3px; background-color: {LINE}; {_pad(4)}")
+                left_btn.setStyleSheet(f"border-radius: 3px; background-color: {CUE_WHITE}; {_pad(4)}")
                 
                 right_btn = CustomButton()
                 right_btn.setText(right)
                 right_btn.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
                 right_btn.normalClick.connect(on_normal_click)
                 right_btn.shiftClick.connect(on_shift_click)
-                right_btn.setStyleSheet(f"border-radius: 3px; background-color: {LINE}; {_pad(4)}")
+                right_btn.setStyleSheet(f"border-radius: 3px; background-color: {CUE_WHITE}; {_pad(4)}")
 
                 left_btn.info((left_btn, right_btn), (self.round_number, vert_offset // 3, 0), round_id)
                 right_btn.info((right_btn, left_btn), (self.round_number, vert_offset // 3, 1), round_id)
@@ -586,7 +587,7 @@ class MainSessionWindow(QMainWindow):
                 spacer = QFrame()
                 spacer.setFrameShape(QFrame.HLine)
                 spacer.setFrameShadow(QFrame.Sunken)
-                spacer.setStyleSheet("background-color: #333333; max-height: 3px; border: none;")
+                spacer.setStyleSheet(f"background-color: {LINE}; max-height: 3px; border: none;")
                 
                 layout.addWidget(spacer, vert_offset, 0, 1, 3)
             
@@ -662,7 +663,7 @@ class MainSessionWindow(QMainWindow):
                 self.round_number += 1
                 
                 edges, nodes = self.builder.estimate_rounds_left()
-                self.console.append(f"{edges}, {nodes}")
+                self.console.append(f"Edges: {edges}, Nodes: {nodes}")
                 return card_layout
                 
             def remove_last_round(layout: QGridLayout, col: int):
@@ -704,6 +705,7 @@ class MainSessionWindow(QMainWindow):
             game_manager_panel_scoll_area.setWidget(game_manager_panel_widget)
             game_manager_panel_scoll_area.setWidgetResizable(True)
             game_manager_panel_scoll_area.setMinimumWidth(int(200 * self.scale))
+            game_manager_panel_scoll_area.viewport().setStyleSheet("background: transparent;")
             
             self.round_number = 0
             
@@ -716,22 +718,21 @@ class MainSessionWindow(QMainWindow):
 
             return game_manager_panel_scoll_area
         
-        PANELS = [
+        self.PANELS = [
             ("console", "Console", True, console_panel),
             ("players", "Players in Session", True, players_panel),
             ("leaderboard", "Leaderboard", True, leaderboard_panel),
-            ("statistics", "Statistics", False, statistics_panel),
             ("player_manager", "Player Manager", True, player_manager_panel),
             ("game_manager", "Game Manager", True, game_manager_panel),
         ]
 
         # Build all panel widgets up-front
         self.panel_widgets: dict[str, QWidget] = {}
-        for pid, _, visible, build_fn in PANELS:
+        for pid, _, visible, build_fn in self.PANELS:
             
             w = build_fn()
             w.setStyleSheet(w.styleSheet() + f"""
-                QWidget#panel_{pid} {{ background:{PANEL_COL}; }}
+                QWidget#panel_{pid} {{ background:{DARK}; }}
             """)
             w.setObjectName(f"panel_{pid}")
             
@@ -740,7 +741,7 @@ class MainSessionWindow(QMainWindow):
             frame.setFrameShape(QFrame.StyledPanel)
             frame.setStyleSheet(f"""
                 QFrame {{
-                    background:{PANEL_COL};
+                    background:{DARK};
                     border: none;
                 }}
             """)
@@ -759,7 +760,7 @@ class MainSessionWindow(QMainWindow):
                 frame.hide()
 
         # Header references panel_widgets to toggle visibility
-        self.header = CustomHeaderBar(PANELS, self.panel_widgets)
+        self.header = CustomHeaderBar(self.PANELS, self.panel_widgets)
 
         # Let the header stretch across the full width of the window.
         # (AlignLeft previously forced it to shrink to its sizeHint width.)
@@ -778,7 +779,7 @@ class MainSessionWindow(QMainWindow):
             QSplitter::handle:hover {{ background:#777; }}
         """)
 
-        for pid, _, _, _ in PANELS:
+        for pid, _, _, _ in self.PANELS:
             self.panels_splitter.addWidget(self.panel_widgets[pid])
 
         scroll = QScrollArea()
@@ -824,12 +825,8 @@ class MainSessionWindow(QMainWindow):
                 
                 self.console.append(f"Match Added | {p1_name} v {p2_name} | {winner_name}")
                 
-                update_player_active(self.conn, self.config["active_sessions_count"])
-                
             if action == "DELETE" and table_name == "matches":
                 self.console.append(f"==== MATCH DELETED ====")
-                
-                update_player_active(self.conn, self.config["active_sessions_count"])
                 
             elif action != "UPDATE" and table_name != "elo_history":
                 self.console.append(f"{table_name} # {action}")
@@ -903,6 +900,7 @@ class MainSessionWindow(QMainWindow):
             self.save = self.exit_code
         
         session = get_session(self.conn, self.session_id)
+            
         
         # if we are not saving the current session
         if not self.save and session["status"] != "completed":
@@ -910,6 +908,7 @@ class MainSessionWindow(QMainWindow):
             
         # if we are saving
         else:
+            update_player_active(self.conn, self.config["active_sessions_count"])
             up_session_status(self.conn, self.session_id, "completed")
                 
         event.accept()
@@ -949,13 +948,26 @@ class MainSessionWindow(QMainWindow):
         cmd = parts[0].lower()
 
         if cmd == "help":
-            self.console.append("Available commands:")
-            self.console.append("  help - Show this help message")
-            self.console.append("  clear - Clear the console")
-            self.console.append("  echo <text> - Echo the text back to the console")
-            self.console.append("  nround - creates a new round")
-            self.console.append("  dround - deletes the last round")
-            self.console.append("  close <action> - closes the window and either 'save' or 'discard' session")
+            text = " ".join(parts[1:])
+            
+            if not text:
+                self.console.append("Available commands:")
+                self.console.append("\n")
+                self.console.append("  help - Show this help message")
+                self.console.append("  clear - Clear the console")
+                self.console.append("  echo <text> - Echo the text back to the console")
+                self.console.append("  nround - creates a new round")
+                self.console.append("  dround - deletes the last round")
+                self.console.append("  lay <action> - quickly changes the layout")
+                self.console.append("  close <action> - closes the window and either 'save' or 'discard' session")
+                
+            elif text == "lay":
+                self.console.append("Possible Decorators for comand 'lay'")
+                self.console.append("setup")
+                self.console.append("mini")
+                self.console.append("adv")
+                self.console.append("all")
+                self.console.append("cmd")
 
         elif cmd == "cls" or cmd == "clear":
             self.console.clear()
@@ -986,6 +998,34 @@ class MainSessionWindow(QMainWindow):
             if text == "discard":
                 self.exit_code = 0
                 self.close()
+                
+            else:
+                self.console.warn(f"Decorator not recognised: {text}")
+
+        elif cmd == "lay":
+            text = " ".join(parts[1:])
+            
+            if text == "setup":
+                [self.header.set_panel_visible(panel[0], False) for panel in self.PANELS]
+                self.header.set_panel_visible("console", True)
+                self.header.set_panel_visible("players", True)
+                self.header.set_panel_visible("player_manager", True)
+            
+            elif text == "mini":
+                [self.header.set_panel_visible(panel[0], False) for panel in self.PANELS]
+                self.header.set_panel_visible("game_manager", True)
+            
+            elif text == "adv":
+                [self.header.set_panel_visible(panel[0], False) for panel in self.PANELS]
+                self.header.set_panel_visible("console", True)
+                self.header.set_panel_visible("game_manager", True)
+            
+            elif text == "all":
+                [self.header.set_panel_visible(panel[0], True) for panel in self.PANELS]
+            
+            elif text == "cmd":
+                [self.header.set_panel_visible(panel[0], False) for panel in self.PANELS]
+                self.header.set_panel_visible("console", True)
                 
             else:
                 self.console.warn(f"Decorator not recognised: {text}")

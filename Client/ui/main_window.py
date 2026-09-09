@@ -50,6 +50,33 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self.central)
         self.main_layout = QGridLayout(self.central)
         
+        self.central.setAttribute(Qt.WA_StyledBackground, True)
+        self.central.setStyleSheet(f"background: {DARK};")
+
+        # optional: bring the native File/View menu bar onto the same palette
+        self.menuBar().setStyleSheet(f"""
+            QMenuBar {{
+                background: {HEAD};
+                color: {TEXT};
+                border-bottom: 1px solid {LINE};
+            }}
+            QMenuBar::item {{
+                background: transparent;
+                padding: 4px 10px;
+            }}
+            QMenuBar::item:selected {{
+                background: {LINE};
+            }}
+            QMenu {{
+                background: {HEAD};
+                color: {TEXT};
+                border: 1px solid {LINE};
+            }}
+            QMenu::item:selected {{
+                background: {LINE};
+            }}
+        """)
+        
         self.console = ConsoleWidget()
         self.console.setFont(self.small_font)
         
@@ -252,7 +279,10 @@ class MainWindow(QMainWindow):
         elif cmd == "ping":
             
             if parts[1] == "active":
-                update_player_active(self.conn)
+                if parts[2]:
+                    update_player_active(self.conn, int(parts[2]))
+                else:
+                    update_player_active(self.conn)
         
         else:
             self.console.append(f"Unknown Command: {cmd}")

@@ -1,8 +1,9 @@
 from PySide6.QtWidgets import QDialog, QGridLayout, QWidget, QLineEdit
-from PySide6.QtGui import QCursor
+from PySide6.QtGui import QCursor, QFont
 from PySide6.QtCore import Qt, Signal
 
 from utils.utils import clean_name
+from resources.colours import HEAD, LINE, TEXT, ACCENT
 
 class TextBoxWindow(QDialog):
     submitted_player = Signal(str)
@@ -23,7 +24,21 @@ class TextBoxWindow(QDialog):
         layout.setSpacing(0)
 
         self.box = QLineEdit()
-        self.box.setStyleSheet(f"padding: 0px; margin: 0px; background-color: black;")
+        self.box.setFont(QFont("Segoe UI", round(self.scale * 12)))
+        self.box.setStyleSheet(f"""
+            QLineEdit {{
+                padding: 6px 10px;
+                margin: 0px;
+                background-color: {HEAD};
+                color: {TEXT};
+                border: 1px solid {LINE};
+                border-radius: 4px;
+                selection-background-color: {ACCENT};
+            }}
+            QLineEdit:focus {{
+                border: 1px solid {ACCENT};
+            }}
+        """)
         layout.addWidget(self.box)
 
         self.box.returnPressed.connect(self.submit_text)
