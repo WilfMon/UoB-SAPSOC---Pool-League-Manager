@@ -962,12 +962,28 @@ class MainSessionWindow(QMainWindow):
             if not text:
                 self.console.append("Available commands:")
                 self.console.append(" ")
-                self.console.append("  help - Show this help message")
+                self.console.append("  help <cmd> - Show help about a command")
                 self.console.append("  clear - Clear the console")
+                self.console.append("  list - lists information")
+                self.console.append("  nplayer - adds a new player to the session")
+                self.console.append("  rplayer - removes a player from the session")
                 self.console.append("  nround - creates a new round")
                 self.console.append("  dround - deletes the last round")
                 self.console.append("  lay <action> - quickly changes the layout")
                 self.console.append("  close <action> - closes the window and either 'save' or 'discard' session")
+                
+            elif text == "list":
+                self.console.append("Possible Decorators for comand 'list':")
+                self.console.append("  players - list all players in the session currently")
+                self.console.append("  matches <round> - lists all the matches in the session or\n  in the round if a round number is specified")
+                
+            elif text == "nplayer":
+                self.console.append("Format of command:")
+                self.console.append("  nplayer <first_name last_name> <first_name last_name> ...")
+                
+            elif text == "rplayer":
+                self.console.append("Format of command:")
+                self.console.append("  rplayer <first_name last_name> <first_name last_name> ...")
                 
             elif text == "lay":
                 self.console.append("Possible Decorators for comand 'lay':")
@@ -977,10 +993,8 @@ class MainSessionWindow(QMainWindow):
                 self.console.append("  all")
                 self.console.append("  cmd")
                 
-            elif text == "list":
-                self.console.append("Possible Decorators for comand 'list':")
-                self.console.append("  players - list all players in the session currently")
-                self.console.append("  matches <round> - lists all the matches in the session or\nin the round if a round number is specified")
+            else:
+                self.console.append(f"No extra info exists for this command: {text}")
 
         elif cmd == "cls" or cmd == "clear":
             self.console.clear()
@@ -1009,6 +1023,9 @@ class MainSessionWindow(QMainWindow):
                     for r in self.builder.rounds_played:
                         for u, v in r:
                             self.console.append(f"{u} | {v}")
+                            
+            if not parts[1]:
+                self.console.append("No decorator supplied do cmd: help list")
             
         # add a new player
         elif cmd == "nplayer":
@@ -1056,7 +1073,6 @@ class MainSessionWindow(QMainWindow):
                 self.button_remove.click()
                 remove_all_from_qlist(self.selected_players_list)
             
-                
         # create round
         elif cmd == "nround":
             if get_items_from_qlist(self.players_list_seed) == None:

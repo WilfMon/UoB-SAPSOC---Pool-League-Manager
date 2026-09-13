@@ -24,6 +24,7 @@ DB_PATH = Path(__file__).parent / "league.db"
 SCHEMA_PATH = Path(__file__).parent / "schema.sql"
 
 POINTS_PER_WIN = 1
+POINT_STEAL_FACTOR = 0.2
 
 ACTIONS = {
         apsw.SQLITE_INSERT: "INSERT",
@@ -206,7 +207,7 @@ def update_player_active(conn, active_sessions_count=10):
 
 def update_player_elo_decay(conn, session_id, decay_sessions_count=3, rock_bottom_elo=800):
     """Update all players elo decay if they have missed decay_sessions_count number of sessions in a row"""
-    players = list_all_players(conn)                          
+    players = list_all_players(conn)
     session = get_session(conn, session_id)
     
     recorded_at = session["session_date"]
@@ -286,6 +287,13 @@ def get_player_matches_played(conn, player_id):
         WHERE eh.player_id = ? AND NOT eh.elo_decay
     """, (player_id,)).fetchone()[0]
     return row
+
+
+def get_player_points(conn, semester_id, player_id):
+    """Return the points that a player is on for a specific semester"""
+    with transaction(conn):
+        row = conn.execute("SELECT points FROM semesters_players WHERE semester_id = ? AND player_id = ?", (semester_id, player_id)).fetchone()
+        return row[0] if row else None
 
 # ---------------------------------------------------------------
 # Semesters
@@ -399,12 +407,23 @@ def list_all_semesters(conn) -> tuple[dict, list]:
     return (_rows_as_dicts(conn, "SELECT * FROM semesters ORDER BY semester_id ASC"), row) if row else None
 
 
-def _award_semester_point(conn, semester_id, player_id, points=POINTS_PER_WIN):
+def _award_semester_point(conn, semester_id, winner_id, loser_id):
     """Add points to a player's semester total."""
-    add_player_to_semester(conn, semester_id, player_id)
+    add_player_to_semester(conn, semester_id, winner_id)
+    add_player_to_semester(conn, semester_id, loser_id)
+    
+    w_points = get_player_points(conn, semester_id, winner_id)
+    l_points = get_player_points(conn, semester_id, loser_id)
+    
+    if l_points - w_points >= 10:
+        points = POINTS_PER_WIN + (l_points * POINT_STEAL_FACTOR)
+        
+    else:
+        points = POINTS_PER_WIN
+    
     conn.execute(
         "UPDATE semesters_players SET points = points + ? WHERE semester_id = ? AND player_id = ?",
-        (points, semester_id, player_id)
+        (points, semester_id, winner_id)
     )
 
 # ---------------------------------------------------------------
@@ -615,7 +634,10 @@ def record_match(
             add_session_attendance(conn, session_id, player2_id)
 
         if winner_id is not None and semester_id is not None:
-            _award_semester_point(conn, semester_id, winner_id)
+            if winner_id == player1_id:
+                _award_semester_point(conn, semester_id, winner_id, player2_id)
+            elif winner_id == player2_id:
+                _award_semester_point(conn, semester_id, winner_id, player1_id)
 
         # Bye
         if player2_id is None:
@@ -737,7 +759,10 @@ def _recalculate_all_elo(conn):
         )
 
         if winner_id is not None and semester_id is not None:
-            _award_semester_point(conn, semester_id, winner_id)
+            if winner_id == p1_id:
+                _award_semester_point(conn, semester_id, winner_id, p2_id)
+            elif winner_id == p2_id:
+                _award_semester_point(conn, semester_id, winner_id, p1_id)
 
         elo_map[p1_id] = new1
         elo_map[p2_id] = new2
