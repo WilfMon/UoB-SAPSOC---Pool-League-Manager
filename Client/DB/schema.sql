@@ -22,6 +22,8 @@ CREATE TABLE players (
     base_elo      FLOAT NOT NULL DEFAULT 1000,     -- permanent starting point, set once
     current_elo   FLOAT NOT NULL DEFAULT 1000,     -- live rating, derived/recalculable
     is_active     INTEGER NOT NULL DEFAULT 1 CHECK (is_active IN (0, 1)),
+    decay_count   INTEGER NOT NULL DEFAULT 0,
+    decay_amt     INTEGER NOT NULL DEFAULT 0,
     notes         TEXT
 );
 
@@ -110,6 +112,7 @@ CREATE TABLE elo_history (
     elo_history_id  INTEGER PRIMARY KEY AUTOINCREMENT,
     player_id       INTEGER NOT NULL REFERENCES players(player_id) ON DELETE CASCADE,
     match_id        INTEGER REFERENCES matches(match_id) ON DELETE CASCADE,
+    elo_decay       INTEGER NOT NULL DEFAULT 0,
     elo_before      INTEGER NOT NULL,
     elo_after       INTEGER NOT NULL,
     elo_change      INTEGER NOT NULL,
@@ -243,4 +246,4 @@ SELECT
     eh.match_id
 FROM elo_history eh
 JOIN players p ON p.player_id = eh.player_id
-ORDER BY eh.recorded_at;
+ORDER BY eh.recorded_at, eh.match_id;

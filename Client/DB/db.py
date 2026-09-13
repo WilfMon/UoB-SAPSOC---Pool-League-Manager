@@ -8,6 +8,8 @@ writing raw SQL scattered through the GUI code.
 import apsw
 import apsw.ext
 
+import numpy as np
+
 from datetime import datetime
 
 from contextlib import contextmanager
@@ -16,7 +18,6 @@ from collections.abc import Callable
 
 import sys
 sys.path.append(str(Path(__file__).resolve().parent.parent))
-from utils.utils import calc_elo_change
 
 
 DB_PATH = Path(__file__).parent / "league.db"
@@ -91,6 +92,9 @@ def _rows_as_dicts(conn, sql, params=()):
 
 def add_player(conn, first_name, last_name, is_member=0, joined_date=None, starting_elo=1000):
     """Add a new player to the database and return their player_id."""
+    if joined_date == None:
+        joined_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    
     with transaction(conn):
         row = conn.execute(
             "SELECT player_id FROM players WHERE first_name = ? AND last_name = ?",
@@ -198,6 +202,90 @@ def update_player_active(conn, active_sessions_count=10):
                   )
             )
         """, (active_sessions_count,))
+
+
+def update_player_elo_decay(conn, session_id, decay_sessions_count=3, rock_bottom_elo=800):
+    """Update all players elo decay if they have missed decay_sessions_count number of sessions in a row"""
+    players = list_all_players(conn)                          
+    session = get_session(conn, session_id)
+    
+    recorded_at = session["session_date"]
+    
+    elo_decay_list = [5, 10, 15, 25, 50]
+    
+    for player in players:
+        
+        absence = get_player_absence_streak(conn, player["player_id"])
+        
+        if absence >= decay_sessions_count:
+            decay_index = absence - decay_sessions_count
+            if decay_index >= 4:
+                decay_index = 4
+                
+            # check if they will go below rock_bottom_elo - if so make sure they hit rock bottom elo
+            if player["current_elo"] - elo_decay_list[decay_index] < rock_bottom_elo:
+                diff = player["current_elo"] - rock_bottom_elo
+                new_elo = player["current_elo"] - diff
+                
+                # make sure no elo is given
+                if diff < 0:
+                    return
+                
+            else:
+                new_elo = player["current_elo"] - elo_decay_list[decay_index]
+                
+            # dont update if they are at rock_bottom_elo
+            if player["current_elo"] != rock_bottom_elo:
+                
+                # update database
+                conn.execute(
+                    """INSERT INTO elo_history
+                    (player_id, match_id, elo_decay, elo_before, elo_after, elo_change, recorded_at)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)""",
+                    (player["player_id"], None, 1, player["current_elo"], new_elo, new_elo - player["current_elo"], recorded_at)
+                )
+                
+                conn.execute("UPDATE players SET decay_count = decay_count + 1 WHERE player_id = ?", (player["player_id"],))
+                conn.execute("UPDATE players SET decay_amt = decay_amt + ? WHERE player_id = ?", (new_elo - player["current_elo"], player["player_id"]))
+
+
+def get_player_absence_streak(conn, player_id):
+    """Return the number of consecutive most recent completed sessions a player
+    has missed (counting back from the latest completed session to their last
+    attended completed session). A player who has never attended a completed
+    session is counted as absent for every completed session."""
+    row = conn.execute("""
+        SELECT COUNT(*)
+        FROM sessions s
+        WHERE s.status = 'completed'
+          AND s.session_id > COALESCE(
+              (SELECT MAX(sa.session_id)
+               FROM session_attendance sa
+               JOIN sessions s2 ON s2.session_id = sa.session_id
+               WHERE sa.player_id = ?
+                 AND s2.status = 'completed'),
+              0
+          )
+          AND NOT EXISTS (
+              SELECT 1 FROM session_attendance sa2
+              WHERE sa2.session_id = s.session_id
+                AND sa2.player_id = ?
+          )
+    """, (player_id, player_id)).fetchone()[0]
+    return row
+
+
+def get_player_matches_played(conn, player_id):
+    """
+    Return the total number of actual matches (excluding byes) a player has played.\n
+    Uses elo_history as this is wiped when elo is recalculated
+    """
+    row = conn.execute("""
+        SELECT COUNT(*)
+        FROM elo_history eh
+        WHERE eh.player_id = ? AND NOT eh.elo_decay
+    """, (player_id,)).fetchone()[0]
+    return row
 
 # ---------------------------------------------------------------
 # Semesters
@@ -381,6 +469,9 @@ def up_session_status(conn, session_id, status):
     """Update a session status"""
     with transaction(conn):
         conn.execute("UPDATE sessions SET status = ? WHERE session_id = ?", (status, session_id))
+        
+    if status == "completed" and session_id != 0:
+        update_player_elo_decay(conn, session_id)
 
 
 def delete_session(conn, session_id):
@@ -449,6 +540,47 @@ def get_rounds_in_session(conn, session_id) -> list[tuple]:
 # Matches
 # ---------------------------------------------------------------
 
+def _elo_calculation(conn, p1, p2) -> tuple[float, float]:
+    """Calculates the elo change when p1 is the winner and p2 is the loser"""
+    
+    def placement_func(x, a=2, b=0.3):
+        """
+        Returns a value to multiply k_factor by to increase elo gain and loss for the first 10/12 games\n
+        x - matches played
+        a - const affects steepness
+        b - const affects steepness
+        """
+        y = 1 + a * (np.e ** (- b * x))
+        return y
+    
+    p1_m_played = get_player_matches_played(conn, p1["player_id"])
+    p2_m_played = get_player_matches_played(conn, p2["player_id"])
+    
+    p1_elo = p1["current_elo"]
+    p2_elo = p2["current_elo"]
+    
+    s = Settings()
+    config = s.load_settings()["elo_vars"]
+
+    # define the constants
+    BASE = config["base"]
+    SCALE_FACTOR = config["scale_factor"] # controls the trend value (thousends)
+    
+    # controls how much a win or loss effects the elo change
+    k_factor_1 = 72 * placement_func(p1_m_played)
+    k_factor_2 = 72 * placement_func(p2_m_played)
+
+    # calc probablity for each player to win given the ratings
+    E1 = 1 / (1 + (BASE ** ((p2_elo - p1_elo) / SCALE_FACTOR)))
+    E2 = 1 - E1
+    
+    # calc the change in ratings due to the outcome
+    Ra = k_factor_1 * (1 - E1) # a won
+    Rb = k_factor_2 * (0 - E2) # b lost
+
+    return (Ra, Rb)
+
+
 def record_match(
     conn,
     round_id,
@@ -500,14 +632,14 @@ def record_match(
         p2_elo = override_p2_elo if override_p2_elo is not None else p2["current_elo"]
 
         if winner_id == player1_id:
-            chg1, chg2 = calc_elo_change(p1_elo, p2_elo)
+            chg1, chg2 = _elo_calculation(conn, p1, p2)
         elif winner_id == player2_id:
-            chg2, chg1 = calc_elo_change(p2_elo, p1_elo)
+            chg2, chg1 = _elo_calculation(conn, p2, p1)
         else:
             chg1 = chg2 = 0
 
-        new1 = p1_elo + chg1
-        new2 = p2_elo + chg2
+        new1 = p1["current_elo"] + chg1
+        new2 = p2["current_elo"] + chg2
 
         conn.execute(
             """INSERT INTO matches
@@ -536,16 +668,6 @@ def record_match(
         )
 
         return match_id
-
-
-def get_match(conn, match_id):
-    """Get the info from a match"""
-    return _rows_as_dicts(conn, "SELECT * FROM matches WHERE match_id = ?", (match_id,))[0]
-
-
-def list_all_matches(conn):
-    """Returns a list of all the matches as dicts"""
-    return _rows_as_dicts(conn, "SELECT * FROM matches ORDER BY match_id ASC")
 
 
 def _recalculate_all_elo(conn):
@@ -583,9 +705,9 @@ def _recalculate_all_elo(conn):
         p2_before = elo_map[p2_id]
 
         if winner_id == p1_id:
-            chg1, chg2 = calc_elo_change(p1_before, p2_before)
+            chg1, chg2 = _elo_calculation(conn, get_player(conn, p1_id), get_player(conn, p2_id))
         elif winner_id == p2_id:
-            chg2, chg1 = calc_elo_change(p2_before, p1_before)
+            chg2, chg1 = _elo_calculation(conn, get_player(conn, p2_id), get_player(conn, p1_id))
         else:
             chg1 = chg2 = 0
 
@@ -619,6 +741,16 @@ def _recalculate_all_elo(conn):
 
         elo_map[p1_id] = new1
         elo_map[p2_id] = new2
+
+
+def get_match(conn, match_id):
+    """Get the info from a match"""
+    return _rows_as_dicts(conn, "SELECT * FROM matches WHERE match_id = ?", (match_id,))[0]
+
+
+def list_all_matches(conn):
+    """Returns a list of all the matches as dicts"""
+    return _rows_as_dicts(conn, "SELECT * FROM matches ORDER BY match_id ASC")
 
 
 def recalculate_all_elo(conn):
@@ -690,3 +822,6 @@ def get_player_elo_timeline(conn, player_id):
 
 if __name__ == "__main__":
     init_db()
+    
+else:
+    from utils.utils_classes import Settings

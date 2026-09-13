@@ -1,5 +1,6 @@
 import numpy as np
 
+from PySide6.QtWidgets import QListWidgetItem
 from PySide6.QtCore import Qt
 
 from .utils_classes import Settings
@@ -53,6 +54,13 @@ def remove_item_from_qlist(list_widget, text):
         removed_item = list_widget.takeItem(row)
         
         del removed_item
+        
+def remove_all_from_qlist(list_widget):
+    
+    items = get_items_from_qlist(list_widget)
+    
+    for item in items:
+        remove_item_from_qlist(list_widget, item)
 
 def clear_layout(layout):
     if layout is not None:
@@ -63,29 +71,6 @@ def clear_layout(layout):
             
             if widget is not None:
                 widget.setParent(None)
-                
-def calc_elo_change(a, b) -> tuple[float, float]: # where A is the winner
-
-    s = Settings()
-    config = s.load_settings()["elo_vars"]
-
-    # define the constants
-    BASE = config["base"]
-    SCALE_FACTOR = config["scale_factor"] # controls the trend value (thousends)
-    
-    # controls how much a win or loss effects the elo change
-    k_factor_a = 72
-    k_factor_b = 72
-
-    # calc probablity for each player to win given the ratings
-    Ea = 1 / (1 + (BASE ** ((b - a) / SCALE_FACTOR)))
-    Eb = 1 - Ea
-    
-    # calc the change in ratings due to the outcome
-    Ra = k_factor_a * (1 - Ea) # a won
-    Rb = k_factor_b * (0 - Eb) # b lost
-
-    return (Ra, Rb)
 
 def clear_grid_after_row(layout, start_row: int):
     """

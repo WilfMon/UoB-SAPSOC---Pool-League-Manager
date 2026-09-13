@@ -7,6 +7,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 import datetime
+import re
 
 from PySide6.QtWidgets import QMainWindow, QPlainTextEdit, QSpacerItem, QInputDialog, QMessageBox, QListWidgetItem, QSizePolicy, QLabel, QGridLayout,  QFrame, QPushButton, QVBoxLayout, QWidget, QListWidget, QMenu, QApplication, QLineEdit, QScrollArea, QHBoxLayout, QSplitter, QComboBox, QSpinBox, QSlider, QRadioButton, QButtonGroup
 from PySide6.QtGui import QAction, QCursor, QFont, QCloseEvent
@@ -16,12 +17,12 @@ from .confimation_window import ConfirmationWindow
 
 from ui.custom_widgets import CustomButton, CustomHeaderBar, ConsoleWidget
 
-from utils.utils import clean_name, clear_grid_after_row, get_items_from_qlist, remove_item_from_qlist, calc_elo_change
+from utils.utils import clean_name, clear_grid_after_row, get_items_from_qlist, remove_item_from_qlist, remove_all_from_qlist
 from utils.utils_classes import SessionBuilder
 
 from DB.db import (
                     get_connection, list_active_players, get_pid_from_name, get_player, create_round, get_match, get_name_from_pid, delete_round, get_round_id, get_session, list_all_semesters,
-                   create_semester, create_session, list_all_players, add_player, record_match, delete_match, get_match_id, listen, get_rounds_in_session, delete_session, up_session_status, update_player_active,
+                   create_semester, create_session, list_all_players, add_player, record_match, delete_match, get_match_id, listen, _elo_calculation, delete_session, up_session_status, update_player_active,
                    get_semester_standings, get_alltime_standings,
                    ACTIONS
                    )
@@ -105,10 +106,12 @@ class MainSessionWindow(QMainWindow):
             
             def refresh_players_list():
                 
+                players = get_items_from_qlist(self.players_list_seed)
+                if players == None:
+                    return
+                
                 self.players_list_seed.blockSignals(True)
                 self.players_list_seed.model().blockSignals(True)
-                
-                players = get_items_from_qlist(self.players_list_seed)
                 
                 self.players_list_seed.clear()
 
@@ -210,9 +213,12 @@ class MainSessionWindow(QMainWindow):
                     logger.warning("No valid name submitted")
                     return
                 
-                text = QListWidgetItem(text)
-                #text.setSizeHint(QSize(0, 18))
-                self.selected_players_list.addItem(text)
+                item = self.selected_players_list.findItems(text, Qt.MatchExactly)
+                if not item:
+                    text = QListWidgetItem(text)
+                    self.selected_players_list.addItem(text)
+                else: 
+                    logger.warning(f"Player: {text} already submitted")
 
                 self.input_box.clear()
                 
@@ -263,6 +269,8 @@ class MainSessionWindow(QMainWindow):
                             self.players_list_seed.addItem(player)
                 
                 participants = get_items_from_qlist(self.selected_players_list)
+                if participants == None:
+                    return
                 
                 players = list_all_players(self.conn)
                 players_names = []
@@ -403,7 +411,7 @@ class MainSessionWindow(QMainWindow):
                 b = other.property("elo_change")
                 b_elo = b[0]["current_elo"]
                 
-                return (f"{a_elo:.0f} --> {a_elo + a[1]:.0f}", f"{b_elo:.0f} --> {b_elo - b[2]:.0f}")
+                return (f"{a_elo:.0f} --> {a_elo + a[1]:.0f}", f"{b_elo:.0f} --> {b_elo + b[2]:.0f}")
             
             # ---------------------------------------------------------------
             # Functions to control the buttons
@@ -423,6 +431,8 @@ class MainSessionWindow(QMainWindow):
                 
                 main_elo = _fetch_elo_label(main.position)
                 other_elo = _fetch_elo_label(other.position)
+                
+                print(self.session_items)
                 
                 main_elo.setStyleSheet(f"background:transparent; font-size:{14 * self.scale}px; color:{GREEN}")
                 other_elo.setStyleSheet(f"background:transparent; font-size:{14 * self.scale}px; color:{RED}")
@@ -502,20 +512,18 @@ class MainSessionWindow(QMainWindow):
                         p1_new = get_player(self.conn, p1_old["player_id"])
                         p2_new = get_player(self.conn, p2_old["player_id"])
                         
-                        p_change1, _ = calc_elo_change(p1_new["current_elo"], p2_new["current_elo"])
-                        p_change2, _ = calc_elo_change(p2_new["current_elo"], p1_new["current_elo"])
-                        p_change1 = abs(p_change1)
-                        p_change2 = abs(p_change2)
+                        p1_gain, p2_loss = _elo_calculation(self.conn, p1_new, p2_new)
+                        p2_gain, p1_loss = _elo_calculation(self.conn, p2_new, p1_new)
                         
                         # update stored info
-                        row["p1_elo_label"].setProperty("elo_change", (p1_new, p_change1, p_change2))
-                        row["p2_elo_label"].setProperty("elo_change", (p2_new, p_change2, p_change1))
+                        row["p1_elo_label"].setProperty("elo_change", (p1_new, p1_gain, p1_loss))
+                        row["p2_elo_label"].setProperty("elo_change", (p2_new, p2_gain, p2_loss))
                         
                         if not row["p1_button"].clicked or not row["p1_button"].clicked:
                             
                             # update display text
-                            row["p1_elo_label"].setText(f"{p1_new["current_elo"]:.0f} + {p_change1:.0f}, - {p_change2:.0f}")
-                            row["p2_elo_label"].setText(f"{p2_new["current_elo"]:.0f} + {p_change2:.0f}, - {p_change1:.0f}")
+                            row["p1_elo_label"].setText(f"{p1_new["current_elo"]:.0f}, +{p1_gain:.0f}, {p1_loss:.0f}")
+                            row["p2_elo_label"].setText(f"{p2_new["current_elo"]:.0f}, +{p2_gain:.0f}, {p2_loss:.0f}")
             
             # ---------------------------------------------------------------
             # Functions to build the UI
@@ -570,12 +578,12 @@ class MainSessionWindow(QMainWindow):
                 layout.addWidget(right_btn, vert_offset, 2)
 
                 # Rounded float formatting for ELO labels
-                p1_elo_lbl = QLabel(f"{p1_elo[0]["current_elo"]:.0f} + {p1_elo[1]:.0f}, - {p1_elo[2]:.0f}")
+                p1_elo_lbl = QLabel(f"{p1_elo[0]["current_elo"]:.0f}, +{p1_elo[1]:.0f}, {p1_elo[2]:.0f}")
                 p1_elo_lbl.setProperty("elo_change", p1_elo)
                 p1_elo_lbl.setStyleSheet(f"background:transparent; font-size:{14 * self.scale}px; color:{TEXT}")
                 layout.addWidget(p1_elo_lbl, vert_offset + 1, 0, alignment=Qt.AlignLeft)
                 
-                p2_elo_lbl = QLabel(f"{p2_elo[0]["current_elo"]:.0f} + {p2_elo[1]:.0f}, - {p2_elo[2]:.0f}")
+                p2_elo_lbl = QLabel(f"{p2_elo[0]["current_elo"]:.0f}, +{p2_elo[1]:.0f}, {p2_elo[2]:.0f}")
                 p2_elo_lbl.setProperty("elo_change", p2_elo)
                 p2_elo_lbl.setStyleSheet(f"background:transparent; font-size:{14 * self.scale}px; color:{TEXT}")
                 layout.addWidget(p2_elo_lbl, vert_offset + 1, 2, alignment=Qt.AlignLeft)
@@ -602,22 +610,26 @@ class MainSessionWindow(QMainWindow):
             # Functions to control rounds
             # ---------------------------------------------------------------
             
-            def add_new_round(layout: QGridLayout, round_to_rebuild=None):
+            def add_new_round(layout: QGridLayout):
                 """
                 Adds a new round to the game manager panel.
                 Accepts round_to_rebuild so that an exact copy of a previous round can be refreshed to update the UI.
                 """
                 
-                if round_to_rebuild is None:
-                    # Get players from seed and update the builder
-                    players_names = get_items_from_qlist(self.players_list_seed)
-                    self.builder.update_players(players_names)
+                # Get players from seed and update the builder
+                players_names = get_items_from_qlist(self.players_list_seed)
+                self.builder.update_players(players_names)
                     
-                    # Start a new row for a new round
-                    self.session_items.append([])
-                    round_, bye = self.builder.create_round()
-                else:
-                    round_, bye = round_to_rebuild
+                edges, nodes = self.builder.estimate_rounds_left()
+                self.console.append(f"Edges: {edges}, Nodes: {nodes}")
+                if edges == 0:
+                    self.console.warn("No Matches Left to Play!")
+                    return
+                    
+                # Start a new row for a new round
+                self.session_items.append([])
+                round_, bye = self.builder.create_round()
+
 
                 col = self.round_number
 
@@ -642,13 +654,10 @@ class MainSessionWindow(QMainWindow):
                     fn2, ln2 = match[1].split(" ")
                     p2 = get_player(self.conn, get_pid_from_name(self.conn, fn2.strip(), ln2.strip()))
 
-                    p_change1, _ = calc_elo_change(p1["current_elo"], p2["current_elo"])
-                    p_change2, _ = calc_elo_change(p2["current_elo"], p1["current_elo"])
+                    p1_gain, p2_loss = _elo_calculation(self.conn, p1, p2)
+                    p2_gain, p1_loss = _elo_calculation(self.conn, p2, p1)
 
-                    p_change1 = abs(p_change1)
-                    p_change2 = abs(p_change2)
-
-                    _round_row(card_layout, vert_offset, match[0], match[1], (p1, p_change1, p_change2), (p2, p_change2, p_change1), round_id)
+                    _round_row(card_layout, vert_offset, match[0], match[1], (p1, p1_gain, p1_loss), (p2, p2_gain, p2_loss), round_id)
                     _round_spacer(card_layout, vert_offset + 2)
 
                 if bye is None:
@@ -661,12 +670,12 @@ class MainSessionWindow(QMainWindow):
                 card_layout.setRowStretch(vert_offset + 4, 1)  # Pushes internal rows upward cleanly
 
                 self.round_number += 1
-                
-                edges, nodes = self.builder.estimate_rounds_left()
-                self.console.append(f"Edges: {edges}, Nodes: {nodes}")
+            
                 return card_layout
                 
             def remove_last_round(layout: QGridLayout, col: int):
+                
+                self.session_items.pop(-1)
                 
                 for row in range(layout.rowCount()):
                     item = layout.itemAtPosition(row, col)
@@ -900,7 +909,7 @@ class MainSessionWindow(QMainWindow):
             self.save = self.exit_code
         
         session = get_session(self.conn, self.session_id)
-            
+        
         
         # if we are not saving the current session
         if not self.save and session["status"] != "completed":
@@ -952,22 +961,26 @@ class MainSessionWindow(QMainWindow):
             
             if not text:
                 self.console.append("Available commands:")
-                self.console.append("\n")
+                self.console.append(" ")
                 self.console.append("  help - Show this help message")
                 self.console.append("  clear - Clear the console")
-                self.console.append("  echo <text> - Echo the text back to the console")
                 self.console.append("  nround - creates a new round")
                 self.console.append("  dround - deletes the last round")
                 self.console.append("  lay <action> - quickly changes the layout")
                 self.console.append("  close <action> - closes the window and either 'save' or 'discard' session")
                 
             elif text == "lay":
-                self.console.append("Possible Decorators for comand 'lay'")
-                self.console.append("setup")
-                self.console.append("mini")
-                self.console.append("adv")
-                self.console.append("all")
-                self.console.append("cmd")
+                self.console.append("Possible Decorators for comand 'lay':")
+                self.console.append("  setup")
+                self.console.append("  mini")
+                self.console.append("  adv")
+                self.console.append("  all")
+                self.console.append("  cmd")
+                
+            elif text == "list":
+                self.console.append("Possible Decorators for comand 'list':")
+                self.console.append("  players - list all players in the session currently")
+                self.console.append("  matches <round> - lists all the matches in the session or\nin the round if a round number is specified")
 
         elif cmd == "cls" or cmd == "clear":
             self.console.clear()
@@ -976,18 +989,89 @@ class MainSessionWindow(QMainWindow):
             text = " ".join(parts[1:])
             self.console.append(text)
                 
+        # list infomation
+        elif cmd == "list":
+            if parts[1] == "players":
+                players = get_items_from_qlist(self.players_list_seed)
+                for player in players:
+                    self.console.append(player)
+                    
+            if parts[1] == "matches":
+                if parts[2]:
+                    target_round = int(parts[2])
+                    
+                    for i, r in enumerate(self.builder.rounds_played):
+                        if (i + 1) == target_round:
+                            for u, v in r:
+                                self.console.append(f"{u} | {v}")
+                
+                else:
+                    for r in self.builder.rounds_played:
+                        for u, v in r:
+                            self.console.append(f"{u} | {v}")
+            
+        # add a new player
+        elif cmd == "nplayer":
+            match = re.findall(r"<(.*?)>", command)
+            
+            if match:
+                remove_all_from_qlist(self.selected_players_list)
+                
+                for text in match:
+                    fn, ln = text.split(" ")
+                    fn = clean_name(fn)
+                    ln = clean_name(ln)
+                    p_name = f"{fn} {ln}"
+                    
+                    item = self.selected_players_list.findItems(p_name, Qt.MatchExactly)
+                    if not item:
+                        p_name = QListWidgetItem(p_name)
+                        self.selected_players_list.addItem(p_name)
+                    else: 
+                        self.console.warn(f"Player: {p_name} already submitted")
+                
+                self.button_add.click()
+                remove_all_from_qlist(self.selected_players_list)
+                
+        # remove player
+        elif cmd == "rplayer":
+            match = re.findall(r"<(.*?)>", command)
+            
+            if match:
+                remove_all_from_qlist(self.selected_players_list)
+                
+                for text in match:
+                    fn, ln = text.split(" ")
+                    fn = clean_name(fn)
+                    ln = clean_name(ln)
+                    p_name = f"{fn} {ln}"
+                    
+                    item = self.selected_players_list.findItems(p_name, Qt.MatchExactly)
+                    if not item:
+                        p_name = QListWidgetItem(p_name)
+                        self.selected_players_list.addItem(p_name)
+                    else: 
+                        self.console.warn(f"Player: {p_name} already submitted")
+                    
+                self.button_remove.click()
+                remove_all_from_qlist(self.selected_players_list)
+            
+                
+        # create round
         elif cmd == "nround":
             if get_items_from_qlist(self.players_list_seed) == None:
                 self.console.warn("No players selected")
             else:
                 self.add_round_action.trigger()
             
+        # delete round
         elif cmd == "dround":
             if self.round_number == 0:
                 self.console.warn("No rounds to delete")
             else:
                 self.remove_round_action.trigger()
             
+        # close and save or dont save the session
         elif cmd == "close":
             text = " ".join(parts[1:])
             
@@ -1002,6 +1086,7 @@ class MainSessionWindow(QMainWindow):
             else:
                 self.console.warn(f"Decorator not recognised: {text}")
 
+        # changes layout
         elif cmd == "lay":
             text = " ".join(parts[1:])
             

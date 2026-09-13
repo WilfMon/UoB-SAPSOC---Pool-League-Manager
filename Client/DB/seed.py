@@ -196,9 +196,10 @@ for sem in final_parsed_data:
             #Per Session Logic
             elif re.match(ses_format, round_[0]):
                 
-                ses_id = create_session(conn, sem_id, round_[0], [])
                 ses_date = format_date(round_[0])
-                up_session_status(conn, ses_id, "completed")
+                ses_id = create_session(conn, sem_id, ses_date, [])
+                
+                up_session_status(conn, ses_id - 1, "completed")
                 
                 
                 round_count = 1
