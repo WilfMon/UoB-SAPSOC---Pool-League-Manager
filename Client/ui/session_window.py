@@ -996,12 +996,9 @@ class MainSessionWindow(QMainWindow):
             else:
                 self.console.append(f"No extra info exists for this command: {text}")
 
+        # clear console
         elif cmd == "cls" or cmd == "clear":
             self.console.clear()
-
-        elif cmd == "echo":
-            text = " ".join(parts[1:])
-            self.console.append(text)
                 
         # list infomation
         elif cmd == "list":
@@ -1130,6 +1127,11 @@ class MainSessionWindow(QMainWindow):
                 
             else:
                 self.console.warn(f"Decorator not recognised: {text}")
+
+        # fun commands
+        elif cmd == "echo":
+            text = " ".join(parts[1:])
+            self.console.append(text)
 
         else:
             self.console.inform(f"Unknown command: {cmd}")

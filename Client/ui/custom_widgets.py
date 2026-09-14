@@ -1,4 +1,4 @@
-from PySide6.QtCore import QPoint, Qt, Signal, QPropertyAnimation, QEasingCurve, Property
+from PySide6.QtCore import QPoint, Qt, Signal, QPropertyAnimation, QEasingCurve, Property, QEvent
 from PySide6.QtWidgets import QWidget, QHBoxLayout, QLabel, QMenu, QPushButton, QSizePolicy, QApplication, QPlainTextEdit, QLineEdit, QVBoxLayout, QSplitter, QCheckBox
 from PySide6.QtGui import QAction, QPainter, QColor
 
@@ -152,7 +152,10 @@ class ConsoleWidget(QWidget):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        
+
+        self.last_cmd = []
+        self.last_cmd_tracker = -1
+
         self.setAttribute(Qt.WA_StyledBackground, True)
         self.setAutoFillBackground(True)
 
@@ -189,6 +192,36 @@ class ConsoleWidget(QWidget):
 
         self.input.returnPressed.connect(self._on_return_pressed)
 
+        # Install event filter on the input field
+        self.input.installEventFilter(self)
+
+    # Intercept key events sent to self.input
+    def eventFilter(self, obj, event):
+        if obj is self.input and event.type() == QEvent.Type.KeyPress:
+            if event.key() == Qt.Key.Key_Up:
+                if self.last_cmd:
+                    self.last_cmd_tracker -= 1
+                    
+                    if abs(self.last_cmd_tracker) > len(self.last_cmd):
+                        self.last_cmd_tracker = - len(self.last_cmd)
+                        
+                    self.input.setText(self.last_cmd[self.last_cmd_tracker])
+                    
+                return True  # Consume the event (prevents moving text cursor)
+            
+            if event.key() == Qt.Key.Key_Down:
+                if self.last_cmd:                        
+                    self.last_cmd_tracker += 1
+                    
+                    if self.last_cmd_tracker > -1:
+                        self.last_cmd_tracker = -1
+                    
+                    self.input.setText(self.last_cmd[self.last_cmd_tracker])
+                    
+                return True  # Consume the event (prevents moving text cursor)
+
+        return super().eventFilter(obj, event)
+
     def _on_return_pressed(self):
         text = self.input.text().strip()
         if not text:
@@ -196,6 +229,8 @@ class ConsoleWidget(QWidget):
 
         # echo command
         self.append(f">> {text}")
+        self.last_cmd.append(text)
+        self.last_cmd_tracker = -1
 
         self.commandEntered.emit(text)
 
@@ -207,7 +242,7 @@ class ConsoleWidget(QWidget):
 
     def warn(self, text: str):
         self.output.appendPlainText(f"WARN | {text}")
-        
+
     def inform(self, text: str):
         self.output.appendPlainText(f"INFO | {text}")
 
