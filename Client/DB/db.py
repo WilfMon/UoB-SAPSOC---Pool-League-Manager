@@ -485,12 +485,22 @@ def get_session(conn, session_id):
 
 
 def up_session_status(conn, session_id, status):
-    """Update a session status"""
+    """
+    Update a session status\n
+    If the session is completed, update all players active status and elo decay
+    """
     with transaction(conn):
         conn.execute("UPDATE sessions SET status = ? WHERE session_id = ?", (status, session_id))
         
     if status == "completed" and session_id != 0:
-        update_player_elo_decay(conn, session_id)
+        config = Settings().load_settings()
+        
+        update_player_active(conn, config["active_sessions_count"])
+        update_player_elo_decay(
+            conn, session_id, 
+            decay_sessions_count=config["elo_vars"]["decay_sessions_count"],
+            rock_bottom_elo=config["elo_vars"]["rock_bottom_elo"]
+        )
 
 
 def delete_session(conn, session_id):

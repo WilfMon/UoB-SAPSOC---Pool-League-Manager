@@ -917,7 +917,6 @@ class MainSessionWindow(QMainWindow):
             
         # if we are saving
         else:
-            update_player_active(self.conn, self.config["active_sessions_count"])
             up_session_status(self.conn, self.session_id, "completed")
                 
         event.accept()
