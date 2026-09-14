@@ -23,7 +23,7 @@ from utils.utils_classes import SessionBuilder
 from DB.db import (
                     get_connection, list_active_players, get_pid_from_name, get_player, create_round, get_match, get_name_from_pid, delete_round, get_round_id, get_session, list_all_semesters,
                    create_semester, create_session, list_all_players, add_player, record_match, delete_match, get_match_id, listen, _elo_calculation, delete_session, up_session_status, update_player_active,
-                   get_semester_standings, get_alltime_standings,
+                   get_semester_standings, get_alltime_standings, get_session_from_date, get_semester, list_players_in_session,
                    ACTIONS
                    )
 
@@ -41,6 +41,8 @@ class MainSessionWindow(QMainWindow):
         
         self.config = config
         self.scale = config["scale"]
+        
+        self.elo_chg_view = False
 
         WIDTH = int(1960 * self.scale)
         HEIGHT = int(1080 * self.scale)
@@ -64,7 +66,7 @@ class MainSessionWindow(QMainWindow):
         
         # create semester if it already dosent exist
         date_time = datetime.datetime.now()
-        self.date = date_time.strftime("%d") + "." + date_time.strftime("%m") + "." + date_time.strftime("%Y") # 01.01.2000 first jan 2000
+        self.date = date_time.strftime("%Y") + "-" + date_time.strftime("%m") + "-" + date_time.strftime("%d") # 2000-01-01 first jan 2000
         self.year = date_time.strftime("%Y")
         self.month = int(date_time.strftime("%m"))
         
@@ -432,8 +434,6 @@ class MainSessionWindow(QMainWindow):
                 main_elo = _fetch_elo_label(main.position)
                 other_elo = _fetch_elo_label(other.position)
                 
-                print(self.session_items)
-                
                 main_elo.setStyleSheet(f"background:transparent; font-size:{14 * self.scale}px; color:{GREEN}")
                 other_elo.setStyleSheet(f"background:transparent; font-size:{14 * self.scale}px; color:{RED}")
                 
@@ -504,6 +504,15 @@ class MainSessionWindow(QMainWindow):
                 
                 for _round in self.session_items:
                     for row in _round:
+                        
+                        # check if elo should not be shown
+                        if not self.elo_chg_view:
+                            row["p1_elo_label"].hide()
+                            row["p2_elo_label"].hide()
+                        else:
+                            row["p1_elo_label"].show()
+                            row["p2_elo_label"].show()
+                        
                         # retrive old elo
                         p1_old = row["p1_elo_label"].property("elo_change")[0]
                         p2_old = row["p2_elo_label"].property("elo_change")[0]
@@ -550,7 +559,7 @@ class MainSessionWindow(QMainWindow):
                 
                 return card, card_layout
             
-            def _round_row(layout, vert_offset, left: str, right: str, p1_elo: str, p2_elo: str, round_id: int) -> QWidget:
+            def _round_row(layout, vert_offset, left: str, right: str, p1_elo: tuple, p2_elo: tuple, round_id: int) -> QWidget:
 
                 left_btn = CustomButton()
                 left_btn.setText(left)
@@ -581,12 +590,17 @@ class MainSessionWindow(QMainWindow):
                 p1_elo_lbl = QLabel(f"{p1_elo[0]["current_elo"]:.0f}, +{p1_elo[1]:.0f}, {p1_elo[2]:.0f}")
                 p1_elo_lbl.setProperty("elo_change", p1_elo)
                 p1_elo_lbl.setStyleSheet(f"background:transparent; font-size:{14 * self.scale}px; color:{TEXT}")
-                layout.addWidget(p1_elo_lbl, vert_offset + 1, 0, alignment=Qt.AlignLeft)
                 
                 p2_elo_lbl = QLabel(f"{p2_elo[0]["current_elo"]:.0f}, +{p2_elo[1]:.0f}, {p2_elo[2]:.0f}")
                 p2_elo_lbl.setProperty("elo_change", p2_elo)
                 p2_elo_lbl.setStyleSheet(f"background:transparent; font-size:{14 * self.scale}px; color:{TEXT}")
+                
+                layout.addWidget(p1_elo_lbl, vert_offset + 1, 0, alignment=Qt.AlignLeft)
                 layout.addWidget(p2_elo_lbl, vert_offset + 1, 2, alignment=Qt.AlignLeft)
+                
+                if not self.elo_chg_view:
+                    p1_elo_lbl.hide()
+                    p2_elo_lbl.hide()
                 
                 self.session_items[self.round_number].append({"p1_button": left_btn, "p2_button": right_btn, "p1_elo_label": p1_elo_lbl, "p2_elo_label": p2_elo_lbl})
                 
@@ -700,8 +714,11 @@ class MainSessionWindow(QMainWindow):
             self.action_menu = self.menuBar().addMenu("Action")
             self.add_round_action = QAction("Add Round", self, triggered=lambda: add_new_round(self.main_game_manager_layout))
             self.remove_round_action = QAction("Remove Round", self, triggered=lambda: remove_last_round(self.main_game_manager_layout, self.round_number - 1))
+            
             self.action_menu.addAction(self.add_round_action)
             self.action_menu.addAction(self.remove_round_action)
+            
+            self.refresh_session_items_action = QAction("_", self, triggered=lambda: refresh_session_items())
                 
             self.main_game_manager_layout = QGridLayout()
             self.main_game_manager_layout.setSpacing(12)  # Controls horizontal distance between round columns
@@ -819,8 +836,6 @@ class MainSessionWindow(QMainWindow):
             """ Logger Function for the console """
             action = ACTIONS.get(action_code, "UNKNOWN")
             
-            #print(f"{action} # {table_name}")
-            
             # Matches
             if action == "INSERT" and table_name == "matches":
                 match_info = get_match(self.conn, rowid)
@@ -832,13 +847,11 @@ class MainSessionWindow(QMainWindow):
                 fn, ln = get_name_from_pid(self.conn, match_info["winner_id"])
                 winner_name = f"{fn} {ln}"
                 
-                self.console.append(f"Match Added | {p1_name} v {p2_name} | {winner_name}")
-                
-            if action == "DELETE" and table_name == "matches":
-                self.console.append(f"==== MATCH DELETED ====")
+                self.console.append(f"~ {table_name} # {action}")
+                self.console.append(f"    {p1_name} v {p2_name} | {winner_name}")
                 
             elif action != "UPDATE" and table_name != "elo_history":
-                self.console.append(f"{table_name} # {action}")
+                self.console.append(f"~ {table_name} # {action}")
             
         listen(self.conn, on_database_change)
         
@@ -963,18 +976,25 @@ class MainSessionWindow(QMainWindow):
                 self.console.append(" ")
                 self.console.append("  help <cmd> - Show help about a command")
                 self.console.append("  clear - Clear the console")
-                self.console.append("  list - lists information")
+                self.console.append("  list - lists information about session")
+                self.console.append("  inform - lists information from the database")
                 self.console.append("  nplayer - adds a new player to the session")
                 self.console.append("  rplayer - removes a player from the session")
                 self.console.append("  nround - creates a new round")
                 self.console.append("  dround - deletes the last round")
                 self.console.append("  lay <action> - quickly changes the layout")
                 self.console.append("  close <action> - closes the window and either 'save' or 'discard' session")
+                self.console.append("  elochg <action> - changes if elo gain/loss is displayed")
                 
             elif text == "list":
                 self.console.append("Possible Decorators for comand 'list':")
                 self.console.append("  players - list all players in the session currently")
                 self.console.append("  matches <round> - lists all the matches in the session or\n  in the round if a round number is specified")
+                
+            elif text == "inform":
+                self.console.append("Possible Decorators for comand 'inform':")
+                self.console.append("  p first_name last_name - info about a player")
+                self.console.append("  ses yyyy-mm-dd - info about a session")
                 
             elif text == "nplayer":
                 self.console.append("Format of command:")
@@ -1003,8 +1023,8 @@ class MainSessionWindow(QMainWindow):
         elif cmd == "list":
             if parts[1] == "players":
                 players = get_items_from_qlist(self.players_list_seed)
-                for player in players:
-                    self.console.append(player)
+                for p in players:
+                    self.console.append(p)
                     
             if parts[1] == "matches":
                 if parts[2]:
@@ -1022,13 +1042,61 @@ class MainSessionWindow(QMainWindow):
                             
             if not parts[1]:
                 self.console.append("No decorator supplied do cmd: help list")
+        
+        # get information from the database
+        elif cmd == "inform":
+            if parts[1] == "p":
+                if parts[2] and parts[3]:
+                    fn = parts[2].title()
+                    ln = parts[3].title()
+                    pid = get_pid_from_name(self.conn, fn, ln)
+                    
+                    if pid:
+                        p = get_player(self.conn, pid)
+                        
+                        self.console.append(f"Player: {fn} {ln}:")
+                        self.console.append(f"# id                   {p["player_id"]}")
+                        self.console.append(f"# date joined    {p["joined_date"]}")
+                        self.console.append(f"# member         {p["is_member"]}")
+                        self.console.append(f"# active             {p["is_active"]}")
+                        self.console.append(f"# elo                 {p["current_elo"]}")
+                        self.console.append(f"# decay count   {p["decay_count"]}")
+                        self.console.append(f"# decay amt      {p["decay_amt"]}")
+                        self.console.append(f"# notes             {p["notes"]}")
+                        
+                    else:
+                        self.console.warn(f"Player not recognised: {fn} {ln}")
+                
+            elif parts[1] == "ses":
+                if re.fullmatch(r"\d{4}-\d{2}-\d{2}", parts[2]):
+                    ses = get_session_from_date(self.conn, parts[2])
+                    
+                    if ses:
+                        sem = get_semester(self.conn, ses["semester_id"])
+                        players = list_players_in_session(self.conn, ses["session_id"])
+                        
+                        self.console.append(f"Session recorded on {parts[2]}:")
+                        self.console.append(f"# id          {ses["session_id"]}")
+                        self.console.append(f"# status    {ses["status"]}")
+                        self.console.append(f"# sem       {sem["display_name"]}")
+                        self.console.append(f"# players")
+                        
+                        for p in players:
+                            self.console.append(f"         {p["first_name"]} {p["last_name"]}")
+                    
+                else:
+                    self.console.warn(f"Date not recognised: {parts[2]}")
+                
+            elif parts[1] == "sem":
+                pass
             
         # add a new player
         elif cmd == "nplayer":
             match = re.findall(r"<(.*?)>", command)
             
             if match:
-                remove_all_from_qlist(self.selected_players_list)
+                if get_items_from_qlist(self.selected_players_list):
+                    remove_all_from_qlist(self.selected_players_list)
                 
                 for text in match:
                     fn, ln = text.split(" ")
@@ -1123,6 +1191,23 @@ class MainSessionWindow(QMainWindow):
             elif text == "cmd":
                 [self.header.set_panel_visible(panel[0], False) for panel in self.PANELS]
                 self.header.set_panel_visible("console", True)
+                
+            else:
+                self.console.warn(f"Decorator not recognised: {text}")
+
+        # show or hide elo change in matches
+        elif cmd == "elochg":
+            text = " ".join(parts[1:])
+            
+            if text == "show":
+                self.elo_chg_view = True
+                self.refresh_session_items_action.trigger()
+                self.console.append(f"Elo Change View: {self.elo_chg_view}")
+                
+            elif text == "hide":
+                self.elo_chg_view = False
+                self.refresh_session_items_action.trigger()
+                self.console.append(f"Elo Change View: {self.elo_chg_view}")
                 
             else:
                 self.console.warn(f"Decorator not recognised: {text}")

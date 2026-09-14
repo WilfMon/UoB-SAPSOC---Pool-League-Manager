@@ -154,7 +154,7 @@ class ConsoleWidget(QWidget):
         super().__init__(parent)
 
         self.last_cmd = []
-        self.last_cmd_tracker = -1
+        self.last_cmd_tracker = 0
 
         self.setAttribute(Qt.WA_StyledBackground, True)
         self.setAutoFillBackground(True)
@@ -230,7 +230,7 @@ class ConsoleWidget(QWidget):
         # echo command
         self.append(f">> {text}")
         self.last_cmd.append(text)
-        self.last_cmd_tracker = -1
+        self.last_cmd_tracker = 0
 
         self.commandEntered.emit(text)
 

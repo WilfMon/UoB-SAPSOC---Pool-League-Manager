@@ -50,9 +50,9 @@ def clean_to_sessions(sessions_data):
 
 
 def format_date(date):
-    day, month, year = date.split(".")
+    year, month, day = date.split("-")
     
-    return f"{year}-{month}-{day} 00:00:00"
+    return f"{year}-{month}-{day}"
 
 
 with open("DB/raw_data.txt", "r") as file:
@@ -120,51 +120,7 @@ matches_list = []
 players_set = set()
 
 sem_format = r"^\d{4}\.\d{4}\.\d+$"
-ses_format = r"^\d{2}\.\d{2}\.\d+$"
-
-for sem in final_parsed_data:
-    for session in sem:
-        for round_ in session:
-            
-            #Per Semester Logic
-            if re.match(sem_format, round_[0]):
-                #print(f"Semester: {round_[0]}")
-                pass
-                
-            #Per Session Logic
-            elif re.match(ses_format, round_[0]):
-                #print(f"Session: {round_[0]}")
-                pass
-                
-            #Per Round Logic
-            else:
-                #print(f"Round: {round_}")
-                
-                for match in round_:
-                    ls = match.split(",")
-                    
-                    def format_name(name):
-                        name = name.lower()
-                        name = name.title()
-                        return name.strip()
-                    
-                    first_name1 = format_name(ls[0])                                              
-                    last_name1 = format_name(ls[1])
-                    p_name1 = (first_name1, last_name1)
-                    
-                    first_name2 = format_name(ls[2])
-                    last_name2 = format_name(ls[3])
-                    p_name2 = (first_name2, last_name2)
-                    
-                    players_set.add(p_name1)
-                    players_set.add(p_name2)
-                    
-                    if ls[4]:
-                        #player 1 won
-                        matches_list.append((p_name1, p_name2, 1))
-                    else:
-                        #player 2 won
-                        matches_list.append((p_name1, p_name2, 0))
+ses_format = r"^\d{4}\-\d{2}\-\d+$"
                                 
 conn = get_connection()
 ses_date = None
@@ -206,6 +162,7 @@ for sem in final_parsed_data:
                 
             #Per Round Logic
             else:
+                #print(round_)
                 
                 round_id = create_round(conn, ses_id, round_count)
                 
@@ -239,7 +196,7 @@ for sem in final_parsed_data:
                             p1id,
                             p2id,
                             p1id,
-                            played_at = ses_date,
+                            played_at = f"{ses_date} 00:00:00",
                         )
                     elif ls[5].strip() == "1":
                         #player 2 won
@@ -249,5 +206,7 @@ for sem in final_parsed_data:
                             p1id,
                             p2id,
                             p2id,
-                            played_at = ses_date,
+                            played_at = f"{ses_date} 00:00:00",
                         )
+                        
+up_session_status(conn, ses_id, "completed")

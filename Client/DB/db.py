@@ -484,6 +484,12 @@ def get_session(conn, session_id):
     return row[0] if row else None
 
 
+def get_session_from_date(conn, session_date):
+    """Get information about a session from date"""
+    row = _rows_as_dicts(conn, "SELECT * FROM sessions WHERE session_date = ?", (session_date,))
+    return row[0] if row else None
+
+
 def up_session_status(conn, session_id, status):
     """
     Update a session status\n
@@ -572,13 +578,16 @@ def get_rounds_in_session(conn, session_id) -> list[tuple]:
 def _elo_calculation(conn, p1, p2) -> tuple[float, float]:
     """Calculates the elo change when p1 is the winner and p2 is the loser"""
     
-    def placement_func(x, a=2, b=0.3):
+    def placement_func(x, a=2, b=0.3, override=False):
         """
         Returns a value to multiply k_factor by to increase elo gain and loss for the first 10/12 games\n
         x - matches played
         a - const affects steepness
         b - const affects steepness
         """
+        if override:
+            return 1
+        
         y = 1 + a * (np.e ** (- b * x))
         return y
     
@@ -705,67 +714,77 @@ def record_match(
 def _recalculate_all_elo(conn):
     """Internal recalculation. Assumes a transaction is already active."""
 
+    # preserve decays in elo
+    decays = dict()
+    for ses in list_all_sessions(conn):
+        decays[ses["session_date"]] = _rows_as_dicts(conn, "SELECT * FROM elo_history WHERE elo_decay AND recorded_at = ? ORDER BY recorded_at ASC", (ses["session_date"],))
+
     conn.execute("UPDATE players SET current_elo = base_elo")
     conn.execute("DELETE FROM elo_history")
     conn.execute("UPDATE semesters_players SET points = 0")
 
     matches = conn.execute(
-        """SELECT m.match_id, m.player1_id, m.player2_id,
-                  m.winner_id, m.played_at, s.semester_id
+        """SELECT m.match_id, m.player1_id, m.player2_id, m.winner_id, m.played_at, s.session_id, s.session_date, s.semester_id
            FROM matches m
            JOIN rounds r ON m.round_id = r.round_id
            JOIN sessions s ON r.session_id = s.session_id
            ORDER BY m.match_id ASC"""
     ).fetchall()
+    
+    prev_session_id = matches[0][5] # first session id
+    prev_session_date = matches[0][6] # first session date
 
-    players = conn.execute(
-        "SELECT player_id, base_elo FROM players"
-    )
-
-    elo_map = {player_id: elo for player_id, elo in players}
-
-    for match_id, p1_id, p2_id, winner_id, played_at, semester_id in matches:
-        p1_before = elo_map[p1_id]
-
-        if p2_id is None:
-            conn.execute(
-                "UPDATE matches SET player1_elo_before = ?, player1_elo_after = ? WHERE match_id = ?",
-                (p1_before, p1_before, match_id)
-            )
-            continue
-
-        p2_before = elo_map[p2_id]
+    for match_id, p1_id, p2_id, winner_id, played_at, session_id, session_date, semester_id in matches:
+        
+        # begining of a new session therefore complete last session elo decay
+        if session_id != prev_session_id:
+            lst = decays[prev_session_date]
+            
+            if lst:
+                for d in lst:
+                    conn.execute(
+                        """INSERT INTO elo_history
+                        (player_id, match_id, elo_decay, elo_before, elo_after, elo_change, recorded_at)
+                        VALUES (?, ?, ?, ?, ?, ?, ?)""",
+                        (d["player_id"], None, 1, d["elo_before"], d["elo_after"], d["elo_change"], d["recorded_at"])
+                    )
+                
+            prev_session_id = session_id
+            prev_session_date = session_date
+        
+        p1 = get_player(conn, p1_id)
+        p2 = get_player(conn, p2_id)
 
         if winner_id == p1_id:
-            chg1, chg2 = _elo_calculation(conn, get_player(conn, p1_id), get_player(conn, p2_id))
+            chg1, chg2 = _elo_calculation(conn, p1, p2)
         elif winner_id == p2_id:
-            chg2, chg1 = _elo_calculation(conn, get_player(conn, p2_id), get_player(conn, p1_id))
+            chg2, chg1 = _elo_calculation(conn, p2, p1)
         else:
             chg1 = chg2 = 0
 
-        new1 = p1_before + chg1
-        new2 = p2_before + chg2
+        new1 = p1["current_elo"] + chg1
+        new2 = p2["current_elo"] + chg2
 
         conn.execute(
             """UPDATE matches
                SET player1_elo_before = ?, player2_elo_before = ?,
                    player1_elo_after = ?, player2_elo_after = ?
                WHERE match_id = ?""",
-            (p1_before, p2_before, new1, new2, match_id)
+            (p1["current_elo"], p2["current_elo"], new1, new2, match_id)
         )
 
         conn.execute(
             """INSERT INTO elo_history
                (player_id, match_id, elo_before, elo_after, elo_change, recorded_at)
                VALUES (?, ?, ?, ?, ?, ?)""",
-            (p1_id, match_id, p1_before, new1, new1 - p1_before, played_at)
+            (p1_id, match_id, p1["current_elo"], new1, new1 - p1["current_elo"], played_at)
         )
 
         conn.execute(
             """INSERT INTO elo_history
                (player_id, match_id, elo_before, elo_after, elo_change, recorded_at)
                VALUES (?, ?, ?, ?, ?, ?)""",
-            (p2_id, match_id, p2_before, new2, new2 - p2_before, played_at)
+            (p2_id, match_id, p2["current_elo"], new2, new2 - p2["current_elo"], played_at)
         )
 
         if winner_id is not None and semester_id is not None:
@@ -773,9 +792,18 @@ def _recalculate_all_elo(conn):
                 _award_semester_point(conn, semester_id, winner_id, p2_id)
             elif winner_id == p2_id:
                 _award_semester_point(conn, semester_id, winner_id, p1_id)
-
-        elo_map[p1_id] = new1
-        elo_map[p2_id] = new2
+                
+                
+    lst = decays[prev_session_date]
+            
+    if lst:
+        for d in lst:
+            conn.execute(
+                """INSERT INTO elo_history
+                (player_id, match_id, elo_decay, elo_before, elo_after, elo_change, recorded_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?)""",
+                (d["player_id"], None, 1, d["elo_before"], d["elo_after"], d["elo_change"], d["recorded_at"])
+            )
 
 
 def get_match(conn, match_id):
