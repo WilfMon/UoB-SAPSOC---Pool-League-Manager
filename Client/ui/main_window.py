@@ -20,7 +20,7 @@ from ui.custom_widgets import ConsoleWidget
 from utils.utils import clean_name
 from utils.utils_classes import Settings
 
-from DB.db import (
+from database.db import (
                     get_connection, list_active_players, get_pid_from_name, get_player, create_round, get_match, get_name_from_pid, delete_round, get_round_id, get_session, list_all_semesters,
                    create_semester, create_session, list_all_players, add_player, record_match, delete_match, get_match_id, listen, get_rounds_in_session, delete_session, up_session_status, update_player_active,
                    get_semester_standings, get_alltime_standings, update_player_membership, list_all_matches, get_session_id_from_round, get_semester_id_from_round, list_all_sessions, complete_semester,

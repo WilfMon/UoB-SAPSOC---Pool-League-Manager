@@ -426,6 +426,12 @@ def _award_semester_point(conn, semester_id, winner_id, loser_id):
         (points, semester_id, winner_id)
     )
 
+
+def remove_semester(conn, semester_id):
+    """Removes a semester permemantly, use with caution"""
+    with transaction(conn):
+        conn.execute("DELETE FROM semesters WHERE semester_id = ?", (semester_id,))
+
 # ---------------------------------------------------------------
 # Sessions / attendance
 # ---------------------------------------------------------------

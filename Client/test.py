@@ -1,4 +1,4 @@
-from DB.db import get_connection, get_player_matches_played, get_player_absence_streak ,recalculate_all_elo
+from database.db import get_connection, get_player_matches_played, get_player_absence_streak ,recalculate_all_elo, complete_semester, remove_semester
 
 conn = get_connection()
 
@@ -6,4 +6,4 @@ conn = get_connection()
 
 #print(get_player_absence_streak(conn, 70))
 
-recalculate_all_elo(conn)
+remove_semester(conn, 5)

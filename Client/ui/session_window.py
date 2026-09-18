@@ -20,7 +20,7 @@ from ui.custom_widgets import CustomButton, CustomHeaderBar, ConsoleWidget
 from utils.utils import clean_name, clear_grid_after_row, get_items_from_qlist, remove_item_from_qlist, remove_all_from_qlist
 from utils.utils_classes import SessionBuilder
 
-from DB.db import (
+from database.db import (
                     get_connection, list_active_players, get_pid_from_name, get_player, create_round, get_match, get_name_from_pid, delete_round, get_round_id, get_session, list_all_semesters,
                    create_semester, create_session, list_all_players, add_player, record_match, delete_match, get_match_id, listen, _elo_calculation, delete_session, up_session_status, update_player_active,
                    get_semester_standings, get_alltime_standings, get_session_from_date, get_semester, list_players_in_session,
