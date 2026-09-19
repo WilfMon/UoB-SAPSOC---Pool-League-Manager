@@ -107,6 +107,7 @@ class SessionBuilder():
         round_ = max_weight_matching(self.G, maxcardinality=True)
         
         self.remove_played_matches(round_)
+        self.rounds_played.append(round_.copy())
         
         bye = None
         
@@ -133,8 +134,7 @@ class SessionBuilder():
         # Check if any rounds are left to play
         if self.G.number_of_edges() == 0:
             self.rounds_left = False
-                
-        self.rounds_played.append(round_)
+            
         self.byes.append(bye)
         return round_, bye
     
@@ -157,10 +157,17 @@ class SessionBuilder():
             
             if self.G.has_edge(u, v): # check if the edge exists and if it doesn't don't attempt to remove
                 self.G.remove_edge(u, v)
-
-    def estimate_rounds_left(self) -> int:
+                
+    def count_matching_iterations(self):
+        # Copy the graph to avoid mutating your original data structure
+        H = self.G.copy()
+        iterations = 0
         
-        edges = self.G.number_of_edges()
-        nodes = self.G.number_of_nodes()
-        
-        return edges, nodes
+        while True:
+            matching = nx.max_weight_matching(H)
+            if not matching:
+                break
+            iterations += 1
+            H.remove_edges_from(matching)
+            
+        return iterations

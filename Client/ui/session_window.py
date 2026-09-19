@@ -613,7 +613,7 @@ class MainSessionWindow(QMainWindow):
                 
                 layout.addWidget(spacer, vert_offset, 0, 1, 3)
             
-            def round_bye_row(layout, vert_offset, bye: str) -> QWidget:
+            def _round_bye_row(layout, vert_offset, bye: str) -> QWidget:
                 """Adds the last row to the round container for the bye"""
                 bye_lbl = QLabel(f"Bye: {bye}")
                 bye_lbl.setStyleSheet(f"color:{TEXT}; background:transparent; font-size:12px; font-weight:600;")
@@ -634,15 +634,17 @@ class MainSessionWindow(QMainWindow):
                 players_names = get_items_from_qlist(self.players_list_seed)
                 self.builder.update_players(players_names)
                     
-                edges, nodes = self.builder.estimate_rounds_left()
-                self.console.append(f"Edges: {edges}, Nodes: {nodes}")
-                if edges == 0:
-                    self.console.warn("No Matches Left to Play!")
-                    return
-                    
                 # Start a new row for a new round
                 self.session_items.append([])
                 round_, bye = self.builder.create_round()
+                
+                # display how many rounds are left
+                iterations = self.builder.count_matching_iterations()
+                if not self.builder.rounds_left and iterations == 0 and round_ == set():
+                    self.console.warn("No Matches Left to Play!")
+                    return
+                else:
+                    self.console.append(f"Rounds Left: {iterations}")
 
 
                 col = self.round_number
@@ -678,7 +680,7 @@ class MainSessionWindow(QMainWindow):
                     bye = "Na"
 
                 # Fixed: Use vert_offset + 3 (next available row) instead of i * 3
-                round_bye_row(card_layout, vert_offset + 3, bye)
+                _round_bye_row(card_layout, vert_offset + 3, bye)
 
                 # 3. Standardize layout row height constraints
                 card_layout.setRowStretch(vert_offset + 4, 1)  # Pushes internal rows upward cleanly
@@ -732,6 +734,13 @@ class MainSessionWindow(QMainWindow):
             game_manager_panel_scoll_area.setWidgetResizable(True)
             game_manager_panel_scoll_area.setMinimumWidth(int(200 * self.scale))
             game_manager_panel_scoll_area.viewport().setStyleSheet("background: transparent;")
+            
+            def scroll_to_right(min_val, max_val):
+                # Whenever the scroll range changes, set the value to the new maximum
+                game_manager_panel_scoll_area.horizontalScrollBar().setValue(max_val)
+
+            # Connect the rangeChanged signal to our auto-scroll function
+            game_manager_panel_scoll_area.horizontalScrollBar().rangeChanged.connect(scroll_to_right)
             
             self.round_number = 0
             
