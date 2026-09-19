@@ -3,16 +3,16 @@
 block_cipher = None
 
 a = Analysis(
-    ['main.py'],
-    pathex=[],
+    ['Client/main.py'],
+    pathex=['Client'],
     binaries=[],
     datas=[
-        ('database/league.db', 'database'),
-        ('database/schema.sql', 'database'),
-        ('resources/', 'resources'),
-        ('ui/', 'ui'),
-        ('utils/', 'utils'),
-        ('settings.json', '.')
+        ('Client/database/league.db', 'database'),
+        ('Client/database/schema.sql', 'database'),
+        ('Client/resources/', 'resources'),
+        ('Client/ui/', 'ui'),
+        ('Client/utils/', 'utils'),
+        ('Client/settings.json', '.')
     ],
     hiddenimports=[],
     hookspath=[],
