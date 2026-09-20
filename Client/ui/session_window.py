@@ -41,6 +41,7 @@ class MainSessionWindow(QMainWindow):
         
         self.config = config
         self.scale = config["scale"]
+        self.gm_font_size = 20
         
         self.elo_chg_view = False
 
@@ -434,8 +435,8 @@ class MainSessionWindow(QMainWindow):
                 main_elo = _fetch_elo_label(main.position)
                 other_elo = _fetch_elo_label(other.position)
                 
-                main_elo.setStyleSheet(f"background:transparent; font-size:{14 * self.scale}px; color:{GREEN}")
-                other_elo.setStyleSheet(f"background:transparent; font-size:{14 * self.scale}px; color:{RED}")
+                main_elo.setStyleSheet(f"background:transparent; font-size:{self.gm_font_size * self.scale}px; color:{GREEN}")
+                other_elo.setStyleSheet(f"background:transparent; font-size:{self.gm_font_size * self.scale}px; color:{RED}")
                 
                 new_m, new_o = _calc_new_elo_for_labels(main_elo, other_elo)
                 
@@ -472,8 +473,8 @@ class MainSessionWindow(QMainWindow):
                 main_elo = _fetch_elo_label(main.position)
                 other_elo = _fetch_elo_label(other.position)
                 
-                main_elo.setStyleSheet(f"background:transparent; font-size:{14 * self.scale}px; color:{TEXT}")
-                other_elo.setStyleSheet(f"background:transparent; font-size:{14 * self.scale}px; color:{TEXT}")
+                main_elo.setStyleSheet(f"background:transparent; font-size:{self.gm_font_size * self.scale}px; color:{TEXT}")
+                other_elo.setStyleSheet(f"background:transparent; font-size:{self.gm_font_size * self.scale}px; color:{TEXT}")
                 
                 p1_elo = main_elo.property("elo_change")
                 main_elo.setText(f"{p1_elo[0]["current_elo"]:.0f} + {p1_elo[1]:.0f}, - {p1_elo[2]:.0f}")
@@ -566,21 +567,21 @@ class MainSessionWindow(QMainWindow):
                 left_btn.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
                 left_btn.normalClick.connect(on_normal_click)
                 left_btn.shiftClick.connect(on_shift_click)
-                left_btn.setStyleSheet(f"border-radius: 3px; background-color: {CUE_WHITE}; {_pad(4)}")
+                left_btn.setStyleSheet(f"border-radius: 3px; background-color: {CUE_WHITE}; {_pad(4)}; font-size:{self.gm_font_size * self.scale}px")
                 
                 right_btn = CustomButton()
                 right_btn.setText(right)
                 right_btn.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
                 right_btn.normalClick.connect(on_normal_click)
                 right_btn.shiftClick.connect(on_shift_click)
-                right_btn.setStyleSheet(f"border-radius: 3px; background-color: {CUE_WHITE}; {_pad(4)}")
+                right_btn.setStyleSheet(f"border-radius: 3px; background-color: {CUE_WHITE}; {_pad(4)}; font-size:{self.gm_font_size * self.scale}px")
 
                 left_btn.info((left_btn, right_btn), (self.round_number, vert_offset // 3, 0), round_id)
                 right_btn.info((right_btn, left_btn), (self.round_number, vert_offset // 3, 1), round_id)
 
                 # Center the VS label
                 vs_lbl = QLabel("v")
-                vs_lbl.setStyleSheet("background: transparent;")
+                vs_lbl.setStyleSheet(f"background: transparent; font-size:{self.gm_font_size * self.scale}px;")
                 
                 layout.addWidget(left_btn, vert_offset, 0)
                 layout.addWidget(vs_lbl, vert_offset, 1, alignment=Qt.AlignCenter)
@@ -589,11 +590,11 @@ class MainSessionWindow(QMainWindow):
                 # Rounded float formatting for ELO labels
                 p1_elo_lbl = QLabel(f"{p1_elo[0]["current_elo"]:.0f}, +{p1_elo[1]:.0f}, {p1_elo[2]:.0f}")
                 p1_elo_lbl.setProperty("elo_change", p1_elo)
-                p1_elo_lbl.setStyleSheet(f"background:transparent; font-size:{14 * self.scale}px; color:{TEXT}")
+                p1_elo_lbl.setStyleSheet(f"background:transparent; font-size:{self.gm_font_size * self.scale}px; color:{TEXT}")
                 
                 p2_elo_lbl = QLabel(f"{p2_elo[0]["current_elo"]:.0f}, +{p2_elo[1]:.0f}, {p2_elo[2]:.0f}")
                 p2_elo_lbl.setProperty("elo_change", p2_elo)
-                p2_elo_lbl.setStyleSheet(f"background:transparent; font-size:{14 * self.scale}px; color:{TEXT}")
+                p2_elo_lbl.setStyleSheet(f"background:transparent; font-size:{self.gm_font_size * self.scale}px; color:{TEXT}")
                 
                 layout.addWidget(p1_elo_lbl, vert_offset + 1, 0, alignment=Qt.AlignLeft)
                 layout.addWidget(p2_elo_lbl, vert_offset + 1, 2, alignment=Qt.AlignLeft)
@@ -616,7 +617,7 @@ class MainSessionWindow(QMainWindow):
             def _round_bye_row(layout, vert_offset, bye: str) -> QWidget:
                 """Adds the last row to the round container for the bye"""
                 bye_lbl = QLabel(f"Bye: {bye}")
-                bye_lbl.setStyleSheet(f"color:{TEXT}; background:transparent; font-size:12px; font-weight:600;")
+                bye_lbl.setStyleSheet(f"color:{TEXT}; background:transparent; font-size:{self.gm_font_size * self.scale}px; font-weight:600;")
                 
                 layout.addWidget(bye_lbl, vert_offset, 0)
             
