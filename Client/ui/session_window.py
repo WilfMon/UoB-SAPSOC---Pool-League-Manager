@@ -41,7 +41,7 @@ class MainSessionWindow(QMainWindow):
         
         self.config = config
         self.scale = config["scale"]
-        self.gm_font_size = 20
+        self.gm_font_size = round(self.scale * 22)
         
         self.elo_chg_view = False
 
@@ -50,8 +50,8 @@ class MainSessionWindow(QMainWindow):
 
         self.setWindowTitle(f"Session")
         self.setMinimumSize(WIDTH, HEIGHT)
-        self.default_font = QFont("Segoe UI", round(self.scale * 18))
-        self.small_font = QFont("Segoe UI", round(self.scale * 12))
+        self.default_font = QFont("Segoe UI", round(self.scale * 22))
+        self.small_font = QFont("Segoe UI", round(self.scale * 16))
         
         central = QWidget()
         self.layout_ = QGridLayout()
