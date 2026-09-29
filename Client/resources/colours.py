@@ -19,3 +19,18 @@ WOOD           = "#4A2E1A"
 WOOD_DARK      = "#24150A"
 BRASS_LIGHT    = "#ebcd95"
 CUE_WHITE      = "#1F1D1C"  # inverted-bg for cards sitting on cards
+
+# match quality colors
+QUALITY_COLORS = {
+    0: "#153152",
+    1: "#214E9A",
+    2: "#428AC9",
+    3: "#4D8FA9",
+    4: "#41966B",
+    5: "#A6B94D",
+    6: "#C8A640",
+    7: "#C6A8D4",
+    8: "#673F8A",
+    9: "#4B166A",
+    10: "#39144C"
+}

@@ -119,6 +119,14 @@ def get_player(conn, player_id):
     return rows[0] if rows else None
 
 
+def get_player_current_elo_high_low():
+    """Get the elo extremes"""
+    conn = get_connection()
+    
+    rows = _rows_as_dicts(conn, "SELECT * FROM players ORDER BY current_elo DESC")
+    return rows[0], rows[-1]
+
+
 def list_all_players(conn):
     """Return all players sorted by current Elo descending."""
     return _rows_as_dicts(conn, "SELECT * FROM players ORDER BY current_elo DESC")
@@ -581,7 +589,7 @@ def get_rounds_in_session(conn, session_id) -> list[tuple]:
 # Matches
 # ---------------------------------------------------------------
 
-def _elo_calculation(conn, p1, p2) -> tuple[float, float]:
+def _elo_calculation(conn, p1, p2, return_prob=None) -> tuple[float, float]:
     """Calculates the elo change when p1 is the winner and p2 is the loser"""
     
     def placement_func(x, a=2, b=0.3, override=False):
@@ -618,11 +626,20 @@ def _elo_calculation(conn, p1, p2) -> tuple[float, float]:
     E1 = 1 / (1 + (BASE ** ((p2_elo - p1_elo) / SCALE_FACTOR)))
     E2 = 1 - E1
     
+    if return_prob:
+        return (E1, E2)
+    
     # calc the change in ratings due to the outcome
     Ra = k_factor_1 * (1 - E1) # a won
     Rb = k_factor_2 * (0 - E2) # b lost
 
     return (Ra, Rb)
+
+
+def elo_prob(p1, p2):
+    conn = get_connection()
+    
+    return _elo_calculation(conn, p1, p2, return_prob=True)
 
 
 def record_match(

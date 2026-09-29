@@ -206,6 +206,8 @@ class MainWindow(QMainWindow):
             self.console.append("  save matches <path> - write all matches to a .txt file for safekeeping")
             self.console.append("  members <action> <first_name last_name> ... - update the membership status of a player")
             self.console.append("  semester end - completes the current semester")
+            self.console.append("  ping active - refreshes the active status of all players in the database")
+            self.console.append("  optiqualvar - optimises the match quality variables")
 
         elif cmd == "cls" or cmd == "clear":
             self.console.clear()
@@ -283,6 +285,13 @@ class MainWindow(QMainWindow):
                     update_player_active(self.conn, int(parts[2]))
                 else:
                     update_player_active(self.conn)
+        
+        elif cmd == "optiqualvar":
+            from utils.utils import optimise_quality_vars
+            
+            self.console.append("Optimising quality variables...")
+            q_high, q_low = optimise_quality_vars()
+            self.console.append(f"Optimised quality variables: High = {q_high}, Low = {q_low}")
         
         else:
             self.console.append(f"Unknown Command: {cmd}")

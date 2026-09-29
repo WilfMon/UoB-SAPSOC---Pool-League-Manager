@@ -1,8 +1,13 @@
 {
     "scale": 1.0,
-
     "active_sessions_count": 5,
-
+    "match_quality_factors": {
+        "diff_factor": 0.05,
+        "total_elo_factor": 1500,
+        "peak_factor": 0.04,
+        "max_quality": 3.1192670145539836,
+        "min_quality": 1.0546360768839742
+    },
     "elo_vars": {
         "base": 10,
         "scale_factor": 600,

@@ -17,7 +17,7 @@ from .confimation_window import ConfirmationWindow
 
 from ui.custom_widgets import CustomButton, CustomHeaderBar, ConsoleWidget
 
-from utils.utils import clean_name, clear_grid_after_row, get_items_from_qlist, remove_item_from_qlist, remove_all_from_qlist
+from utils.utils import clean_name, clear_grid_after_row, get_items_from_qlist, remove_item_from_qlist, remove_all_from_qlist, calc_match_quality
 from utils.utils_classes import SessionBuilder
 
 from database.db import (
@@ -27,7 +27,7 @@ from database.db import (
                    ACTIONS
                    )
 
-from resources.colours import DARK, HEAD, PANEL_COL, LINE, TEXT, ACCENT, GREEN, RED, CUE_WHITE
+from resources.colours import DARK, HEAD, PANEL_COL, LINE, TEXT, ACCENT, GREEN, RED, CUE_WHITE, QUALITY_COLORS
 from resources.stylesheets import _scrollbar_stylesheet, _title_text_stylesheet, _normal_text_stylesheet
 
 class MainSessionWindow(QMainWindow):
@@ -44,6 +44,7 @@ class MainSessionWindow(QMainWindow):
         self.gm_font_size = round(self.scale * 22)
         
         self.elo_chg_view = False
+        self.matchq_view = False
 
         WIDTH = int(1960 * self.scale)
         HEIGHT = int(1080 * self.scale)
@@ -429,8 +430,8 @@ class MainSessionWindow(QMainWindow):
                     print("already clicked")
                     return
                 
-                main.setStyleSheet(f"border-radius: 3px; background-color: {GREEN}; {_pad(4)}")
-                other.setStyleSheet(f"border-radius: 3px; background-color: {RED}; {_pad(4)}")
+                main.setStyleSheet(f"border-radius: 3px; background-color: {GREEN}; {_pad(4)}; font-size:{self.gm_font_size * self.scale}px")
+                other.setStyleSheet(f"border-radius: 3px; background-color: {RED}; {_pad(4)}; font-size:{self.gm_font_size * self.scale}px")
                 
                 main_elo = _fetch_elo_label(main.position)
                 other_elo = _fetch_elo_label(other.position)
@@ -467,8 +468,8 @@ class MainSessionWindow(QMainWindow):
                     print("already not clicked")
                     return
                 
-                main.setStyleSheet(f"border-radius: 3px; background-color: {CUE_WHITE}; {_pad(4)}")
-                other.setStyleSheet(f"border-radius: 3px; background-color: {CUE_WHITE}; {_pad(4)}")
+                main.setStyleSheet(f"border-radius: 3px; background-color: {CUE_WHITE}; {_pad(4)}; font-size:{self.gm_font_size * self.scale}px")
+                other.setStyleSheet(f"border-radius: 3px; background-color: {CUE_WHITE}; {_pad(4)}; font-size:{self.gm_font_size * self.scale}px")
                 
                 main_elo = _fetch_elo_label(main.position)
                 other_elo = _fetch_elo_label(other.position)
@@ -513,6 +514,11 @@ class MainSessionWindow(QMainWindow):
                         else:
                             row["p1_elo_label"].show()
                             row["p2_elo_label"].show()
+                            
+                        if not self.matchq_view:
+                            row["q_label"].hide()
+                        else:
+                            row["q_label"].show()
                         
                         # retrive old elo
                         p1_old = row["p1_elo_label"].property("elo_change")[0]
@@ -583,9 +589,16 @@ class MainSessionWindow(QMainWindow):
                 vs_lbl = QLabel("v")
                 vs_lbl.setStyleSheet(f"background: transparent; font-size:{self.gm_font_size * self.scale}px;")
                 
+                # match quality label
+                quality = calc_match_quality(p1_elo[0], p2_elo[0])
+                q_label = QLabel(str(quality))
+                q_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+                q_label.setStyleSheet(f"background: {QUALITY_COLORS[quality]}; border-radius: 3px; font-size:{self.gm_font_size * self.scale}px; {_pad(4)}")
+                
                 layout.addWidget(left_btn, vert_offset, 0)
                 layout.addWidget(vs_lbl, vert_offset, 1, alignment=Qt.AlignCenter)
                 layout.addWidget(right_btn, vert_offset, 2)
+                layout.addWidget(q_label, vert_offset, 3, alignment=Qt.AlignCenter)
 
                 # Rounded float formatting for ELO labels
                 p1_elo_lbl = QLabel(f"{p1_elo[0]["current_elo"]:.0f}, +{p1_elo[1]:.0f}, {p1_elo[2]:.0f}")
@@ -602,8 +615,17 @@ class MainSessionWindow(QMainWindow):
                 if not self.elo_chg_view:
                     p1_elo_lbl.hide()
                     p2_elo_lbl.hide()
+                    
+                if not self.matchq_view:
+                    q_label.hide()
                 
-                self.session_items[self.round_number].append({"p1_button": left_btn, "p2_button": right_btn, "p1_elo_label": p1_elo_lbl, "p2_elo_label": p2_elo_lbl})
+                self.session_items[self.round_number].append({
+                    "p1_button": left_btn, 
+                    "p2_button": right_btn, 
+                    "p1_elo_label": p1_elo_lbl, 
+                    "p2_elo_label": p2_elo_lbl, 
+                    "q_label": q_label,
+                })
                 
             def _round_spacer(layout, vert_offset):
                 """Adds a spacer to the round container"""
@@ -612,7 +634,7 @@ class MainSessionWindow(QMainWindow):
                 spacer.setFrameShadow(QFrame.Sunken)
                 spacer.setStyleSheet(f"background-color: {LINE}; max-height: 3px; border: none;")
                 
-                layout.addWidget(spacer, vert_offset, 0, 1, 3)
+                layout.addWidget(spacer, vert_offset, 0, 1, 4)
             
             def _round_bye_row(layout, vert_offset, bye: str) -> QWidget:
                 """Adds the last row to the round container for the bye"""
@@ -995,6 +1017,7 @@ class MainSessionWindow(QMainWindow):
                 self.console.append("  lay <action> - quickly changes the layout")
                 self.console.append("  close <action> - closes the window and either 'save' or 'discard' session")
                 self.console.append("  elochg <action> - changes if elo gain/loss is displayed")
+                self.console.append("  matchq <action> - changes if match quality is displayed")
                 
             elif text == "list":
                 self.console.append("Possible Decorators for comand 'list':")
@@ -1218,6 +1241,22 @@ class MainSessionWindow(QMainWindow):
                 self.elo_chg_view = False
                 self.refresh_session_items_action.trigger()
                 self.console.append(f"Elo Change View: {self.elo_chg_view}")
+                
+            else:
+                self.console.warn(f"Decorator not recognised: {text}")
+
+        elif cmd == "matchq":
+            text = " ".join(parts[1:])
+            
+            if text == "show":
+                self.matchq_view = True
+                self.refresh_session_items_action.trigger()
+                self.console.append(f"Match Quality View: {self.matchq_view}")
+                
+            elif text == "hide":
+                self.matchq_view = False
+                self.refresh_session_items_action.trigger()
+                self.console.append(f"Match Quality View: {self.matchq_view}")
                 
             else:
                 self.console.warn(f"Decorator not recognised: {text}")

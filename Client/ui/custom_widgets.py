@@ -214,11 +214,20 @@ class ConsoleWidget(QWidget):
                     self.last_cmd_tracker += 1
                     
                     if self.last_cmd_tracker > -1:
-                        self.last_cmd_tracker = -1
+                        self.last_cmd_tracker = 0
+                        self.input.setText("")
+                        
+                        return True
                     
                     self.input.setText(self.last_cmd[self.last_cmd_tracker])
                     
                 return True  # Consume the event (prevents moving text cursor)
+            
+            if event.key() == Qt.Key.Key_Escape:
+                self.last_cmd_tracker = 0
+                self.input.setText("")
+                
+                return True
 
         return super().eventFilter(obj, event)
 
