@@ -126,7 +126,7 @@ def get_player_current_elo_high_low():
     rows = _rows_as_dicts(conn, "SELECT * FROM players ORDER BY current_elo DESC")
     return rows[0], rows[-1]
 
-
+1
 def list_all_players(conn):
     """Return all players sorted by current Elo descending."""
     return _rows_as_dicts(conn, "SELECT * FROM players ORDER BY current_elo DESC")
@@ -192,6 +192,15 @@ def is_player_active(conn, player_id):
         (player_id,)
     ).fetchone()
     return row[0] if row else None
+
+
+def update_player_name(conn, fn, ln, n_fn, n_ln):
+    """Update a player's name"""
+    with transaction(conn):
+        conn.execute(
+            "UPDATE players SET first_name = ?, last_name = ? WHERE first_name = ?, last_name = ?",
+            (n_fn, n_ln, fn, ln)
+        )
 
 
 def update_player_active(conn, active_sessions_count=10):
