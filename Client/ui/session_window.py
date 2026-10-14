@@ -343,7 +343,7 @@ class MainSessionWindow(QMainWindow):
             self.player_manager_layout.addWidget(card, 3, 0)
 
 
-            active_players = list_active_players(self.conn)
+            active_players = list_active_players(self.conn, "first_name", "ASC")
             
             for player in active_players:
                 

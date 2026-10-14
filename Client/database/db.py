@@ -126,17 +126,17 @@ def get_player_current_elo_high_low():
     rows = _rows_as_dicts(conn, "SELECT * FROM players ORDER BY current_elo DESC")
     return rows[0], rows[-1]
 
-1
-def list_all_players(conn):
+
+def list_all_players(conn, order_by="current_elo", control="DESC"):
     """Return all players sorted by current Elo descending."""
-    return _rows_as_dicts(conn, "SELECT * FROM players ORDER BY current_elo DESC")
+    return _rows_as_dicts(conn, f"SELECT * FROM players ORDER BY {order_by} {control}")
 
 
-def list_active_players(conn):
+def list_active_players(conn, order_by="current_elo", control="DESC"):
     """Return all active players sorted by current Elo descending."""
     return _rows_as_dicts(
         conn,
-        "SELECT * FROM players WHERE is_active = 1 ORDER BY current_elo DESC"
+        f"SELECT * FROM players WHERE is_active = 1 ORDER BY {order_by} {control}"
     )
 
 
