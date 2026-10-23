@@ -10,6 +10,7 @@ MUTED      = "#C1B39C"  # --ink-soft    soft muted ledger text
 ACCENT     = "#D4A04B"  # --brass       titles / section labels
 GREEN      = "#0f9763"  # --felt-v-light  win state / positive
 RED        = "#DF493B"  # --loss-red    loss state / negative
+BLUE       = "#1e5892"  # Match is ongoing
 
 # Extra site tokens, in case custom_widgets.py / confimation_window.py
 # want finer control than the 8 names above give you.

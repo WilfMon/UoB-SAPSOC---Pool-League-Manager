@@ -7,12 +7,14 @@ from resources.colours import HEAD, LINE, TEXT, MUTED, ACCENT, BRASS_LIGHT, FELT
 class CustomButton(QPushButton):
     normalClick = Signal(tuple)
     shiftClick = Signal(tuple)
+    ctrlClick = Signal(tuple)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.clicked.connect(self._handle_click)
         
         self.clicked = False
+        self.ctrlClicked = False
         
     def info(self, buttons: tuple[QPushButton, QPushButton], position: tuple[int, int], round_id: int): # first one is the subject button
         self.buttons = buttons
@@ -22,8 +24,13 @@ class CustomButton(QPushButton):
     def _handle_click(self):
         if QApplication.keyboardModifiers() & Qt.ShiftModifier:
             self.shiftClick.emit(self.buttons)
+        
+        # prevent both keys from registering
         else:
-            self.normalClick.emit(self.buttons)
+            if QApplication.keyboardModifiers() & Qt.ControlModifier:
+                self.ctrlClick.emit(self.buttons)
+            else:
+                self.normalClick.emit(self.buttons)
 
 
 class CustomHeaderBar(QWidget):

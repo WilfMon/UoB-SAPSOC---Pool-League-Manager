@@ -27,7 +27,7 @@ from database.db import (
                    ACTIONS
                    )
 
-from resources.colours import DARK, HEAD, PANEL_COL, LINE, TEXT, ACCENT, GREEN, RED, CUE_WHITE, QUALITY_COLORS
+from resources.colours import DARK, HEAD, PANEL_COL, LINE, TEXT, ACCENT, GREEN, RED, CUE_WHITE, QUALITY_COLORS, BLUE
 from resources.stylesheets import _scrollbar_stylesheet, _title_text_stylesheet, _normal_text_stylesheet
 
 class MainSessionWindow(QMainWindow):
@@ -500,6 +500,31 @@ class MainSessionWindow(QMainWindow):
                 other.clicked = False
                 refresh_session_items()
                 self.update_leaderboard()
+                
+            def on_ctrl_click(btns):
+                """Update the button states to show a blue color, indicates the match is ongoing"""
+                
+                main, other = btns
+                # check if the button has already been normal clicked and return if so
+                if main.clicked or other.clicked:
+                    print("already clicked")
+                    return
+                
+                if main.ctrlClicked or other.ctrlClicked:
+                    # reset back to default
+                    main.setStyleSheet(f"border-radius: 3px; background-color: {CUE_WHITE}; {_pad(4)}; font-size:{self.gm_font_size * self.scale}px")
+                    other.setStyleSheet(f"border-radius: 3px; background-color: {CUE_WHITE}; {_pad(4)}; font-size:{self.gm_font_size * self.scale}px")
+                    main.ctrlClicked = False
+                    other.ctrlClicked = False
+                    
+                else:
+                    # turn background blue
+                    main.setStyleSheet(f"border-radius: 3px; background-color: {BLUE}; {_pad(4)}; font-size:{self.gm_font_size * self.scale}px")
+                    other.setStyleSheet(f"border-radius: 3px; background-color: {BLUE}; {_pad(4)}; font-size:{self.gm_font_size * self.scale}px")
+                    main.ctrlClicked = True
+                    other.ctrlClicked = True
+                
+                refresh_session_items()
             
             def refresh_session_items():
                 """Updates the session elo labels with potentially new database updates"""
@@ -573,6 +598,7 @@ class MainSessionWindow(QMainWindow):
                 left_btn.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
                 left_btn.normalClick.connect(on_normal_click)
                 left_btn.shiftClick.connect(on_shift_click)
+                left_btn.ctrlClick.connect(on_ctrl_click)
                 left_btn.setStyleSheet(f"border-radius: 3px; background-color: {CUE_WHITE}; {_pad(4)}; font-size:{self.gm_font_size * self.scale}px")
                 
                 right_btn = CustomButton()
@@ -580,6 +606,7 @@ class MainSessionWindow(QMainWindow):
                 right_btn.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
                 right_btn.normalClick.connect(on_normal_click)
                 right_btn.shiftClick.connect(on_shift_click)
+                right_btn.ctrlClick.connect(on_ctrl_click)
                 right_btn.setStyleSheet(f"border-radius: 3px; background-color: {CUE_WHITE}; {_pad(4)}; font-size:{self.gm_font_size * self.scale}px")
 
                 left_btn.info((left_btn, right_btn), (self.round_number, vert_offset // 3, 0), round_id)
