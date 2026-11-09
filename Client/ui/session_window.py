@@ -433,6 +433,17 @@ class MainSessionWindow(QMainWindow):
                 main.setStyleSheet(f"border-radius: 3px; background-color: {GREEN}; {_pad(4)}; font-size:{self.gm_font_size * self.scale}px")
                 other.setStyleSheet(f"border-radius: 3px; background-color: {RED}; {_pad(4)}; font-size:{self.gm_font_size * self.scale}px")
                 
+                round_i, _, _ = main.position
+                    
+                if 0 <= (round_i + 1) < len(self.session_items):
+                    for row in self.session_items[round_i + 1]:
+                        
+                        if row["p1_button"].text() == main.text() or row["p1_button"].text() == other.text():
+                            row["p1_button"].setStyleSheet(f"border-radius: 3px; background-color: {CUE_WHITE}; {_pad(4)}; font-size:{self.gm_font_size * self.scale}px")
+
+                        if row["p2_button"].text() == main.text() or row["p2_button"].text() == other.text():
+                            row["p2_button"].setStyleSheet(f"border-radius: 3px; background-color: {CUE_WHITE}; {_pad(4)}; font-size:{self.gm_font_size * self.scale}px")
+                
                 main_elo = _fetch_elo_label(main.position)
                 other_elo = _fetch_elo_label(other.position)
                 
@@ -498,6 +509,8 @@ class MainSessionWindow(QMainWindow):
                 
                 main.clicked = False
                 other.clicked = False
+                main.ctrlClicked = False
+                other.ctrlClicked = False
                 refresh_session_items()
                 self.update_leaderboard()
                 
@@ -512,13 +525,39 @@ class MainSessionWindow(QMainWindow):
                 
                 if main.ctrlClicked or other.ctrlClicked:
                     # reset back to default
+                    
+                    round_i, _, _ = main.position
+                    
+                    if 0 <= (round_i + 1) < len(self.session_items):
+                        # round after this exist so we can search it for players
+                        for row in self.session_items[round_i + 1]:
+                            
+                            if row["p1_button"].text() == main.text() or row["p1_button"].text() == other.text():
+                                row["p1_button"].setStyleSheet(f"border-radius: 3px; background-color: {CUE_WHITE}; {_pad(4)}; font-size:{self.gm_font_size * self.scale}px")
+
+                            if row["p2_button"].text() == main.text() or row["p2_button"].text() == other.text():
+                                row["p2_button"].setStyleSheet(f"border-radius: 3px; background-color: {CUE_WHITE}; {_pad(4)}; font-size:{self.gm_font_size * self.scale}px")
+                    
                     main.setStyleSheet(f"border-radius: 3px; background-color: {CUE_WHITE}; {_pad(4)}; font-size:{self.gm_font_size * self.scale}px")
                     other.setStyleSheet(f"border-radius: 3px; background-color: {CUE_WHITE}; {_pad(4)}; font-size:{self.gm_font_size * self.scale}px")
                     main.ctrlClicked = False
                     other.ctrlClicked = False
                     
                 else:
-                    # turn background blue
+                    # turn background blue for this button and all ahead containing same players
+                    
+                    round_i, _, _ = main.position
+                    
+                    if 0 <= (round_i + 1) < len(self.session_items):
+                        # round after this exist so we can search it for players
+                        for row in self.session_items[round_i + 1]:
+                            
+                            if row["p1_button"].text() == main.text() or row["p1_button"].text() == other.text():
+                                row["p1_button"].setStyleSheet(f"border-radius: 3px; background-color: {BLUE}; {_pad(4)}; font-size:{self.gm_font_size * self.scale}px")
+
+                            if row["p2_button"].text() == main.text() or row["p2_button"].text() == other.text():
+                                row["p2_button"].setStyleSheet(f"border-radius: 3px; background-color: {BLUE}; {_pad(4)}; font-size:{self.gm_font_size * self.scale}px")
+                    
                     main.setStyleSheet(f"border-radius: 3px; background-color: {BLUE}; {_pad(4)}; font-size:{self.gm_font_size * self.scale}px")
                     other.setStyleSheet(f"border-radius: 3px; background-color: {BLUE}; {_pad(4)}; font-size:{self.gm_font_size * self.scale}px")
                     main.ctrlClicked = True
