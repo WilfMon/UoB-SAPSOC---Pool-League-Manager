@@ -533,13 +533,11 @@ class MainSessionWindow(QMainWindow):
                         for row in self.session_items[round_i + 1]:
                             
                             if row["p1_button"].text() == main.text() or row["p1_button"].text() == other.text():
-                                row["p1_button"].setStyleSheet(f"border-radius: 3px; background-color: {CUE_WHITE}; {_pad(4)}; font-size:{self.gm_font_size * self.scale}px")
+                                row["p1_button"].ctrlClicked = False
 
                             if row["p2_button"].text() == main.text() or row["p2_button"].text() == other.text():
-                                row["p2_button"].setStyleSheet(f"border-radius: 3px; background-color: {CUE_WHITE}; {_pad(4)}; font-size:{self.gm_font_size * self.scale}px")
+                                row["p2_button"].ctrlClicked = False
                     
-                    main.setStyleSheet(f"border-radius: 3px; background-color: {CUE_WHITE}; {_pad(4)}; font-size:{self.gm_font_size * self.scale}px")
-                    other.setStyleSheet(f"border-radius: 3px; background-color: {CUE_WHITE}; {_pad(4)}; font-size:{self.gm_font_size * self.scale}px")
                     main.ctrlClicked = False
                     other.ctrlClicked = False
                     
@@ -553,13 +551,11 @@ class MainSessionWindow(QMainWindow):
                         for row in self.session_items[round_i + 1]:
                             
                             if row["p1_button"].text() == main.text() or row["p1_button"].text() == other.text():
-                                row["p1_button"].setStyleSheet(f"border-radius: 3px; background-color: {BLUE}; {_pad(4)}; font-size:{self.gm_font_size * self.scale}px")
+                                row["p1_button"].ctrlClicked = True
 
                             if row["p2_button"].text() == main.text() or row["p2_button"].text() == other.text():
-                                row["p2_button"].setStyleSheet(f"border-radius: 3px; background-color: {BLUE}; {_pad(4)}; font-size:{self.gm_font_size * self.scale}px")
+                                row["p2_button"].ctrlClicked = True
                     
-                    main.setStyleSheet(f"border-radius: 3px; background-color: {BLUE}; {_pad(4)}; font-size:{self.gm_font_size * self.scale}px")
-                    other.setStyleSheet(f"border-radius: 3px; background-color: {BLUE}; {_pad(4)}; font-size:{self.gm_font_size * self.scale}px")
                     main.ctrlClicked = True
                     other.ctrlClicked = True
                 
@@ -570,6 +566,17 @@ class MainSessionWindow(QMainWindow):
                 
                 for _round in self.session_items:
                     for row in _round:
+                        
+                        # ctrl click updates
+                        if row["p1_button"].ctrlClicked:
+                            row["p1_button"].setStyleSheet(f"border-radius: 3px; background-color: {BLUE}; {_pad(4)}; font-size:{self.gm_font_size * self.scale}px")
+                        else:
+                            row["p1_button"].setStyleSheet(f"border-radius: 3px; background-color: {CUE_WHITE}; {_pad(4)}; font-size:{self.gm_font_size * self.scale}px")
+                        
+                        if row["p2_button"].ctrlClicked:
+                            row["p2_button"].setStyleSheet(f"border-radius: 3px; background-color: {BLUE}; {_pad(4)}; font-size:{self.gm_font_size * self.scale}px")
+                        else:
+                            row["p2_button"].setStyleSheet(f"border-radius: 3px; background-color: {CUE_WHITE}; {_pad(4)}; font-size:{self.gm_font_size * self.scale}px")
                         
                         # check if elo should not be shown
                         if not self.elo_chg_view:
