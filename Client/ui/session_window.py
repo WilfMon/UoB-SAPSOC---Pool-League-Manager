@@ -27,7 +27,7 @@ from database.db import (
                    ACTIONS
                    )
 
-from resources.colours import DARK, HEAD, PANEL_COL, LINE, TEXT, ACCENT, GREEN, RED, CUE_WHITE, QUALITY_COLORS, BLUE
+from resources.colours import DARK, HEAD, PANEL_COL, LINE, TEXT, ACCENT, GREEN, RED, CUE_WHITE, QUALITY_COLORS, BLUE, BLUE1, BLUE2
 from resources.stylesheets import _scrollbar_stylesheet, _title_text_stylesheet, _normal_text_stylesheet
 
 class MainSessionWindow(QMainWindow):
@@ -48,6 +48,8 @@ class MainSessionWindow(QMainWindow):
 
         WIDTH = int(1960 * self.scale)
         HEIGHT = int(1080 * self.scale)
+        
+        BLUES = (BLUE, BLUE1, BLUE2)
 
         self.setWindowTitle(f"Session")
         self.setMinimumSize(WIDTH, HEIGHT)
@@ -439,10 +441,24 @@ class MainSessionWindow(QMainWindow):
                     for row in self.session_items[round_i + 1]:
                         
                         if row["p1_button"].text() == main.text() or row["p1_button"].text() == other.text():
-                            row["p1_button"].setStyleSheet(f"border-radius: 3px; background-color: {CUE_WHITE}; {_pad(4)}; font-size:{self.gm_font_size * self.scale}px")
+                            row["p1_button"].ctrlClicked = False
+                            row["p1_button"].ahead_count = 0
 
                         if row["p2_button"].text() == main.text() or row["p2_button"].text() == other.text():
-                            row["p2_button"].setStyleSheet(f"border-radius: 3px; background-color: {CUE_WHITE}; {_pad(4)}; font-size:{self.gm_font_size * self.scale}px")
+                            row["p2_button"].ctrlClicked = False
+                            row["p2_button"].ahead_count = 0
+                            
+                    if 0 <= (round_i + 2) < len(self.session_items):
+                        # search second round also
+                        for row in self.session_items[round_i + 2]:
+                                                    
+                            if row["p1_button"].text() == main.text() or row["p1_button"].text() == other.text():
+                                row["p1_button"].ctrlClicked = False
+                                row["p1_button"].ahead_count = 0
+
+                            if row["p2_button"].text() == main.text() or row["p2_button"].text() == other.text():
+                                row["p2_button"].ctrlClicked = False
+                                row["p2_button"].ahead_count = 0
                 
                 main_elo = _fetch_elo_label(main.position)
                 other_elo = _fetch_elo_label(other.position)
@@ -461,14 +477,14 @@ class MainSessionWindow(QMainWindow):
                 # database updates
                 record_match(self.conn, round_id, p1_id, p2_id, p1_id)
                 
+                main.clicked = True
+                other.clicked = True
+                
                 refresh_session_items()
                 self.update_leaderboard()
                 
                 main_elo.setText(new_m)
                 other_elo.setText(new_o)
-                
-                main.clicked = True
-                other.clicked = True
                 
             def on_shift_click(btns):
                 """Revert button states to how they were before they were clicked; also revert match to unplayed in the database"""
@@ -534,9 +550,23 @@ class MainSessionWindow(QMainWindow):
                             
                             if row["p1_button"].text() == main.text() or row["p1_button"].text() == other.text():
                                 row["p1_button"].ctrlClicked = False
+                                row["p1_button"].ahead_count = 0
 
                             if row["p2_button"].text() == main.text() or row["p2_button"].text() == other.text():
                                 row["p2_button"].ctrlClicked = False
+                                row["p2_button"].ahead_count = 0
+                                
+                        if 0 <= (round_i + 2) < len(self.session_items):
+                            # search second round also
+                            for row in self.session_items[round_i + 2]:
+                                                        
+                                if row["p1_button"].text() == main.text() or row["p1_button"].text() == other.text():
+                                    row["p1_button"].ctrlClicked = False
+                                    row["p1_button"].ahead_count = 0
+    
+                                if row["p2_button"].text() == main.text() or row["p2_button"].text() == other.text():
+                                    row["p2_button"].ctrlClicked = False
+                                    row["p2_button"].ahead_count = 0
                     
                     main.ctrlClicked = False
                     other.ctrlClicked = False
@@ -552,9 +582,23 @@ class MainSessionWindow(QMainWindow):
                             
                             if row["p1_button"].text() == main.text() or row["p1_button"].text() == other.text():
                                 row["p1_button"].ctrlClicked = True
+                                row["p1_button"].ahead_count = 1
 
                             if row["p2_button"].text() == main.text() or row["p2_button"].text() == other.text():
                                 row["p2_button"].ctrlClicked = True
+                                row["p2_button"].ahead_count = 1
+                                
+                        if 0 <= (round_i + 2) < len(self.session_items):
+                            # search second round also
+                            for row in self.session_items[round_i + 2]:
+                                                        
+                                if row["p1_button"].text() == main.text() or row["p1_button"].text() == other.text():
+                                    row["p1_button"].ctrlClicked = True
+                                    row["p1_button"].ahead_count = 2
+    
+                                if row["p2_button"].text() == main.text() or row["p2_button"].text() == other.text():
+                                    row["p2_button"].ctrlClicked = True
+                                    row["p2_button"].ahead_count = 2
                     
                     main.ctrlClicked = True
                     other.ctrlClicked = True
@@ -568,15 +612,16 @@ class MainSessionWindow(QMainWindow):
                     for row in _round:
                         
                         # ctrl click updates
-                        if row["p1_button"].ctrlClicked:
-                            row["p1_button"].setStyleSheet(f"border-radius: 3px; background-color: {BLUE}; {_pad(4)}; font-size:{self.gm_font_size * self.scale}px")
-                        else:
+                        if row["p1_button"].ctrlClicked and not row["p1_button"].clicked:
+                            row["p1_button"].setStyleSheet(f"border-radius: 3px; background-color: {BLUES[row["p1_button"].ahead_count]}; {_pad(4)}; font-size:{self.gm_font_size * self.scale}px")
+                        elif not row["p1_button"].ctrlClicked and not row["p1_button"].clicked:
                             row["p1_button"].setStyleSheet(f"border-radius: 3px; background-color: {CUE_WHITE}; {_pad(4)}; font-size:{self.gm_font_size * self.scale}px")
                         
-                        if row["p2_button"].ctrlClicked:
-                            row["p2_button"].setStyleSheet(f"border-radius: 3px; background-color: {BLUE}; {_pad(4)}; font-size:{self.gm_font_size * self.scale}px")
-                        else:
+                        if row["p2_button"].ctrlClicked and not row["p2_button"].clicked:
+                            row["p2_button"].setStyleSheet(f"border-radius: 3px; background-color: {BLUES[row["p2_button"].ahead_count]}; {_pad(4)}; font-size:{self.gm_font_size * self.scale}px")
+                        elif not row["p2_button"].ctrlClicked and not row["p2_button"].clicked:
                             row["p2_button"].setStyleSheet(f"border-radius: 3px; background-color: {CUE_WHITE}; {_pad(4)}; font-size:{self.gm_font_size * self.scale}px")
+                        
                         
                         # check if elo should not be shown
                         if not self.elo_chg_view:
@@ -780,7 +825,7 @@ class MainSessionWindow(QMainWindow):
 
                 # 3. Standardize layout row height constraints
                 card_layout.setRowStretch(vert_offset + 4, 1)  # Pushes internal rows upward cleanly
-
+                
                 self.round_number += 1
             
                 return card_layout
@@ -814,7 +859,7 @@ class MainSessionWindow(QMainWindow):
             self.remove_round_action = QAction("Remove Round", self, triggered=lambda: remove_last_round(self.main_game_manager_layout, self.round_number - 1))
             
             self.action_menu.addAction(self.add_round_action)
-            self.action_menu.addAction(self.remove_round_action)
+            #self.action_menu.addAction(self.remove_round_action)
             
             self.refresh_session_items_action = QAction("_", self, triggered=lambda: refresh_session_items())
                 
@@ -850,9 +895,9 @@ class MainSessionWindow(QMainWindow):
             return game_manager_panel_scoll_area
         
         self.PANELS = [
-            ("console", "Console", True, console_panel),
+            ("console", "Console", False, console_panel),
             ("players", "Players in Session", True, players_panel),
-            ("leaderboard", "Leaderboard", True, leaderboard_panel),
+            ("leaderboard", "Leaderboard", False, leaderboard_panel),
             ("player_manager", "Player Manager", True, player_manager_panel),
             ("game_manager", "Game Manager", True, game_manager_panel),
         ]

@@ -15,6 +15,7 @@ class CustomButton(QPushButton):
         
         self.clicked = False
         self.ctrlClicked = False
+        self.ahead_count = 0
         
     def info(self, buttons: tuple[QPushButton, QPushButton], position: tuple[int, int], round_id: int): # first one is the subject button
         self.buttons = buttons
